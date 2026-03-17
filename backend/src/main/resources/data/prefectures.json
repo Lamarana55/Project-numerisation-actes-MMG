@@ -1,0 +1,43 @@
+[
+  { "code": "BFA", "nom": "Boffa", "codeRegion": "03" },
+  { "code": "BKE", "nom": "Boké", "codeRegion": "03" },
+  { "code": "FRI", "nom": "Fria", "codeRegion": "03" },
+  { "code": "GAL", "nom": "Gaoual", "codeRegion": "03" },
+  { "code": "KDR", "nom": "Koundara", "codeRegion": "03" },
+
+  { "code": "CKY", "nom": "Conakry", "codeRegion": "01" },
+
+  { "code": "DBL", "nom": "Dabola", "codeRegion": "06" },
+  { "code": "DGR", "nom": "Dinguiraye", "codeRegion": "06" },
+  { "code": "FRN", "nom": "Faranah", "codeRegion": "06" },
+  { "code": "KDG", "nom": "Kissidougou", "codeRegion": "06" },
+
+  { "code": "KKA", "nom": "Kankan", "codeRegion": "07" },
+  { "code": "KRN", "nom": "Kérouané", "codeRegion": "07" },
+  { "code": "KRS", "nom": "Kouroussa", "codeRegion": "07" },
+  { "code": "MDN", "nom": "Mandiana", "codeRegion": "07" },
+  { "code": "SGR", "nom": "Siguiri", "codeRegion": "07" },
+
+  { "code": "CYA", "nom": "Coyah", "codeRegion": "02" },
+  { "code": "DBK", "nom": "Dubréka", "codeRegion": "02" },
+  { "code": "FRC", "nom": "Forécariah", "codeRegion": "02" },
+  { "code": "KDA", "nom": "Kindia", "codeRegion": "02" },
+  { "code": "TML", "nom": "Télimélé", "codeRegion": "02" },
+
+  { "code": "KBA", "nom": "Koubia", "codeRegion": "05" },
+  { "code": "LBE", "nom": "Labé", "codeRegion": "05" },
+  { "code": "LLM", "nom": "Lélouma", "codeRegion": "05" },
+  { "code": "MLI", "nom": "Mali", "codeRegion": "05" },
+  { "code": "TGE", "nom": "Tougué", "codeRegion": "05" },
+
+  { "code": "DLB", "nom": "Dalaba", "codeRegion": "04" },
+  { "code": "MMU", "nom": "Mamou", "codeRegion": "04" },
+  { "code": "PTA", "nom": "Pita", "codeRegion": "04" },
+
+  { "code": "BLA", "nom": "Beyla", "codeRegion": "08" },
+  { "code": "GKD", "nom": "Guéckédou", "codeRegion": "08" },
+  { "code": "LLA", "nom": "Lola", "codeRegion": "08" },
+  { "code": "MCT", "nom": "Macenta", "codeRegion": "08" },
+  { "code": "ZKR", "nom": "Nzérékoré", "codeRegion": "08" },
+  { "code": "YMU", "nom": "Yomou", "codeRegion": "08" }
+]

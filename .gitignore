@@ -1,0 +1,60 @@
+# Compiled files
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+hs_err_pid*
+*.sh
+
+# Project-level ignores
+/target/
+/build/
+/bin/
+
+# Backend (Spring Boot) specific
+backend/target/
+backend/.mvn/
+backend/dependency-reduced-pom.xml
+backend/.springBeans
+backend/.env
+
+# Frontend (Angular) specific
+frontend/node_modules/
+frontend/dist/
+frontend/out-tsc/
+frontend/.angular/cache
+frontend/npm-debug.log
+frontend/yarn-error.log
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+.project
+.classpath
+.settings/
+
+# Logs
+*.log
+logs/
+backend/logs/*
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Sensitive information
+*.key
+*.pem
+*.crt
+application-secret.properties

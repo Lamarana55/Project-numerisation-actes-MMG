@@ -1,0 +1,156 @@
+<!-- permissions-list.component.html -->
+<div class="permissions-container">
+
+  <!-- En-tête avec beau design -->
+  <div class="header-section">
+    <div class="header-background"></div>
+    <div class="header-content">
+      <div class="title-container">
+        <div class="icon-wrapper">
+          <mat-icon class="title-icon">verified_user</mat-icon>
+        </div>
+        <div class="title-text">
+          <h1 class="page-title">Gestion des Permissions</h1>
+          <p class="page-subtitle">{{ permissions.length }} permission(s) configurée(s)</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Barre d'actions avec nouveau layout -->
+  <div class="actions-bar">
+    <!-- Bouton ajouter à gauche -->
+    <div class="actions-left">
+      <button mat-raised-button
+              color="primary"
+              (click)="openAddDialog()"
+              [disabled]="loading"
+              class="add-btn">
+        <mat-icon>add</mat-icon>
+        Nouvelle Permission
+      </button>
+
+      <button mat-icon-button
+              (click)="refreshData()"
+              [disabled]="loading"
+              matTooltip="Actualiser"
+              class="refresh-btn">
+        <mat-icon>refresh</mat-icon>
+      </button>
+    </div>
+
+    <!-- Recherche à droite -->
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Rechercher une permission</mat-label>
+      <input matInput
+             [(ngModel)]="searchTerm"
+             (input)="applyFilter()"
+             placeholder="Nom ou description...">
+      <mat-icon matPrefix>search</mat-icon>
+      <button mat-icon-button
+              matSuffix
+              *ngIf="searchTerm"
+              (click)="clearSearch()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </mat-form-field>
+  </div>
+
+  <!-- Résultats -->
+  <div class="results-info" *ngIf="!loading">
+    {{ filteredPermissions.length }} résultat(s)
+    <span *ngIf="searchTerm"> pour "{{ searchTerm }}"</span>
+  </div>
+
+  <!-- Contenu principal -->
+  <div class="content-section">
+
+    <!-- Chargement -->
+    <div *ngIf="loading" class="state-container">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Chargement...</p>
+    </div>
+
+    <!-- Erreur -->
+    <div *ngIf="error && !loading" class="state-container error">
+      <mat-icon>error_outline</mat-icon>
+      <h3>Erreur</h3>
+      <p>{{ error }}</p>
+      <button mat-button color="primary" (click)="refreshData()">
+        Réessayer
+      </button>
+    </div>
+
+    <!-- Vide -->
+    <div *ngIf="!loading && !error && filteredPermissions.length === 0" class="state-container empty">
+      <mat-icon>security</mat-icon>
+      <h3>{{ searchTerm ? 'Aucun résultat' : 'Aucune permission' }}</h3>
+      <p>{{ searchTerm ? 'Modifiez votre recherche' : 'Commencez par créer une permission' }}</p>
+      <button mat-raised-button
+              color="primary"
+              (click)="searchTerm ? clearSearch() : openAddDialog()">
+        <mat-icon>{{ searchTerm ? 'clear' : 'add' }}</mat-icon>
+        {{ searchTerm ? 'Effacer la recherche' : 'Créer une permission' }}
+      </button>
+    </div>
+
+    <!-- Tableau -->
+    <div *ngIf="!loading && !error && filteredPermissions.length > 0" class="table-section">
+      <table mat-table [dataSource]="paginatedPermissions" class="permissions-table">
+
+        <!-- Nom -->
+        <ng-container matColumnDef="nom">
+          <th mat-header-cell *matHeaderCellDef>Permission</th>
+          <td mat-cell *matCellDef="let permission">
+            <mat-chip selected class="permission-chip">
+              {{ permission.nom }}
+            </mat-chip>
+          </td>
+        </ng-container>
+
+        <!-- Description -->
+        <ng-container matColumnDef="description">
+          <th mat-header-cell *matHeaderCellDef>Description</th>
+          <td mat-cell *matCellDef="let permission">
+            {{ permission.description || 'Aucune description' }}
+          </td>
+        </ng-container>
+
+        <!-- Actions -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let permission">
+            <button mat-icon-button
+                    color="primary"
+                    (click)="openEditDialog(permission)"
+                    [disabled]="loading"
+                    matTooltip="Modifier">
+              <mat-icon>edit</mat-icon>
+            </button>
+
+            <button mat-icon-button
+                    color="warn"
+                    (click)="deletePermission(permission)"
+                    [disabled]="loading"
+                    matTooltip="Supprimer">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+
+      <!-- Pagination -->
+      <mat-paginator
+        [length]="totalItems"
+        [pageSize]="pageSize"
+        [pageSizeOptions]="pageSizeOptions"
+        [pageIndex]="currentPage"
+        (page)="onPageChange($event)"
+        showFirstLastButtons>
+      </mat-paginator>
+    </div>
+  </div>
+</div>

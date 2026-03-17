@@ -1,0 +1,203 @@
+<div class="container-fluid ">
+
+  <!-- Header avec titre -->
+  <div class="row mb-3">
+    <div class="col-md-12">
+      <h2 class="mb-0">
+        <i class="material-icons me-2" style="vertical-align: middle;">dashboard</i>
+        Tableau de Bord des Statistiques
+      </h2>
+      <small class="text-muted" *ngIf="lastUpdate">
+        Dernière mise à jour : {{ lastUpdate | date:'dd/MM/yyyy HH:mm:ss' }}
+      </small>
+    </div>
+  </div>
+
+  <!-- Bouton flottant de rafraîchissement -->
+  <div class="floating-refresh-btn">
+    <button
+      class="btn btn-primary-custom btn-sm"
+      (click)="refreshData()"
+      [disabled]="isLoading"
+      title="Actualiser les données">
+      <i class="material-icons" style="font-size: 1rem;">{{ isLoading ? 'sync' : 'refresh' }}</i>
+      <span
+        [class.spinner-border]="isLoading"
+        [class.spinner-border-sm]="isLoading"
+        [style.margin-left]="isLoading ? '4px' : '0'"
+        style="width: 0.8rem; height: 0.8rem;"></span>
+    </button>
+  </div>
+
+  <!-- Message d'erreur -->
+  <div class="alert alert-danger" role="alert" *ngIf="hasError">
+    <i class="material-icons me-2">error</i>
+    {{ errorMessage }}
+    <button class="btn btn-sm btn-outline-danger ms-2" (click)="refreshData()">
+      Réessayer
+    </button>
+  </div>
+
+  <!-- Indicateur de chargement -->
+  <div class="text-center my-5" *ngIf="isLoading && !dashboardData">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Chargement...</span>
+    </div>
+    <p class="mt-2">Chargement des données...</p>
+  </div>
+
+  <!-- Section des statistiques -->
+  <div class="row g-2 mb-4" *ngIf="!isLoading || dashboardData">
+    <div class="col-xl-2 col-lg-2 col-md-3 col-sm-4 col-6" *ngFor="let stat of statsArray">
+      <mat-card class="stat-card" [ngStyle]="{ 'background-color': stat.backgroundColor }">
+        <mat-card-content class="d-flex align-items-center p-2">
+          <div class="me-2">
+            <i class="material-icons" style="font-size: 1.8rem; color: white;">{{ stat.icon }}</i>
+          </div>
+          <div class="text-white flex-grow-1">
+            <div class="small mb-0 opacity-75">{{ stat.label }}</div>
+            <div class="h6 mb-0 fw-bold">{{ formatNumber(stat.value) }}</div>
+            <small class="opacity-75" *ngIf="stat.percentage" style="font-size: 0.7rem;">
+              {{ formatPercentage(stat.percentage) }}
+            </small>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+
+  <!-- Section de résumé rapide -->
+  <div class="row mb-4" *ngIf="dashboardData">
+    <div class="col-md-12">
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>
+            <h5 class="mb-0">
+              <i class="material-icons me-2" style="vertical-align: middle;">analytics</i>
+              Résumé des Statistiques
+            </h5>
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="row text-center">
+            <div class="col-md-3">
+              <div class="border-end">
+                <h6 class="text-muted">Population Totale</h6>
+                <p class="h4 text-primary mb-0">{{ formatNumber(dashboardData.total_population) }}</p>
+                <small class="text-muted">Personnes recensées avec acte</small>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="border-end">
+                <h6 class="text-muted">Taux avec Actes</h6>
+                <p class="h4 text-success mb-0">{{ formatPercentage(dashboardData.taux_avec_actes) }}</p>
+                <small class="text-muted">{{ formatNumber(dashboardData.total_collecte_avec_actes) }} personnes</small>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="border-end">
+                <h6 class="text-muted">Taux de Validation</h6>
+                <p class="h4 text-info mb-0">{{ formatPercentage(getTauxValidation()) }}</p>
+                <small class="text-muted">{{ formatNumber(dashboardData.total_valid_acte) }} validés</small>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <h6 class="text-muted">Commune Top</h6>
+              <p class="h4 text-warning mb-0">{{ getTopCommune() }}</p>
+              <small class="text-muted">Plus de personne</small>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+
+  <!-- Section des graphiques -->
+  <div class="row" *ngIf="dashboardData">
+    <!-- Graphique des ménages par commune -->
+    <div class="col-lg-6 col-md-12 mb-4">
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>
+            <h5 class="mb-0">
+              <i class="material-icons me-2" style="vertical-align: middle;">home</i>
+              Répartition Population par Commune
+            </h5>
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div style="height: 400px;">
+            <canvas
+              baseChart
+              [data]="menagesChartData"
+              [options]="barChartOptions"
+              [type]="barChartType">
+            </canvas>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Graphique démographique -->
+    <div class="col-lg-6 col-md-12 mb-4">
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>
+            <h5 class="mb-0">
+              <i class="material-icons me-2" style="vertical-align: middle;">people</i>
+              Répartition Démographique
+            </h5>
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div style="height: 400px;">
+            <canvas
+              baseChart
+              [data]="demographieChartData"
+              [options]="barChartOptions"
+              [type]="barChartType">
+            </canvas>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+
+  <!-- Tableau détaillé des communes -->
+  <div class="row" *ngIf="dashboardData">
+    <div class="col-md-12">
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>
+            <h5 class="mb-0">
+              <i class="material-icons me-2" style="vertical-align: middle;">table_chart</i>
+              Détails par Commune
+            </h5>
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Commune</th>
+                  <th>Population</th>
+                  <th>Hommes</th>
+                  <th>Femmes</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let commune of dashboardData.communes_data">
+                  <td><strong>{{ commune.nom_commune }}</strong></td>
+                  <td><strong>{{ formatNumber(commune.homme + commune.femme) }}</strong></td>
+                  <td class="text-primary">{{ formatNumber(commune.homme) }}</td>
+                  <td class="text-danger">{{ formatNumber(commune.femme) }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div>

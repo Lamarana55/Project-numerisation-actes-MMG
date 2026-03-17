@@ -1,0 +1,171 @@
+<div class="about-container">
+  <!-- Header Section -->
+  <section class="header-section">
+    <div class="header-content">
+      <div class="logo-section">
+        <mat-icon class="app-logo">account_balance</mat-icon>
+        <h1>{{ appInfo.name }}</h1>
+      </div>
+      <p class="app-description">{{ appInfo.description }}</p>
+      <div class="version-info">
+        <mat-chip class="version-chip">Version {{ appInfo.version }}</mat-chip>
+        <span class="release-date">Publié le {{ appInfo.releaseDate | date:'dd/MM/yyyy' }}</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Statistics Section -->
+  <section class="statistics-section">
+    <div class="container">
+      <h2>Nos Performances</h2>
+      <div class="stats-grid">
+        <div class="stat-card" *ngFor="let stat of statistics">
+          <mat-icon class="stat-icon">{{ stat.icon }}</mat-icon>
+          <div class="stat-content">
+            <h3>{{ stat.value }}</h3>
+            <p>{{ stat.label }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features-section">
+    <div class="container">
+      <h2>Fonctionnalités Principales</h2>
+      <div class="features-grid">
+        <div class="feature-card" *ngFor="let feature of features">
+          <mat-icon class="feature-icon">{{ feature.icon }}</mat-icon>
+          <h3>{{ feature.title }}</h3>
+          <p>{{ feature.description }}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Team Section -->
+  <section class="team-section">
+    <div class="container">
+      <h2>Notre Équipe</h2>
+      <div class="team-grid">
+        <div class="team-card" *ngFor="let member of teamMembers">
+          <div class="avatar" [style.background-color]="getAvatarColor(member.name)">
+            {{ getInitials(member.name) }}
+          </div>
+          <h3>{{ member.name }}</h3>
+          <p class="role">{{ member.role }}</p>
+          <button mat-icon-button (click)="copyEmail(member.email)"
+                  [matTooltip]="'Copier: ' + member.email">
+            <mat-icon>email</mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Technology Stack -->
+  <section class="tech-section">
+    <div class="container">
+      <h2>Technologies Utilisées</h2>
+      <div class="tech-grid">
+        <div class="tech-card" *ngFor="let tech of technologies">
+          <mat-icon class="tech-icon">{{ tech.logo }}</mat-icon>
+          <h4>{{ tech.name }}</h4>
+          <span class="tech-version">{{ tech.version }}</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Changelog Section -->
+  <section class="changelog-section">
+    <div class="container">
+      <h2>Historique des Versions</h2>
+      <div class="changelog-timeline">
+        <div class="changelog-item" *ngFor="let release of changelog">
+          <div class="timeline-marker"></div>
+          <div class="changelog-content">
+            <div class="changelog-header">
+              <h3>Version {{ release.version }}</h3>
+              <span class="changelog-date">{{ release.date | date:'dd/MM/yyyy' }}</span>
+            </div>
+            <ul class="changelog-list">
+              <li *ngFor="let change of release.changes">{{ change }}</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Organization Info -->
+  <section class="organization-section">
+    <div class="container">
+      <mat-card class="org-card">
+        <mat-card-header>
+          <mat-icon mat-card-avatar>account_balance</mat-icon>
+          <mat-card-title>{{ appInfo.organization }}</mat-card-title>
+          <mat-card-subtitle>{{ appInfo.country }}</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <p>
+            Le Système de Gestion des Collectes (SiGeC) est une initiative du
+            {{ appInfo.organization }} visant à moderniser et digitaliser
+            les processus administratifs liés à l'état civil et au recensement
+            de la population en {{ appInfo.country }}.
+          </p>
+          <div class="contact-info">
+            <div class="contact-item">
+              <mat-icon>location_on</mat-icon>
+              <span>Conakry, République de Guinée</span>
+            </div>
+            <div class="contact-item">
+              <mat-icon>phone</mat-icon>
+              <span>+224 622 000 000</span>
+            </div>
+            <div class="contact-item">
+              <mat-icon>email</mat-icon>
+              <span>contact&#64;ravec.gov.gn</span>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="about-footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h4>Liens Utiles</h4>
+          <ul>
+            <li><a href="#" routerLink="/admin/help">Documentation</a></li>
+            <li><a href="#" routerLink="/admin/support">Support Technique</a></li>
+            <li><a href="#" (click)="openExternalLink('https://ravec.gov.gn/')">Site Officiel RAVEC </a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h4>Ressources</h4>
+          <ul>
+            <li><a href="#" routerLink="/admin/reports/statistics">Statistiques</a></li>
+            <li><a href="#" routerLink="/admin/notifications">Notifications</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h4>Sécurité</h4>
+          <ul>
+            <li><a href="#" routerLink="/admin/help/privacy">Politique de Confidentialité</a></li>
+            <li><a href="#" routerLink="/admin/help/privacy" >Conditions d'Utilisation</a></li>
+            <li><a href="#" routerLink="/admin/help/privacy">Signaler un Problème</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; {{ currentYear }} {{ appInfo.organization }}. Tous droits réservés.</p>
+        <p class="footer-version"> v{{ appInfo.version }} - Développé avec ❤️ en Guinée</p>
+      </div>
+    </div>
+  </footer>
+</div>

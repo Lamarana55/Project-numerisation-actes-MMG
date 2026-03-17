@@ -1,0 +1,107 @@
+<!-- permission-dialog.component.html -->
+<div class="permission-dialog">
+  <!-- En-tête simplifié -->
+  <div class="dialog-header">
+    <h2 class="dialog-title">
+      <mat-icon>{{ data.permission ? 'edit' : 'add_circle' }}</mat-icon>
+      {{ data.title }}
+    </h2>
+  </div>
+
+  <!-- Contenu du formulaire -->
+  <div class="dialog-content">
+    <form [formGroup]="permissionForm" class="permission-form">
+
+      <!-- Nom de la permission -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Nom de la permission *</mat-label>
+        <input matInput
+               formControlName="nom"
+               placeholder="Ex: CAN_MANAGE_USERS"
+               (blur)="suggestPermissionFormat()"
+               maxlength="50">
+        <mat-icon matSuffix
+                  matTooltip="Format: CAN_ACTION_RESOURCE">help_outline</mat-icon>
+        <mat-hint align="end">{{ permissionForm.get('nom')?.value?.length || 0 }}/50</mat-hint>
+        <mat-error *ngIf="hasFieldError('nom')">
+          {{ getNomErrors() }}
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Exemples rapides -->
+      <div class="examples-section" *ngIf="!data.permission">
+        <p class="examples-label">Exemples rapides :</p>
+        <div class="examples-grid">
+          <button type="button"
+                  mat-stroked-button
+                  (click)="fillExample('user')"
+                  class="example-btn">
+            <mat-icon>people</mat-icon>
+            Utilisateurs
+          </button>
+          <button type="button"
+                  mat-stroked-button
+                  (click)="fillExample('role')"
+                  class="example-btn">
+            <mat-icon>security</mat-icon>
+            Rôles
+          </button>
+          <button type="button"
+                  mat-stroked-button
+                  (click)="fillExample('report')"
+                  class="example-btn">
+            <mat-icon>assessment</mat-icon>
+            Rapports
+          </button>
+          <button type="button"
+                  mat-stroked-button
+                  (click)="fillExample('setting')"
+                  class="example-btn">
+            <mat-icon>settings</mat-icon>
+            Paramètres
+          </button>
+        </div>
+      </div>
+
+      <!-- Description -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Description (optionnelle)</mat-label>
+        <textarea matInput
+                  formControlName="description"
+                  rows="3"
+                  placeholder="Décrivez ce que cette permission autorise..."
+                  maxlength="255"></textarea>
+        <mat-hint align="end">{{ permissionForm.get('description')?.value?.length || 0 }}/255</mat-hint>
+        <mat-error *ngIf="hasFieldError('description')">
+          {{ getDescriptionErrors() }}
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Aperçu -->
+      <div class="preview-section" *ngIf="permissionForm.get('nom')?.value">
+        <h4>Aperçu</h4>
+        <div class="preview-content">
+          <mat-chip class="preview-chip">{{ permissionForm.get('nom')?.value }}</mat-chip>
+          <p class="preview-description">
+            {{ permissionForm.get('description')?.value || 'Aucune description fournie' }}
+          </p>
+        </div>
+      </div>
+
+    </form>
+  </div>
+
+  <!-- Actions -->
+  <div class="dialog-actions">
+    <button mat-button (click)="onCancel()" class="cancel-btn">
+      Annuler
+    </button>
+    <button mat-raised-button
+            color="primary"
+            (click)="onSave()"
+            [disabled]="!isFormValid()"
+            class="save-btn">
+      {{ data.permission ? 'Modifier' : 'Créer' }}
+    </button>
+  </div>
+</div>

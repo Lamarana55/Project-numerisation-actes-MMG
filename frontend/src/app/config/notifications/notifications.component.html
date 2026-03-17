@@ -1,0 +1,164 @@
+<!-- notifications.component.html -->
+<div class="notifications-container">
+  <!-- En-tête de la page -->
+  <div class="page-header">
+    <div class="header-content">
+      <div class="header-left">
+        <mat-icon class="page-icon">notifications</mat-icon>
+        <div class="header-text">
+          <h1>Notifications</h1>
+          <p class="header-subtitle">
+            {{ totalCount }} notification{{ totalCount > 1 ? 's' : '' }} au total,
+            {{ unreadCount }} non lue{{ unreadCount > 1 ? 's' : '' }}
+          </p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button mat-raised-button color="primary" (click)="markAllAsRead()"
+                [disabled]="unreadCount === 0" class="action-btn">
+          <mat-icon>done_all</mat-icon>
+          Tout marquer lu
+        </button>
+        <button mat-raised-button (click)="deleteAllRead()"
+                [disabled]="readNotificationsCount === 0"
+                class="action-btn delete-btn">
+          <mat-icon>delete_sweep</mat-icon>
+          Supprimer les lues
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtres et recherche -->
+  <mat-card class="filters-card">
+    <mat-card-content>
+      <div class="filters-container">
+        <!-- Filtres par statut -->
+        <div class="filter-group">
+          <label class="filter-label">Statut :</label>
+          <div class="filter-buttons-group">
+            <button mat-raised-button
+                    *ngFor="let filter of filters"
+                    [color]="selectedFilter === filter.value ? 'primary' : ''"
+                    [class.active-filter]="selectedFilter === filter.value"
+                    (click)="onFilterChange(filter.value)"
+                    class="filter-button">
+              <mat-icon>{{ filter.icon }}</mat-icon>
+              {{ filter.label }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Filtre par catégorie -->
+        <div class="filter-group">
+          <label class="filter-label">Catégorie :</label>
+          <mat-select [(ngModel)]="selectedCategory" (selectionChange)="onCategoryChange($event.value)"
+                      class="category-select">
+            <mat-option *ngFor="let category of categories" [value]="category.value">
+              <mat-icon>{{ category.icon }}</mat-icon>
+              <span class="category-option-text">{{ category.label }}</span>
+            </mat-option>
+          </mat-select>
+        </div>
+
+        <!-- Barre de recherche -->
+        <div class="search-group">
+          <mat-form-field appearance="outline" class="search-field">
+            <mat-label>Rechercher dans les notifications</mat-label>
+            <input matInput [(ngModel)]="searchTerm" (input)="onSearch()"
+                   placeholder="Tapez pour rechercher...">
+            <mat-icon matPrefix>search</mat-icon>
+            <button matSuffix mat-icon-button *ngIf="searchTerm" (click)="clearSearch()">
+              <mat-icon>clear</mat-icon>
+            </button>
+          </mat-form-field>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Liste des notifications -->
+  <div class="notifications-list">
+    <div *ngIf="filteredNotifications.length === 0" class="no-notifications">
+      <mat-icon class="no-notifications-icon">notifications_off</mat-icon>
+      <h3>Aucune notification</h3>
+      <p *ngIf="searchTerm || selectedFilter !== 'all' || selectedCategory !== 'all'">
+        Aucune notification ne correspond à vos critères de recherche.
+      </p>
+      <p *ngIf="!searchTerm && selectedFilter === 'all' && selectedCategory === 'all'">
+        Vous n'avez aucune notification pour le moment.
+      </p>
+    </div>
+
+    <mat-card *ngFor="let notification of filteredNotifications; trackBy: trackByNotificationId"
+              class="notification-card"
+              [class.unread]="!notification.read"
+              [class.read]="notification.read">
+      <mat-card-content>
+        <div class="notification-content">
+          <!-- Icône et indicateur de statut -->
+          <div class="notification-icon-container">
+            <mat-icon [class]="'notification-type-' + notification.type"
+                      class="notification-type-icon">
+              {{ getNotificationIcon(notification.type) }}
+            </mat-icon>
+            <div *ngIf="!notification.read" class="unread-indicator"></div>
+          </div>
+
+          <!-- Contenu principal -->
+          <div class="notification-main">
+            <div class="notification-header">
+              <h3 class="notification-title">{{ notification.title }}</h3>
+              <div class="notification-meta">
+                <mat-chip class="category-chip" [class]="'category-' + notification.category">
+                  <mat-icon>{{ getCategoryIcon(notification.category) }}</mat-icon>
+                  {{ getCategoryLabel(notification.category) }}
+                </mat-chip>
+                <span class="notification-time">{{ getRelativeTime(notification.createdAt) }}</span>
+              </div>
+            </div>
+            <p class="notification-message">{{ notification.message }}</p>
+
+            <!-- Actions de la notification -->
+            <div class="notification-actions" *ngIf="notification.actionUrl || !notification.read">
+              <button *ngIf="notification.actionUrl"
+                      mat-raised-button
+                      color="primary"
+                      [routerLink]="notification.actionUrl"
+                      class="action-link-btn">
+                <mat-icon>{{ notification.actionText?.includes('Voir') ? 'visibility' :
+                              notification.actionText?.includes('Télécharger') ? 'download' :
+                              'arrow_forward' }}</mat-icon>
+                {{ notification.actionText }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Actions sur la notification -->
+          <div class="notification-controls">
+            <button mat-icon-button
+                    [matTooltip]="notification.read ? 'Marquer comme non lue' : 'Marquer comme lue'"
+                    (click)="notification.read ? markAsUnread(notification.id) : markAsRead(notification.id)">
+              <mat-icon>{{ notification.read ? 'mark_email_unread' : 'mark_email_read' }}</mat-icon>
+            </button>
+            <button mat-icon-button
+                    matTooltip="Supprimer la notification"
+                    (click)="deleteNotification(notification.id)"
+                    class="delete-btn">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Pagination (optionnelle pour plus tard) -->
+  <div class="pagination-container" *ngIf="filteredNotifications.length > 10">
+    <mat-paginator [length]="filteredNotifications.length"
+                   [pageSize]="10"
+                   [pageSizeOptions]="[10, 25, 50]"
+                   showFirstLastButtons>
+    </mat-paginator>
+  </div>
+</div>

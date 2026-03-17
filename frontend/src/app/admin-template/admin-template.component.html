@@ -1,0 +1,179 @@
+<mat-toolbar color="primary">
+  <button mat-icon-button (click)="myDrawer.toggle()">
+    <mat-icon>menu</mat-icon>
+  </button>
+
+  <!-- Titre de l'application -->
+  <div class="toolbar-title">
+    <span class="toolbar-title-main">Programme National de Recensement Administratif à Vocation d'État Civil</span>
+    <span class="toolbar-title-acronym">(PN-RAVEC)</span>
+  </div>
+
+  <span style="flex: auto;"></span>
+
+  <!-- Profil utilisateur -->
+  <button [matMenuTriggerFor]="profileMenu" class="profile-trigger-btn">
+    <div class="profile-avatar-circle">
+      <span class="profile-avatar-initials">
+        {{ authService.username?.charAt(0)?.toUpperCase() || 'U' }}
+      </span>
+    </div>
+    <div class="profile-trigger-info">
+      <span class="profile-trigger-name">{{ authService.username }}</span>
+      <span class="profile-trigger-role">Administrateur</span>
+    </div>
+    <mat-icon class="profile-trigger-arrow">expand_more</mat-icon>
+  </button>
+
+  <mat-menu #profileMenu="matMenu" class="profile-menu-panel" xPosition="before">
+    <!-- Header -->
+    <div class="pm-header" (click)="$event.stopPropagation()">
+      <div class="pm-avatar">
+        <span>{{ authService.username?.charAt(0)?.toUpperCase() || 'U' }}</span>
+      </div>
+      <div class="pm-user-info">
+        <span class="pm-name">{{ authService.username }}</span>
+        <span class="pm-role">
+          <mat-icon style="font-size:12px;width:12px;height:12px;vertical-align:middle">verified</mat-icon>
+          Administrateur
+        </span>
+      </div>
+    </div>
+
+    <div class="pm-divider"></div>
+
+    <!-- Actions -->
+    <button mat-menu-item routerLink="/admin/profile" class="pm-item">
+      <div class="pm-item-text">
+        <div class="pm-item-top">
+          <div class="pm-item-icon-inline pm-icon-blue">
+            <mat-icon>person</mat-icon>
+          </div>
+          <span class="pm-item-label">Mon Profil</span>
+        </div>
+        <span class="pm-item-desc">Voir et modifier vos infos</span>
+      </div>
+    </button>
+
+    <button mat-menu-item routerLink="/admin/settings/account" class="pm-item">
+      <div class="pm-item-text">
+        <div class="pm-item-top">
+          <div class="pm-item-icon-inline pm-icon-gray">
+            <mat-icon>settings</mat-icon>
+          </div>
+          <span class="pm-item-label">Paramètres</span>
+        </div>
+        <span class="pm-item-desc">Compte et sécurité</span>
+      </div>
+    </button>
+
+    <div class="pm-divider"></div>
+
+    <!-- Déconnexion -->
+    <button mat-menu-item (click)="logout()" class="pm-item pm-logout">
+      <div class="pm-item-text">
+        <div class="pm-item-top">
+          <div class="pm-item-icon-inline pm-icon-red">
+            <mat-icon>logout</mat-icon>
+          </div>
+          <span class="pm-item-label">Déconnexion</span>
+        </div>
+        <span class="pm-item-desc">Fermer la session</span>
+      </div>
+    </button>
+  </mat-menu>
+</mat-toolbar>
+
+<!-- Ligne de gradient rouge-jaune-vert -->
+<div class="gradient-line"></div>
+<mat-drawer-container>
+  <mat-drawer #myDrawer opened="true" mode="side" position="start" class="sidebar">
+    <mat-nav-list>
+      <!-- Dashboard -->
+      <!-- <a mat-list-item routerLink="/admin/dashboard" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }" class="menu-item">
+        <mat-icon matListItemIcon>dashboard</mat-icon>
+        <span matListItemTitle>Tableau de bord</span>
+      </a> -->
+
+      <!-- Simulation NPI du RAVEC -->
+      <a mat-list-item routerLink="/admin/simulation-npi" routerLinkActive="active-link"
+        [routerLinkActiveOptions]="{ exact: true }" class="menu-item">
+        <mat-icon matListItemIcon>calculate</mat-icon>
+        <span matListItemTitle>Simulation NPI RAVEC</span>
+      </a>
+
+      <!-- Paramétrages -->
+      <mat-list-item *ngIf="canViewSettings()" (click)="toggleSettingsSubmenu()" class="menu-item menu-parent">
+        <mat-icon matListItemIcon>settings</mat-icon>
+        <span matListItemTitle>Paramétrages</span>
+        <mat-icon class="expand-icon">{{ showSettingsSubmenu ? 'expand_less' : 'expand_more' }}</mat-icon>
+      </mat-list-item>
+
+      <!-- Sous-menu pour Paramétrages -->
+      <div class="submenu" [class.expanded]="showSettingsSubmenu">
+        <!-- Gestion des Utilisateurs -->
+        <mat-list-item *ngIf="canViewUsers()" (click)="toggleUsersSubmenu()" class="menu-item submenu-item menu-parent">
+          <mat-icon matListItemIcon>people</mat-icon>
+          <span matListItemTitle>Utilisateurs</span>
+          <mat-icon class="expand-icon">{{ showUsersSubmenu ? 'expand_less' : 'expand_more' }}</mat-icon>
+        </mat-list-item>
+        <div class="submenu level-2" [class.expanded]="showUsersSubmenu">
+          <a mat-list-item routerLink="/admin/users/list" routerLinkActive="active-link"
+            class="menu-item submenu-item level-2-item">
+            <mat-icon matListItemIcon>list</mat-icon>
+            <span matListItemTitle>Liste des Utilisateurs</span>
+          </a>
+        </div>
+
+        <!-- Gestion des Rôles -->
+        <mat-list-item *ngIf="canViewRoles()" (click)="toggleRolesSubmenu()" class="menu-item submenu-item menu-parent">
+          <mat-icon matListItemIcon>security</mat-icon>
+          <span matListItemTitle>Rôles & Permissions</span>
+          <mat-icon class="expand-icon">{{ showRolesSubmenu ? 'expand_less' : 'expand_more' }}</mat-icon>
+        </mat-list-item>
+        <div class="submenu level-2" [class.expanded]="showRolesSubmenu">
+          <a mat-list-item routerLink="/admin/roles/list" routerLinkActive="active-link"
+            class="menu-item submenu-item level-2-item">
+            <mat-icon matListItemIcon>admin_panel_settings</mat-icon>
+            <span matListItemTitle>Gestion des Rôles</span>
+          </a>
+          <a mat-list-item routerLink="/admin/permissions/list" routerLinkActive="active-link"
+            class="menu-item submenu-item level-2-item">
+            <mat-icon matListItemIcon>verified_user</mat-icon>
+            <span matListItemTitle>Gestion des Permissions</span>
+          </a>
+        </div>
+
+        <!-- Gestion des Localités -->
+        <mat-list-item *ngIf="canViewLocalities()" (click)="toggleLocalitiesSubmenu()"
+          class="menu-item submenu-item menu-parent">
+          <mat-icon matListItemIcon>location_on</mat-icon>
+          <span matListItemTitle>Localités</span>
+          <mat-icon class="expand-icon">{{ showLocalitiesSubmenu ? 'expand_less' : 'expand_more' }}</mat-icon>
+        </mat-list-item>
+        <div class="submenu level-2" [class.expanded]="showLocalitiesSubmenu">
+          <a mat-list-item routerLink="/admin/localites/list" routerLinkActive="active-link"
+            class="menu-item submenu-item level-2-item">
+            <mat-icon matListItemIcon>map</mat-icon>
+            <span matListItemTitle>Listes</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Divider -->
+      <mat-divider></mat-divider>
+
+      <!-- Aide -->
+      <a mat-list-item routerLink="/admin/help/about" routerLinkActive="active-link" class="menu-item">
+        <mat-icon matListItemIcon>help</mat-icon>
+        <span matListItemTitle>Aide</span>
+      </a>
+    </mat-nav-list>
+  </mat-drawer>
+
+  <mat-drawer-content>
+    <div class="main-content">
+      <router-outlet></router-outlet>
+    </div>
+  </mat-drawer-content>
+</mat-drawer-container>

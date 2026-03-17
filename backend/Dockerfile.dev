@@ -1,0 +1,24 @@
+# ============================================================
+#  Backend Spring Boot — Dockerfile DÉVELOPPEMENT
+#  Hot-reload via Maven spring-boot:run + DevTools
+# ============================================================
+
+FROM maven:3.9-eclipse-temurin-21
+
+WORKDIR /app
+
+# Copier d'abord le pom.xml seul pour profiter du cache Docker
+# (les dépendances ne sont retéléchargées que si pom.xml change)
+COPY pom.xml .
+RUN mvn dependency:go-offline -B
+
+# Copier le code source
+COPY src ./src
+
+# Exposer le port de l'application + port LiveReload DevTools
+EXPOSE 8091
+
+# Lancer Spring Boot en mode dev avec recompilation automatique
+# spring-boot:run surveille les fichiers et redémarre l'application
+CMD ["mvn", "spring-boot:run", \
+     "-Dspring-boot.run.jvmArguments=-Dspring.devtools.restart.enabled=true"]

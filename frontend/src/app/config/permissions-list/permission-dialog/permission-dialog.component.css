@@ -1,0 +1,197 @@
+/* permission-dialog.component.css */
+
+:root {
+  --primary-color: #4a8a4e;
+  --primary-light: #6ba66f;
+  --primary-gradient: linear-gradient(135deg, #4a8a4e 0%, #6ba66f 100%);
+  --text-primary: #333;
+  --text-secondary: #666;
+  --border-color: #e0e0e0;
+  --surface-color: #ffffff;
+  --shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Container */
+.permission-dialog {
+  min-width: 500px;
+  max-width: 600px;
+  background: var(--surface-color);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* En-tête */
+.dialog-header {
+  background: var(--primary-gradient);
+  color: white;
+  padding: 24px;
+  text-align: center;
+}
+
+.dialog-title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.dialog-title mat-icon {
+  font-size: 1.8rem;
+  width: 1.8rem;
+  height: 1.8rem;
+}
+
+/* Contenu */
+.dialog-content {
+  padding: 24px;
+}
+
+.permission-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Champs de formulaire */
+.full-width {
+  width: 100%;
+}
+
+/* Exemples */
+.examples-section {
+  margin: 16px 0;
+}
+
+.examples-label {
+  margin: 0 0 12px 0;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.examples-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.example-btn {
+  border-color: var(--primary-color) !important;
+  color: var(--primary-color) !important;
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+}
+
+.example-btn:hover {
+  background: var(--primary-color) !important;
+  color: white !important;
+}
+
+.example-btn mat-icon {
+  margin-right: 6px;
+  font-size: 1rem;
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Aperçu */
+.preview-section {
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid var(--primary-color);
+}
+
+.preview-section h4 {
+  margin: 0 0 12px 0;
+  color: var(--primary-color);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.preview-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.preview-chip {
+  background: var(--primary-gradient) !important;
+  color: white !important;
+  font-family: monospace;
+  font-weight: 600;
+  align-self: flex-start;
+  padding: 8px 16px;
+  border-radius: 20px;
+}
+
+.preview-description {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+/* Actions */
+.dialog-actions {
+  padding: 16px 24px;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  background: #f8f9fa;
+  border-top: 1px solid var(--border-color);
+}
+
+.cancel-btn {
+  color: var(--text-secondary);
+}
+
+.save-btn {
+  background: var(--primary-color) !important;
+  min-width: 100px;
+}
+
+/* Personnalisation Material */
+::ng-deep .permission-dialog .mat-mdc-form-field.mat-focused .mat-mdc-form-field-outline-thick {
+  color: var(--primary-color) !important;
+}
+
+::ng-deep .permission-dialog .mat-mdc-form-field.mat-focused .mat-mdc-floating-label {
+  color: var(--primary-color) !important;
+}
+
+::ng-deep .permission-dialog .mat-mdc-raised-button.mat-primary {
+  background-color: var(--primary-color) !important;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .permission-dialog {
+    min-width: 90vw;
+    max-width: 95vw;
+    margin: 10px;
+  }
+
+  .dialog-header,
+  .dialog-content {
+    padding: 20px;
+  }
+
+  .examples-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dialog-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .cancel-btn,
+  .save-btn {
+    width: 100%;
+  }
+}

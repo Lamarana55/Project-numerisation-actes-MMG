@@ -1,0 +1,46 @@
+# Fichiers et dossiers à ignorer lors du build Docker
+
+# Dependencies
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+
+# Build
+dist/
+.angular/
+.cache/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose*.yml
+
+# Env files
+.env
+.env.*
+environment.*.ts
+
+# Documentation
+README.md
+*.md
+
+# Test
+*.spec.ts
+karma.conf.js

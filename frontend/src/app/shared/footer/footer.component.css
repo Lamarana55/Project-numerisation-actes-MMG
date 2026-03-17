@@ -1,0 +1,416 @@
+/* ═══════════════════════════════════════════════════════════════
+   footer.component.css
+   .footer-auth  → login / register / update-password (fond blanc)
+   .footer-app   → pages connectées (fond sombre)
+═══════════════════════════════════════════════════════════════ */
+
+
+/* ──────────────────────────────────────────────────────────────
+   FOOTER AUTH — fond blanc (pages non connectées)
+────────────────────────────────────────────────────────────── */
+
+.footer-auth {
+  width: 100%;
+  background: #ffffff;
+  border-top: 1px solid #e8f0e9;
+  z-index: 1000;
+}
+
+/* Ligne décorative vert/or — opacités visibles sur fond blanc */
+.fa-line-top {
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(74, 138, 78, 0.5),
+    rgba(200, 150, 12, 0.7),
+    rgba(74, 138, 78, 0.5),
+    transparent
+  );
+}
+
+.fa-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 14px 48px 16px;
+}
+
+/* Gauche */
+.fa-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.fa-flag { display: flex; gap: 2px; align-items: center; }
+.fa-flag span { width: 4px; height: 18px; border-radius: 2px; }
+.fc-r { background: #ce1126; }
+.fc-y { background: #fcd116; }
+.fc-g { background: #009460; }
+
+.fa-copy {
+  font-size: 0.72rem;
+  color: #555555;
+  letter-spacing: 0.3px;
+  font-weight: 500;
+}
+
+/* Droite */
+.fa-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.fa-link {
+  font-size: 0.68rem;
+  color: #777777;
+  text-decoration: none;
+  letter-spacing: 0.4px;
+  transition: color 0.2s;
+}
+.fa-link:hover { color: #4a8a4e; }
+
+.fa-sep {
+  color: #cccccc;
+  font-size: 0.7rem;
+}
+
+.fa-version {
+  font-size: 0.65rem;
+  color: #4a8a4e;
+  letter-spacing: 0.8px;
+  font-weight: 600;
+}
+
+
+/* ──────────────────────────────────────────────────────────────
+   FOOTER APP — dark premium (pages connectées)
+────────────────────────────────────────────────────────────── */
+
+.footer-app {
+  width: 100%;
+  background: linear-gradient(180deg, #0f1f12 0%, #0b1a0e 100%);
+  color: rgba(240, 244, 241, 0.75);
+  font-size: 0.82rem;
+}
+
+/* Barre drapeau supérieure */
+.fapp-flag-bar { display: flex; height: 4px; }
+.fapp-flag-bar span { flex: 1; }
+.fb-r { background: #ce1126; }
+.fb-y { background: #fcd116; }
+.fb-g { background: #009460; }
+
+/* Corps */
+.fapp-body { padding: 36px 0 28px; }
+
+.fapp-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 48px;
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+}
+
+/* Colonnes */
+.fapp-col { flex: 1; padding: 0 32px; }
+.fapp-col:first-child { padding-left: 0; }
+.fapp-col:last-child  { padding-right: 0; }
+
+/* Colonne identité */
+.fapp-identity { flex:2; }
+
+.fapp-logo-row{
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.fapp-logo {
+  width: 150px;        /* logo plus grand */
+  height: auto;        /* garde la forme rectangulaire */
+  object-fit: contain;
+  border-radius: 2px;
+  border: 1.5px solid rgba(106, 170, 110, 0.5);
+  background: rgba(255, 255, 255, 0.08);
+
+  padding: 0px;
+  flex-shrink: 0;
+}
+
+
+.fapp-id-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fapp-republic {
+  font-weight: 700;
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 0.95rem;
+  color: rgba(240, 244, 241, 0.9);
+}
+
+.fapp-program {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #009460 !important;
+  line-height: 1.45;
+}
+
+.fapp-accent { color: #c8960c; font-weight: bold; text-decoration: none;}
+
+.fapp-ministry {
+  font-size: 0.70rem;
+  font-weight: bold;
+  color: rgba(240, 244, 241, 0.45);
+  color: whitesmoke;
+  margin-top: 2px;
+}
+
+/* Séparateur vertical */
+.fapp-vline {
+  width: 2px;
+  align-self: stretch;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    rgba(106, 170, 110, 0.25) 20%,
+    rgba(106, 170, 110, 0.25) 80%,
+    transparent
+  );
+  margin: 0 4px;
+  flex-shrink: 0;
+}
+
+/* Titre colonne */
+.fapp-col-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: rgba(240, 244, 241, 0.9);
+  letter-spacing: 0.5px;
+  margin: 0 0 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(106, 170, 110, 0.2);
+}
+
+.fapp-col-title mat-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  color: #4a8a4e;
+}
+
+/* Liste liens */
+.fapp-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.fapp-links li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fapp-links mat-icon {
+  font-size: 15px;
+  width: 15px;
+  height: 15px;
+  color: rgba(106, 170, 110, 0.5);
+  flex-shrink: 0;
+}
+
+.fapp-link {
+  color: rgba(240, 244, 241, 0.6);
+  text-decoration: none;
+  font-size: 0.78rem;
+  transition: color 0.2s;
+}
+.fapp-link:hover { color: rgba(240, 244, 241, 0.95); }
+
+.fapp-link-accent {
+  color: #4a8a4e;
+  text-decoration: none;
+  font-size: 0.78rem;
+  font-weight: 700;
+  transition: color 0.2s;
+}
+.fapp-link-accent:hover { color: #6aaa6e; }
+
+/* Info système / support */
+.fapp-info {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  font-size: 0.78rem;
+  color: rgba(240, 244, 241, 0.55);
+}
+
+.fapp-info li {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.fapp-info strong { color: rgba(240, 244, 241, 0.9); font-weight: 700; }
+
+.fapp-info-icon {
+  font-size: 15px !important;
+  width: 15px !important;
+  height: 15px !important;
+  color: rgba(106, 170, 110, 0.45);
+  flex-shrink: 0;
+}
+
+.fapp-status-ok { color: #4a8a4e; font-weight: 700; }
+
+/* Séparateur horizontal */
+.fapp-hline {
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(106, 170, 110, 0.2),
+    rgba(200, 150, 12, 0.3),
+    rgba(106, 170, 110, 0.2),
+    transparent
+  );
+  margin: 0 48px;
+}
+
+/* Devise */
+.fapp-motto {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 0;
+}
+
+.fapp-motto-text {
+  font-style: italic;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.fapp-motto-flag { display: flex; gap: 4px; }
+.fapp-motto-flag span { height: 4px; width: 36px; border-radius: 2px; }
+.fm-r { background: #ce1126; }
+.fm-y { background: #fcd116; }
+.fm-g { background: #009460; }
+.ft-r { color: #ce1126; }
+.ft-y { color: #fcd116; }
+.ft-g { color: #009460; }
+/* Bas de page */
+.fapp-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 14px 48px 16px;
+}
+
+.fapp-copy {
+  font-size: 0.90rem;
+  font-weight: bold;
+  color: whitesmoke;
+}
+
+.fapp-bottom-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.fapp-bottom-link {
+  font-size: 0.7rem;
+  color: rgba(240, 244, 241, 0.35);
+  text-decoration: none;
+  letter-spacing: 0.3px;
+  transition: color 0.2s;
+}
+.fapp-bottom-link:hover { color: #6aaa6e; }
+
+/* Réseaux sociaux */
+.fapp-socials {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.fapp-social {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(240, 244, 241, 0.4);
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.fapp-social:hover {
+  background: rgba(74, 138, 78, 0.2);
+  border-color: rgba(106, 170, 110, 0.4);
+  color: #6aaa6e;
+}
+
+
+/* ──────────────────────────────────────────────────────────────
+   RESPONSIVE
+────────────────────────────────────────────────────────────── */
+
+/* Footer auth */
+@media (max-width: 640px) {
+  .fa-inner  { padding: 12px 20px 14px; }
+  .fa-right  { display: none; }
+  .fa-left   { justify-content: center; width: 100%; }
+}
+
+/* Footer app */
+@media (max-width: 1024px) {
+  .fapp-col { padding: 0 20px; }
+}
+
+@media (max-width: 768px) {
+  .fapp-container {
+    flex-direction: column;
+    gap: 28px;
+    padding: 0 24px;
+  }
+  .fapp-col    { padding: 0; }
+  .fapp-vline  { display: none; }
+  .fapp-hline  { margin: 0 24px; }
+  .fapp-bottom {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 14px 24px 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .fapp-bottom-right { flex-wrap: wrap; justify-content: center; gap: 12px; }
+}

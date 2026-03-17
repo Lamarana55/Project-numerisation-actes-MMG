@@ -1,0 +1,167 @@
+.container {
+  width: 100%;
+  min-height: 92vh;
+  background: url("../../../assets/images/bg-material.png") center center
+    no-repeat fixed;
+  background-size: contain;
+  margin-top: 20px;
+  padding: 0 15px;
+}
+
+.logo {
+  width: 100%;
+  max-width: 200px;
+  height: auto;
+  margin-bottom: 10px;
+}
+
+/* Header responsive */
+.header-section h1 {
+  font-size: 1.8rem;
+  margin-bottom: 10px;
+}
+
+.header-section h2 {
+  font-size: 1.2rem;
+  margin-bottom: 15px;
+}
+
+/* Login card responsive */
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  padding: 20px;
+  background-color: #f0f0f0;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  margin: 70px auto 0 auto;
+  position: relative; /* Changé de absolute à relative */
+}
+
+.full-width {
+  width: 100%;
+}
+
+.text-link {
+  color: #4a8a4e;
+  text-decoration: none;
+}
+
+.text-link:hover {
+  text-decoration: underline;
+}
+
+.text-center {
+  text-align: center;
+  color: #000000;
+  font-weight: bold;
+}
+
+.text-center-color {
+  text-align: center;
+  color: #4a8a4e;
+  font-weight: bold;
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 12px;
+  background-color: #4a8a4e;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background-color 0.3s;
+}
+
+.submit-btn:hover:not(:disabled) {
+  background-color: #3a7a3e;
+}
+
+.submit-btn:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+/* Media queries pour responsive */
+@media (max-width: 768px) {
+  .container {
+    margin-top: 10px;
+    padding: 0 10px;
+  }
+
+  .logo {
+    max-width: 150px;
+  }
+
+  .header-section h1 {
+    font-size: 1.4rem;
+  }
+
+  .header-section h2 {
+    font-size: 1rem;
+  }
+
+  .login-card {
+    max-width: 100%;
+    margin: 30px auto 0 auto;
+    padding: 15px;
+  }
+
+  .col-sm-6 {
+    padding: 0 10px;
+  }
+}
+
+@media (max-width: 576px) {
+  .container {
+    margin-top: 5px;
+    padding: 0 5px;
+  }
+
+  .logo {
+    max-width: 120px;
+  }
+
+  .header-section h1 {
+    font-size: 1.2rem;
+    line-height: 1.3;
+  }
+
+  .header-section h2 {
+    font-size: 0.9rem;
+  }
+
+  .login-card {
+    margin: 20px auto 0 auto;
+    padding: 10px;
+  }
+
+  .submit-btn {
+    padding: 10px;
+    font-size: 14px;
+  }
+
+  /* Ajustements pour les colonnes sur mobile */
+  .col-sm-3, .col-sm-6 {
+    text-align: center;
+    margin-bottom: 15px;
+  }
+}
+
+/* Ajustements pour les très petits écrans */
+@media (max-width: 400px) {
+  .header-section h1 {
+    font-size: 1.1rem;
+  }
+
+  .header-section h2 {
+    font-size: 0.8rem;
+  }
+
+  .login-card {
+    margin: 15px auto 0 auto;
+  }
+}

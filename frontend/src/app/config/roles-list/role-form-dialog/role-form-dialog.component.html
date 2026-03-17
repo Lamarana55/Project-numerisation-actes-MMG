@@ -1,0 +1,251 @@
+<!-- role-form-dialog.component.html -->
+<div class="role-dialog" (keydown)="onKeyDown($event)">
+  <!-- En-tête -->
+  <div class="dialog-header">
+    <h2 class="dialog-title">
+      <mat-icon>{{ isEditMode ? 'edit' : 'group_add' }}</mat-icon>
+      {{ isEditMode ? 'Modifier le rôle' : 'Nouveau rôle' }}
+    </h2>
+    <div class="completion-bar" *ngIf="!isEditMode">
+      <div class="completion-progress"
+           [style.width.%]="getFormCompletionPercentage()"></div>
+    </div>
+  </div>
+
+  <form [formGroup]="roleForm" (ngSubmit)="onSubmit()">
+    <mat-dialog-content class="dialog-content">
+
+      <!-- Exemples rapides (mode création uniquement) -->
+      <div class="examples-section" *ngIf="!isEditMode">
+        <h3>Exemples de rôles</h3>
+        <div class="examples-grid">
+          <button type="button"
+                  mat-stroked-button
+                  *ngFor="let example of roleExamples"
+                  (click)="fillRoleExample(example.name)"
+                  class="example-btn">
+            <div class="example-content">
+              <span class="example-name">{{ example.name }}</span>
+              <span class="example-description">{{ example.description }}</span>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Informations de base -->
+      <div class="basic-info-section">
+        <h3>
+          <mat-icon>info</mat-icon>
+          Informations de base
+        </h3>
+
+        <!-- Nom du rôle -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Nom du rôle *</mat-label>
+          <input matInput
+                 formControlName="nom"
+                 placeholder="Ex: ADMIN, MANAGER, OPERATOR"
+                 maxlength="50">
+          <mat-icon matSuffix
+                    matTooltip="Format: LETTRES_MAJUSCULES_AVEC_UNDERSCORES">
+            help_outline
+          </mat-icon>
+          <mat-hint align="end">{{ roleForm.get('nom')?.value.length || 0 }}/50</mat-hint>
+          <mat-error *ngIf="hasFieldError('nom')">
+            {{ getFieldError('nom') }}
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Description -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Description *</mat-label>
+          <textarea matInput
+                    formControlName="description"
+                    placeholder="Description détaillée du rôle et de ses responsabilités"
+                    rows="3"
+                    maxlength="255">
+          </textarea>
+          <mat-hint align="end">{{ roleForm.get('description')?.value.length || 0 }}/255</mat-hint>
+          <mat-error *ngIf="hasFieldError('description')">
+            {{ getFieldError('description') }}
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <!-- Permissions -->
+      <div class="permissions-section">
+        <div class="permissions-header">
+          <h3>
+            <mat-icon>verified_user</mat-icon>
+            Permissions
+          </h3>
+          <div class="permissions-summary">
+            <mat-chip [color]="getSelectedPermissionsCount() > 0 ? 'primary' : 'basic'"
+                     selected="getSelectedPermissionsCount() > 0">
+              {{ getSelectedPermissionsCount() }} permission(s) sélectionnée(s)
+            </mat-chip>
+          </div>
+        </div>
+
+        <p class="permissions-subtitle">
+          Sélectionnez les permissions accordées à ce rôle
+        </p>
+
+        <!-- Recherche des permissions -->
+        <mat-form-field appearance="outline" class="search-permissions full-width">
+          <mat-label>Rechercher des permissions</mat-label>
+          <input matInput
+                 [(ngModel)]="searchTerm"
+                 [ngModelOptions]="{standalone: true}"
+                 (input)="onPermissionSearch()"
+                 placeholder="Nom ou description...">
+          <mat-icon matPrefix>search</mat-icon>
+          <button mat-icon-button
+                  matSuffix
+                  *ngIf="searchTerm"
+                  (click)="clearPermissionSearch()">
+            <mat-icon>close</mat-icon>
+          </button>
+        </mat-form-field>
+
+        <!-- Catégories de permissions -->
+        <div class="permissions-grid">
+          <mat-expansion-panel
+            *ngFor="let category of categories"
+            class="permission-category"
+            [expanded]="isCategorySelected(category.key) || searchTerm.length > 0"
+            [disabled]="!(filteredGroupedPermissions[category.key] || groupedPermissions[category.key]).length">
+
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                <div class="category-header">
+                  <mat-checkbox
+                    [checked]="isCategorySelected(category.key)"
+                    [indeterminate]="isCategoryIndeterminate(category.key)"
+                    (change)="toggleCategoryPermissions(category.key)"
+                    (click)="$event.stopPropagation()"
+                    [disabled]="!(filteredGroupedPermissions[category.key] || groupedPermissions[category.key]).length">
+                  </mat-checkbox>
+                  <mat-icon class="category-icon">{{ getCategoryIcon(category.key) }}</mat-icon>
+                  <div class="category-info">
+                    <span class="category-name">{{ category.label }}</span>
+                    <span class="category-description">{{ category.description }}</span>
+                  </div>
+                </div>
+              </mat-panel-title>
+              <mat-panel-description>
+                <div class="category-count">
+                  {{ (filteredGroupedPermissions[category.key] || groupedPermissions[category.key] || []).length }}
+                  permission(s)
+                </div>
+              </mat-panel-description>
+            </mat-expansion-panel-header>
+
+            <div class="permission-list">
+              <mat-checkbox
+                *ngFor="let permission of (filteredGroupedPermissions[category.key] || groupedPermissions[category.key])"
+                [checked]="isPermissionSelected(permission)"
+                (change)="togglePermission(permission)"
+                class="permission-item">
+                <div class="permission-info">
+                  <div class="permission-name">{{ permission.nom }}</div>
+                  <div class="permission-description">
+                    {{ permission.description || 'Aucune description disponible' }}
+                  </div>
+                </div>
+              </mat-checkbox>
+            </div>
+          </mat-expansion-panel>
+
+          <!-- Message si aucune permission trouvée -->
+          <div class="no-permissions" *ngIf="searchTerm">
+            <mat-icon>search_off</mat-icon>
+            <p>Aucune permission trouvée pour "{{ searchTerm }}"</p>
+            <button mat-button (click)="clearPermissionSearch()">
+              Effacer la recherche
+            </button>
+          </div>
+        </div>
+
+        <!-- Résumé des permissions sélectionnées -->
+        <div class="selected-permissions-summary" *ngIf="getSelectedPermissionsCount() > 0">
+          <mat-divider></mat-divider>
+          <div class="summary-content">
+            <mat-icon>info</mat-icon>
+            <span>
+              <strong>{{ getSelectedPermissionsCount() }}</strong> permission(s) sélectionnée(s)
+              pour ce rôle
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Aperçu du rôle -->
+      <div class="preview-section" *ngIf="roleForm.get('nom')?.value">
+        <h4>
+          <mat-icon>preview</mat-icon>
+          Aperçu du rôle
+        </h4>
+        <div class="preview-content">
+          <div class="preview-role">
+            <mat-chip class="preview-chip">{{ roleForm.get('nom')?.value }}</mat-chip>
+            <p class="preview-description">
+              {{ roleForm.get('description')?.value || 'Aucune description fournie' }}
+            </p>
+          </div>
+          <div class="preview-permissions" *ngIf="getSelectedPermissionsCount() > 0">
+            <div class="preview-permissions-header">
+              <mat-icon>verified_user</mat-icon>
+              <span>Permissions accordées ({{ getSelectedPermissionsCount() }})</span>
+            </div>
+            <div class="preview-permissions-list">
+              <mat-chip-set>
+                <mat-chip *ngFor="let permission of permissionSelection.selected.slice(0, 5)"
+                         class="preview-permission-chip">
+                  {{ permission.nom }}
+                </mat-chip>
+                <mat-chip *ngIf="getSelectedPermissionsCount() > 5"
+                         class="more-permissions">
+                  +{{ getSelectedPermissionsCount() - 5 }} autres
+                </mat-chip>
+              </mat-chip-set>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </mat-dialog-content>
+
+    <!-- Actions -->
+    <mat-dialog-actions class="dialog-actions">
+      <div class="actions-left">
+        <button mat-button
+                type="button"
+                (click)="resetForm()"
+                [disabled]="loading">
+          <mat-icon>refresh</mat-icon>
+          Réinitialiser
+        </button>
+      </div>
+
+      <div class="actions-right">
+        <button mat-button
+                type="button"
+                (click)="onCancel()"
+                [disabled]="loading">
+          Annuler
+        </button>
+
+        <button mat-raised-button
+                color="primary"
+                type="submit"
+                [disabled]="!isFormValid() || loading"
+                class="save-btn">
+          <mat-spinner *ngIf="loading" diameter="20" class="spinner-inline"></mat-spinner>
+          <mat-icon *ngIf="!loading">{{ isEditMode ? 'save' : 'add' }}</mat-icon>
+          {{ isEditMode ? 'Modifier' : 'Créer' }}
+        </button>
+      </div>
+    </mat-dialog-actions>
+  </form>
+</div>

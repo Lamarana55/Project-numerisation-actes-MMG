@@ -1,0 +1,48 @@
+# Fichiers et dossiers à ignorer lors du build Docker
+
+# Build artifacts
+target/
+*.jar
+*.war
+*.ear
+*.class
+
+# Logs
+logs/
+*.log
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+.classpath
+.project
+.settings/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose*.yml
+
+# Env files
+.env
+.env.local
+.env.*
+
+# Documentation
+README.md
+*.md
+
+# Test
+src/test/

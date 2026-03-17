@@ -1,0 +1,640 @@
+<!-- Stepper principal -->
+<mat-card class="stepper-card">
+  <mat-card-content>
+    <!-- Header animé avec construction du NPI -->
+    <div class="npi-construction-header" *ngIf="showNPIConstruction">
+      <mat-card class="construction-card">
+        <!-- ✅ APRÈS -->
+        <button *ngIf="constructionProgress === 100" mat-icon-button matTooltip="Copier le NPI" (click)="copyNPI()"
+          class="copy-button">
+          <mat-icon>content_copy</mat-icon>
+        </button>
+        <div class="construction-title">
+          <mat-icon class="pulse-icon">fingerprint</mat-icon>
+          <h3>Construction du NPI en temps réel</h3>
+        </div>
+
+        <div class="npi-preview">
+          <!-- Sexe -->
+          <div class="npi-segment" [class.filled]="npiParts.sexe" [class.animate-in]="npiParts.sexe">
+            <span class="segment-label">Sexe</span>
+            <span class="segment-value" [style.color]="'blue'">{{ npiParts.sexe || '?' }}</span>
+          </div>
+
+          <!-- Année-->
+          <div class="npi-segment" [class.filled]="npiParts.annee" [class.animate-in]="npiParts.annee">
+            <span class="segment-label">Année</span>
+            <span class="segment-value" [style.color]="'black'">{{ npiParts.annee || '??' }}</span>
+          </div>
+
+          <!-- Mois  -->
+          <div class="npi-segment" [class.filled]="npiParts.mois" [class.animate-in]="npiParts.mois">
+            <span class="segment-label">Mois</span>
+            <span class="segment-value" [style.color]="'gray'">{{ npiParts.mois || '??' }}</span>
+          </div>
+
+          <!-- TYPE 1: Préfecture + Commune + Quartier -->
+          <ng-container *ngIf="enfantFormGroup.get('typeNPI')?.value === '1'">
+            <div class="npi-segment" [class.filled]="npiParts.prefecture" [class.animate-in]="npiParts.prefecture">
+              <span class="segment-label">Préfecture</span>
+              <span class="segment-value" [style.color]="'red'">{{ npiParts.prefecture || '???' }}</span>
+            </div>
+
+            <div class="npi-segment" [class.filled]="npiParts.commune" [class.animate-in]="npiParts.commune">
+              <span class="segment-label">Commune</span>
+              <span class="segment-value" [style.color]="'purple'">{{ npiParts.commune || '??' }}</span>
+            </div>
+
+            <div class="npi-segment" [class.filled]="npiParts.quartier" [class.animate-in]="npiParts.quartier">
+              <span class="segment-label">Quartier</span>
+              <span class="segment-value" [style.color]="'green'">{{ npiParts.quartier || '??' }}</span>
+            </div>
+
+            <div class="npi-segment" [class.filled]="numeroAleatoire" [class.animate-in]="numeroAleatoire">
+              <span class="segment-label">N° Aléatoire</span>
+              <span class="segment-value" [style.color]="'black'">{{ numeroAleatoire || '????' }}</span>
+            </div>
+          </ng-container>
+
+          <!-- TYPE 2: Région + Pays (Region en chiffre + Pays en alphanumerique )) -->
+          <ng-container *ngIf="enfantFormGroup.get('typeNPI')?.value === '2'">
+            <div class="npi-segment" [class.filled]="npiParts.region" [class.animate-in]="npiParts.region">
+              <span class="segment-label">Région</span>
+              <span class="segment-value" [style.color]="'red'">{{ npiParts.region || '???' }}</span>
+            </div>
+
+            <div class="npi-segment" [class.filled]="npiParts.pays" [class.animate-in]="npiParts.pays">
+              <span class="segment-label">Pays</span>
+              <span class="segment-value" [style.color]="'purple'">{{ npiParts.pays || '???' }}</span>
+            </div>
+
+            <div class="npi-segment" [class.filled]="numeroAleatoire" [class.animate-in]="numeroAleatoire">
+              <span class="segment-label">N° Aléatoire</span>
+              <span class="segment-value" [style.color]="'black'">{{ numeroAleatoire || '?????' }}</span>
+            </div>
+          </ng-container>
+
+          <!-- TYPE 3: Pays + Région (Pays en alphanumerique + Region en chiffre )-->
+          <ng-container *ngIf="enfantFormGroup.get('typeNPI')?.value === '3'">
+
+            <div class="npi-segment" [class.filled]="npiParts.pays" [class.animate-in]="npiParts.pays">
+              <span class="segment-label">Pays</span>
+              <span class="segment-value" [style.color]="'purple'">{{ npiParts.pays || '???' }}</span>
+            </div>
+
+            <div class="npi-segment" [class.filled]="npiParts.region" [class.animate-in]="npiParts.region">
+              <span class="segment-label">Région</span>
+              <span class="segment-value" [style.color]="'red'">{{ npiParts.region || '???' }}</span>
+            </div>
+
+            <div class="npi-segment" [class.filled]="numeroAleatoire" [class.animate-in]="numeroAleatoire">
+              <span class="segment-label">N° Aléatoire</span>
+              <span class="segment-value" [style.color]="'black'">{{ numeroAleatoire || '?????' }}</span>
+            </div>
+          </ng-container>
+
+          <!-- TYPE 4: Pays + Region (Pays en chiffre + Region en chiffre )-->
+          <ng-container *ngIf="enfantFormGroup.get('typeNPI')?.value === '4'">
+            <div class="npi-segment" [class.filled]="npiParts.pays" [class.animate-in]="npiParts.pays">
+              <span class="segment-label">Pays</span>
+              <span class="segment-value" [style.color]="'purple'">{{ npiParts.pays || '???' }}</span>
+            </div>
+
+            <div class="npi-segment" [class.filled]="npiParts.region" [class.animate-in]="npiParts.region">
+              <span class="segment-label">Région</span>
+              <span class="segment-value" [style.color]="'red'">{{ npiParts.region || '???' }}</span>
+            </div>
+
+            <div class="npi-segment" [class.filled]="numeroAleatoire" [class.animate-in]="numeroAleatoire">
+              <span class="segment-label">N° Aléatoire</span>
+              <span class="segment-value" [style.color]="'black'">{{ numeroAleatoire || '?????' }}</span>
+            </div>
+          </ng-container>
+
+          <!-- Clé de contrôle (commun à tous) -->
+          <div class="npi-segment" [class.filled]="cleControle" [class.animate-in]="cleControle">
+            <span class="segment-label">Clé</span>
+            <span class="segment-value" [style.color]="'maroon'">{{ cleControle || '??' }}</span>
+          </div>
+        </div>
+
+
+        <div class="construction-progress">
+          <mat-progress-bar mode="determinate" [value]="constructionProgress" color="primary"></mat-progress-bar>
+          <span class="progress-text">{{ constructionProgress }}% complété</span>
+        </div>
+      </mat-card>
+    </div>
+
+    <mat-stepper [linear]="isLinear" #stepper class="custom-stepper">
+
+
+      <!-- ÉTAPE 1: Données de l'enfant -->
+
+      <mat-step [stepControl]="enfantFormGroup">
+        <form [formGroup]="enfantFormGroup">
+          <ng-template matStepLabel>
+            <span class="step-label">
+              <mat-icon>child_care</mat-icon>
+              Données de l'enfant
+            </span>
+          </ng-template>
+
+          <div class="step-content">
+            <h3 class="section-title">Informations de l'enfant</h3>
+
+            <!-- NOUVELLE SECTION: Type de NPI -->
+            <h4 class="subsection-title">Type de NPI: </h4>
+
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="form-field-full npi-type-select">
+                <mat-label>Sélectionnez le type de NPI à Générer</mat-label>
+                <mat-select formControlName="typeNPI">
+                  <!-- Trigger personnalisé pour l'affichage -->
+                  <mat-select-trigger>
+                    <div class="selected-npi-option" *ngIf="enfantFormGroup.get('typeNPI')?.value">
+                      <!-- <mat-icon class="selected-npi-icon">{{ getTypeNPIIcon(enfantFormGroup.get('typeNPI')?.value) }}</mat-icon> -->
+                      <span class="selected-npi-text">{{ getTypeNPILabel(enfantFormGroup.get('typeNPI')?.value)
+                        }}</span>
+                    </div>
+                  </mat-select-trigger>
+
+                  <mat-option value="1">
+                    <div class="npi-option">
+                      <mat-icon class="npi-icon">🇬🇳</mat-icon>
+                      <div class="npi-option-text">
+                        <span class="npi-option-title">Guinéenne né en Guinée</span>
+                        <span class="npi-option-desc">Pour les enfants de nationalité guinéenne nés sur le territoire
+                          guinéen</span>
+                      </div>
+                    </div>
+                  </mat-option>
+                  <mat-option value="2">
+                    <div class="npi-option">
+                      <mat-icon class="npi-icon">public</mat-icon>
+                      <div class="npi-option-text">
+                        <span class="npi-option-title">Guinéenne né à l'étranger</span>
+                        <span class="npi-option-desc">Pour les enfants de nationalité guinéenne nés hors du
+                          territoire</span>
+                      </div>
+                    </div>
+                  </mat-option>
+                  <mat-option value="3">
+                    <div class="npi-option">
+                      <mat-icon class="npi-icon">how_to_reg</mat-icon>
+                      <div class="npi-option-text">
+                        <span class="npi-option-title">Étranger résident permanent </span>
+                        <span class="npi-option-desc">Pour les étrangers avec statut de résidence permanente</span>
+                      </div>
+                    </div>
+                  </mat-option>
+                  <mat-option value="4">
+                    <div class="npi-option">
+                      <mat-icon class="npi-icon">badge</mat-icon>
+                      <div class="npi-option-text">
+                        <span class="npi-option-title">Étranger résident temporaire </span>
+                        <span class="npi-option-desc">Pour les étrangers avec statut de résidence temporaire</span>
+                      </div>
+                    </div>
+                  </mat-option>
+                </mat-select>
+                <mat-icon matPrefix class="type-npi-prefix">category</mat-icon>
+                <mat-error *ngIf="enfantFormGroup.get('typeNPI')?.hasError('required')">
+                  Le type de NPI est obligatoire
+                </mat-error>
+                <mat-hint>Choisissez le type correspondant à la situation de l'enfant</mat-hint>
+              </mat-form-field>
+            </div>
+
+            <!-- Trait séparateur -->
+            <div class="section-divider"></div>
+
+            <!-- Première ligne -->
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="form-field-half">
+                <mat-label>Prénom</mat-label>
+                <input matInput formControlName="prenom" placeholder="Prénom de l'enfant">
+                <mat-icon matPrefix>person</mat-icon>
+                <mat-error *ngIf="enfantFormGroup.get('prenom')?.hasError('required')">
+                  Le prénom est obligatoire
+                </mat-error>
+                <mat-error *ngIf="enfantFormGroup.get('prenom')?.hasError('minlength')">
+                  Le prénom doit contenir au moins 2 caractères
+                </mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="form-field-half">
+                <mat-label>Nom</mat-label>
+                <input matInput formControlName="nom" placeholder="Nom de famille">
+                <mat-icon matPrefix>badge</mat-icon>
+                <mat-error *ngIf="enfantFormGroup.get('nom')?.hasError('required')">
+                  Le nom est obligatoire
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <!-- Deuxième ligne -->
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="form-field-third">
+                <mat-label>Sexe</mat-label>
+                <mat-select formControlName="sexe">
+                  <mat-option value="1">Masculin</mat-option>
+                  <mat-option value="2">Féminin</mat-option>
+                </mat-select>
+                <mat-icon matPrefix>wc</mat-icon>
+                <mat-error *ngIf="enfantFormGroup.get('sexe')?.hasError('required')">
+                  Le sexe est obligatoire
+                </mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="form-field-third">
+                <mat-label>Date de naissance</mat-label>
+                <input matInput [matDatepicker]="picker" formControlName="dateNaissance" [max]="maxDate">
+                <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                <mat-datepicker #picker></mat-datepicker>
+                <mat-icon matPrefix>calendar_today</mat-icon>
+                <mat-error *ngIf="enfantFormGroup.get('dateNaissance')?.hasError('required')">
+                  La date de naissance est obligatoire
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <h4 class="subsection-title">Lieu de naissance</h4>
+
+            <!-- Localisation -->
+            <div class="form-row">
+              <!-- TYPE 2 & 3 & 4 : Code Région + Pays -->
+              <ng-container *ngIf=" enfantFormGroup.get('typeNPI')?.value === '2' ||
+              enfantFormGroup.get('typeNPI')?.value === '3' ||
+              enfantFormGroup.get('typeNPI')?.value === '4'">
+                <!-- Pays -->
+                <!-- ✅ APRÈS -->
+                <mat-form-field appearance="outline" class="form-field-full">
+                  <mat-label>Pays de naissance</mat-label>
+                  <input matInput formControlName="pays" [matAutocomplete]="autoPays"
+                    placeholder="Rechercher un pays..." (input)="filtrerPays($event)">
+                  <mat-icon matPrefix>public</mat-icon>
+                  <button *ngIf="enfantFormGroup.get('pays')?.value" matSuffix mat-icon-button type="button"
+                    (click)="effacerPays()">
+                    <mat-icon>close</mat-icon>
+                  </button>
+                  <mat-autocomplete #autoPays="matAutocomplete" [displayWith]="afficherPays">
+                    <mat-option *ngFor="let pays of paysFiltres" [value]="pays">
+                      {{ pays.nom }}
+                    </mat-option>
+                  </mat-autocomplete>
+                </mat-form-field>
+                <!-- Ville -->
+                <mat-form-field appearance="outline" class="form-field-third">
+                  <mat-label>Ville de naissance</mat-label>
+                  <mat-select formControlName="ville">
+                    <mat-option *ngFor="let ville of villesFiltres" [value]="ville.code">
+                      {{ville.nom}}
+                    </mat-option>
+                  </mat-select>
+                  <mat-icon matPrefix>location_city</mat-icon>
+                  <mat-error *ngIf="enfantFormGroup.get('commune')?.hasError('required')">
+                    La v est obligatoire
+                  </mat-error>
+                </mat-form-field>
+              </ng-container>
+
+              <ng-container *ngIf="enfantFormGroup.get('typeNPI')?.value === '1'">
+                <!-- Préfecture -->
+                <mat-form-field appearance="outline" class="form-field-third">
+                  <mat-label>Préfecture de naissance</mat-label>
+                  <mat-select formControlName="prefecture">
+                    <!-- ✅ MODIFICATION : Utiliser getRegionsTriees() au lieu du tableau statique -->
+                    <mat-optgroup *ngFor="let region of getRegionsTriees()" [label]="region">
+                      <!-- ✅ MODIFICATION : Utiliser getPrefecturesPourRegion() au lieu de filtrer -->
+                      <mat-option *ngFor="let pref of getPrefecturesPourRegion(region)" [value]="pref.code">
+                        {{ pref.nom }}
+                      </mat-option>
+                    </mat-optgroup>
+                  </mat-select>
+                  <mat-icon matPrefix>location_city</mat-icon>
+                  <mat-error *ngIf="enfantFormGroup.get('prefecture')?.hasError('required')">
+                    La préfecture est obligatoire
+                  </mat-error>
+                </mat-form-field>
+
+                <!-- Commune -->
+                <mat-form-field appearance="outline" class="form-field-third">
+                  <mat-label>Commune</mat-label>
+                  <mat-select formControlName="commune">
+                    <mat-option *ngFor="let commune of communesFiltrees" [value]="commune.code">
+                      {{commune.nom}}
+                    </mat-option>
+                  </mat-select>
+                  <mat-icon matPrefix>location_city</mat-icon>
+                  <mat-error *ngIf="enfantFormGroup.get('commune')?.hasError('required')">
+                    La commune est obligatoire
+                  </mat-error>
+                </mat-form-field>
+                <!-- Quartier -->
+                <mat-form-field appearance="outline" class="form-field-third">
+                  <mat-label>Quartier</mat-label>
+                  <mat-select formControlName="quartier">
+                    <mat-option *ngFor="let q of quartiersFiltres" [value]="q.code">
+                      {{ q.nom }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-icon matPrefix>location_city</mat-icon>
+                  <mat-error *ngIf="enfantFormGroup.get('quartier')?.hasError('required')">
+                    Le quartier est obligatoire
+                  </mat-error>
+                </mat-form-field>
+
+              </ng-container>
+            </div>
+
+            <!-- Bouton suivant -->
+            <div class="step-actions">
+              <button mat-raised-button color="primary" matStepperNext [disabled]="!enfantFormGroup.valid">
+                Suivant
+                <mat-icon>arrow_forward</mat-icon>
+              </button>
+            </div>
+          </div>
+        </form>
+      </mat-step>
+
+      <!-- ÉTAPE 2: Données du père -->
+      <mat-step [stepControl]="pereFormGroup">
+        <form [formGroup]="pereFormGroup">
+          <ng-template matStepLabel>
+            <span class="step-label">
+              <mat-icon>face</mat-icon>
+              Données du père
+            </span>
+          </ng-template>
+
+          <div class="step-content">
+            <h3 class="section-title">Informations du père</h3>
+
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="form-field-half">
+                <mat-label>Prénom du père</mat-label>
+                <input matInput formControlName="prenomPere" placeholder="Prénom">
+                <mat-icon matPrefix>person</mat-icon>
+                <mat-error *ngIf="pereFormGroup.get('prenomPere')?.hasError('required')">
+                  Le prénom est obligatoire
+                </mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="form-field-half">
+                <mat-label>Nom du père</mat-label>
+                <input matInput formControlName="nomPere" placeholder="Nom">
+                <mat-icon matPrefix>badge</mat-icon>
+                <mat-error *ngIf="pereFormGroup.get('nomPere')?.hasError('required')">
+                  Le nom est obligatoire
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="form-field-third">
+                <mat-label>Date de naissance</mat-label>
+                <input matInput [matDatepicker]="pickerPere" formControlName="dateNaissancePere" [max]="maxDate">
+                <mat-datepicker-toggle matSuffix [for]="pickerPere"></mat-datepicker-toggle>
+                <mat-datepicker #pickerPere></mat-datepicker>
+                <mat-icon matPrefix>calendar_today</mat-icon>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="form-field-third">
+                <mat-label>Profession</mat-label>
+                <input matInput formControlName="professionPere" placeholder="Profession">
+                <mat-icon matPrefix>work</mat-icon>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="form-field-third">
+                <mat-label>Nationalité</mat-label>
+                <input matInput formControlName="nationalitePere" placeholder="Nationalité">
+                <mat-icon matPrefix>flag</mat-icon>
+              </mat-form-field>
+            </div>
+
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="form-field-two-thirds">
+                <mat-label>Adresse</mat-label>
+                <input matInput formControlName="adressePere" placeholder="Adresse complète">
+                <mat-icon matPrefix>home</mat-icon>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="form-field-third">
+                <mat-label>Téléphone</mat-label>
+                <input matInput formControlName="telephonePere" placeholder="Ex: 621234567">
+                <mat-icon matPrefix>phone</mat-icon>
+                <mat-error *ngIf="pereFormGroup.get('telephonePere')?.hasError('pattern')">
+                  Format invalide
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <!-- Boutons de navigation -->
+            <div class="step-actions">
+              <button mat-button matStepperPrevious>
+                <mat-icon>arrow_back</mat-icon>
+                Précédent
+              </button>
+              <button mat-raised-button color="primary" matStepperNext [disabled]="!pereFormGroup.valid">
+                Suivant
+                <mat-icon>arrow_forward</mat-icon>
+              </button>
+            </div>
+          </div>
+        </form>
+      </mat-step>
+
+      <!-- ÉTAPE 3: Données de la mère -->
+      <mat-step [stepControl]="mereFormGroup">
+        <form [formGroup]="mereFormGroup">
+          <ng-template matStepLabel>
+            <span class="step-label">
+              <mat-icon>face_3</mat-icon>
+              Données de la mère
+            </span>
+          </ng-template>
+
+          <div class="step-content">
+            <h3 class="section-title">Informations de la mère</h3>
+
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="form-field-half">
+                <mat-label>Prénom de la mère</mat-label>
+                <input matInput formControlName="prenomMere" placeholder="Prénom">
+                <mat-icon matPrefix>person</mat-icon>
+                <mat-error *ngIf="mereFormGroup.get('prenomMere')?.hasError('required')">
+                  Le prénom est obligatoire
+                </mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="form-field-half">
+                <mat-label>Nom de la mère</mat-label>
+                <input matInput formControlName="nomMere" placeholder="Nom">
+                <mat-icon matPrefix>badge</mat-icon>
+                <mat-error *ngIf="mereFormGroup.get('nomMere')?.hasError('required')">
+                  Le nom est obligatoire
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="form-field-third">
+                <mat-label>Date de naissance</mat-label>
+                <input matInput [matDatepicker]="pickerMere" formControlName="dateNaissanceMere" [max]="maxDate">
+                <mat-datepicker-toggle matSuffix [for]="pickerMere"></mat-datepicker-toggle>
+                <mat-datepicker #pickerMere></mat-datepicker>
+                <mat-icon matPrefix>calendar_today</mat-icon>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="form-field-third">
+                <mat-label>Profession</mat-label>
+                <input matInput formControlName="professionMere" placeholder="Profession">
+                <mat-icon matPrefix>work</mat-icon>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="form-field-third">
+                <mat-label>Nationalité</mat-label>
+                <input matInput formControlName="nationaliteMere" placeholder="Nationalité">
+                <mat-icon matPrefix>flag</mat-icon>
+              </mat-form-field>
+            </div>
+
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="form-field-two-thirds">
+                <mat-label>Adresse</mat-label>
+                <input matInput formControlName="adresseMere" placeholder="Adresse complète">
+                <mat-icon matPrefix>home</mat-icon>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="form-field-third">
+                <mat-label>Téléphone</mat-label>
+                <input matInput formControlName="telephoneMere" placeholder="Ex: 621234567">
+                <mat-icon matPrefix>phone</mat-icon>
+                <mat-error *ngIf="mereFormGroup.get('telephoneMere')?.hasError('pattern')">
+                  Format invalide
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <!-- Boutons de navigation -->
+            <div class="step-actions">
+              <button mat-button matStepperPrevious>
+                <mat-icon>arrow_back</mat-icon>
+                Précédent
+              </button>
+              <button mat-raised-button color="primary" matStepperNext [disabled]="!mereFormGroup.valid"
+                (click)="onValidMere()">
+                Suivant
+                <mat-icon>arrow_forward</mat-icon>
+              </button>
+            </div>
+          </div>
+        </form>
+      </mat-step>
+
+      <!-- ÉTAPE 4: Génération du NPI -->
+      <mat-step (selectionChange)="onStepChange($event)">
+        <ng-template matStepLabel>
+          <span class="step-label">
+            <mat-icon>fingerprint</mat-icon>
+            Génération du NPI
+          </span>
+        </ng-template>
+
+        <div class="step-content">
+          <h3 class="section-title">Récapitulatif des informations</h3>
+
+          <!-- Section récapitulatif -->
+          <div class="recap-section">
+            <mat-card class="recap-card">
+              <mat-card-title>
+                <mat-icon>child_care</mat-icon> Enfant
+              </mat-card-title>
+              <div class="recap-info"><span class="label">Nom</span><span class="value">{{ enfantFormGroup.value.nom
+                  }}</span></div>
+              <div class="recap-info"><span class="label">Prénom</span><span class="value">{{
+                  enfantFormGroup.value.prenom }}</span></div>
+              <div class="recap-info"><span class="label">Sexe</span><span class="value">{{ enfantFormGroup.value.sexe
+                  == 1? 'Masculin': 'Féminin' }}</span></div>
+              <div class="recap-info"><span class="label">Date de Naissance</span><span class="value">{{
+                  enfantFormGroup.value.dateNaissance | date }}</span></div>
+            </mat-card>
+
+            <mat-card class="recap-card">
+              <mat-card-title>
+                <mat-icon>face</mat-icon> Père
+              </mat-card-title>
+              <div class="recap-info"><span class="label">Nom</span><span class="value">{{ pereFormGroup.value.nomPere
+                  }}</span></div>
+              <div class="recap-info"><span class="label">Prénom</span><span class="value">{{
+                  pereFormGroup.value.prenomPere }}</span></div>
+              <div class="recap-info"><span class="label">Date de Naissance</span><span class="value">{{
+                  pereFormGroup.value.dateNaissancePere| date }}</span></div>
+              <div class="recap-info"><span class="label">Profession</span><span class="value">{{
+                  pereFormGroup.value.professionPere }}</span></div>
+            </mat-card>
+
+            <mat-card class="recap-card">
+              <mat-card-title>
+                <mat-icon>face_3</mat-icon> Mère
+              </mat-card-title>
+              <div class="recap-info"><span class="label">Nom</span><span class="value">{{ mereFormGroup.value.nomMere
+                  }}</span></div>
+              <div class="recap-info"><span class="label">Prénom</span><span class="value">{{
+                  mereFormGroup.value.prenomMere }}</span></div>
+              <div class="recap-info"><span class="label">Date de Naissance</span><span class="value">{{
+                  mereFormGroup.value.dateNaissanceMere | date}}</span></div>
+              <div class="recap-info"><span class="label">Profession</span><span class="value">{{
+                  mereFormGroup.value.professionMere }}</span></div>
+            </mat-card>
+          </div>
+
+          <!-- Bouton de génération -->
+          <!-- <button mat-raised-button color="primary" class="generate-btn" (click)="genererNPI()">
+            <mat-icon>fingerprint</mat-icon> Générer le NPI
+          </button> -->
+
+          <div class="npi-result" *ngIf="npiGenere">
+            <mat-card class="npi-card">
+              <mat-card-content>
+                <div class="npi-title">
+                  <mat-icon>verified_user</mat-icon>
+                  NPI Généré
+                </div>
+                <div class="npi-display">
+                  <span class="npi-label">Numéro Personnel d'Identification</span>
+                  <span class="npi-number">
+                    <span *ngFor="let char of npiGenere.split(''); let i = index" [style.color]="getColor(i)">
+                      {{ char }}
+                    </span>
+                  </span>
+                  <button mat-icon-button matTooltip="Copier le NPI" (click)="copyNPI()">
+                    <mat-icon>content_copy</mat-icon>
+                  </button>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          </div>
+          <!-- Actions -->
+          <div class="step-actions">
+            <button mat-button matStepperPrevious>
+              <mat-icon>arrow_back</mat-icon>
+              Précédent
+            </button>
+            <!-- <button mat-raised-button color="accent" (click)="stepper.reset()">
+              <mat-icon>refresh</mat-icon>
+              Recommencer
+            </button> -->
+            <button mat-raised-button color="accent" (click)="resetAll(stepper)">
+              <mat-icon>refresh</mat-icon>
+              Recommencer
+            </button>
+          </div>
+        </div>
+      </mat-step>
+
+    </mat-stepper>
+  </mat-card-content>
+</mat-card>

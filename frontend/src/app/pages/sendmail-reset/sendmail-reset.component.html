@@ -1,0 +1,64 @@
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-sm-3 mt-0">
+      <img src="assets/logo/Logo-PN-RAVEC.png" alt="Logo" class="logo">
+    </div>
+    <div class="col-sm-6 text-center mt-1">
+      <h1>République de Guinée</h1>
+      <h2>
+        <span style="color:red;">Travail</span> -
+        <span style="color:yellow;">Justice</span> -
+        <span style="color:green;">Solidarité</span>
+      </h2> <br>
+      <h1 class="mt-2">Programme National de Recensement Administratif <br>à Vocation d'État Civil</h1>
+    </div>
+    <div class="col-sm-3 text-center mt-3">
+      <img src="assets/images/gn.png" alt="Branding" class="logo">
+    </div>
+
+    <div class="row justify-content-center mt-1">
+      <div>
+        <mat-card class="login-card">
+          <mat-card-header>
+            <mat-card-title class="text-center-color">
+              <mat-icon>email</mat-icon>
+              Réinitialiser le mot de passe
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <!-- <form [formGroup]="forgotPasswordForm" (ngSubmit)="sendResetLink()"> -->
+            <form [formGroup]="forgotPasswordForm" >
+              <mat-form-field appearance="fill" class="full-width">
+                <mat-label>Adresse e-mail</mat-label>
+                <input matInput formControlName="email" type="email" placeholder="Entrer votre adresse e-mail" required>
+                <mat-error *ngIf="forgotPasswordForm.get('email')?.hasError('required')">
+                  L'adresse e-mail est requise.
+                </mat-error>
+                <mat-error *ngIf="forgotPasswordForm.get('email')?.hasError('email')">
+                  Veuillez entrer une adresse e-mail valide.
+                </mat-error>
+              </mat-form-field>
+
+              <button class="submit-btn" type="submit" [disabled]="forgotPasswordForm.invalid">
+                Envoyer le lien de réinitialisation
+              </button>
+
+              <div class="form-group">
+                <div class="text-center text-success font-italic" *ngIf="serverMessage && !serverError">
+                  <small>{{ serverMessage }}</small>
+                </div>
+                <div class="text-center text-danger font-italic" *ngIf="serverError">
+                  <small>{{ serverMessage }}</small>
+                </div>
+              </div>
+            </form>
+          </mat-card-content>
+
+          <mat-card-actions class="text-center">
+            <a routerLink="/login" class="text-link">Retour à la connexion</a>
+          </mat-card-actions>
+        </mat-card>
+      </div>
+    </div>
+  </div>
+</div>

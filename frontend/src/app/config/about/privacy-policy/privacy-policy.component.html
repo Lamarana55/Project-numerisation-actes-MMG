@@ -1,0 +1,471 @@
+<div class="privacy-container">
+  <!-- Header -->
+  <div class="privacy-header">
+    <div class="container">
+      <div class="header-content">
+        <mat-icon class="policy-icon">security</mat-icon>
+        <h1>Politique de Confidentialité</h1>
+        <p class="subtitle">Système de Gestion des Collectes (SiGeC)</p>
+        <div class="update-info">
+          <mat-chip class="update-chip">
+            <mat-icon>update</mat-icon>
+            Dernière mise à jour : {{ lastUpdated | date:'dd/MM/yyyy' }}
+          </mat-chip>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="privacy-content">
+
+      <!-- Navigation latérale -->
+      <aside class="privacy-nav">
+        <mat-card class="nav-card">
+          <mat-card-header>
+            <mat-card-title>Sommaire</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <mat-nav-list>
+              <a mat-list-item
+                 *ngFor="let section of sections"
+                 (click)="scrollToSection(section.id)"
+                 class="nav-item">
+                <mat-icon matListItemIcon>{{ section.icon }}</mat-icon>
+                <span matListItemTitle>{{ section.title }}</span>
+              </a>
+            </mat-nav-list>
+          </mat-card-content>
+          <mat-card-actions>
+            <button mat-stroked-button (click)="printPolicy()" class="action-btn">
+              <mat-icon>print</mat-icon>
+              Imprimer
+            </button>
+            <button mat-stroked-button (click)="downloadPDF()" class="action-btn">
+              <mat-icon>download</mat-icon>
+              PDF
+            </button>
+          </mat-card-actions>
+        </mat-card>
+      </aside>
+
+      <!-- Contenu principal -->
+      <main class="privacy-main">
+
+        <!-- Introduction -->
+        <section id="introduction" class="policy-section">
+          <h2><mat-icon>info</mat-icon>Introduction</h2>
+          <div class="section-content">
+            <p>
+              Le Ministère de l'Administration Territoriale de la République de Guinée s'engage à protéger
+              la confidentialité et la sécurité des données personnelles collectées et traitées dans le cadre
+              du Système de Gestion des Collectes (SiGeC).
+            </p>
+            <p>
+              Cette politique de confidentialité explique comment nous collectons, utilisons, stockons et
+              protégeons vos informations personnelles conformément aux lois guinéennes sur la protection
+              des données et aux meilleures pratiques internationales.
+            </p>
+            <mat-card class="highlight-card">
+              <mat-card-content>
+                <strong>Engagement :</strong> Nous nous engageons à traiter vos données avec le plus haut
+                niveau de sécurité et de confidentialité, en respectant vos droits fondamentaux à la vie privée.
+              </mat-card-content>
+            </mat-card>
+          </div>
+        </section>
+
+        <!-- Collecte des Données -->
+        <section id="data-collection" class="policy-section">
+          <h2><mat-icon>database</mat-icon>Collecte des Données</h2>
+          <div class="section-content">
+            <h3>Types de données collectées</h3>
+            <mat-list>
+              <mat-list-item>
+                <mat-icon matListItemIcon>person</mat-icon>
+                <div matListItemTitle>Données d'identification</div>
+                <div matListItemLine>Nom, prénom, fonction, numéro d'identification</div>
+              </mat-list-item>
+              <mat-list-item>
+                <mat-icon matListItemIcon>contact_mail</mat-icon>
+                <div matListItemTitle>Informations de contact</div>
+                <div matListItemLine>Adresse email, numéro de téléphone, adresse postale</div>
+              </mat-list-item>
+              <mat-list-item>
+                <mat-icon matListItemIcon>security</mat-icon>
+                <div matListItemTitle>Données d'authentification</div>
+                <div matListItemLine>Nom d'utilisateur, mot de passe chiffré, historique des connexions</div>
+              </mat-list-item>
+              <mat-list-item>
+                <mat-icon matListItemIcon>assignment</mat-icon>
+                <div matListItemTitle>Données professionnelles</div>
+                <div matListItemLine>Rôle, permissions, localité d'affectation, historique des actions</div>
+              </mat-list-item>
+            </mat-list>
+
+            <h3>Méthodes de collecte</h3>
+            <p>Les données sont collectées par les moyens suivants :</p>
+            <ul>
+              <li>Formulaires d'inscription et de création de compte</li>
+              <li>Saisie directe lors de l'utilisation de l'application</li>
+              <li>Logs automatiques du système</li>
+              <li>Synchronisation avec les bases de données administratives existantes</li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- Utilisation des Données -->
+        <section id="data-usage" class="policy-section">
+          <h2><mat-icon>settings</mat-icon>Utilisation des Données</h2>
+          <div class="section-content">
+            <p>Vos données personnelles sont utilisées exclusivement dans le cadre des missions légales du
+               Ministère de l'Administration Territoriale pour :</p>
+
+            <div class="usage-grid">
+              <mat-card class="usage-card">
+                <mat-card-header>
+                  <mat-icon mat-card-avatar>assignment_ind</mat-icon>
+                  <mat-card-title>Gestion des Actes</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  Traitement et validation des actes d'état civil, suivi des demandes et génération des documents officiels.
+                </mat-card-content>
+              </mat-card>
+
+              <mat-card class="usage-card">
+                <mat-card-header>
+                  <mat-icon mat-card-avatar>fact_check</mat-icon>
+                  <mat-card-title>Validation des Données</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  Vérification et validation des données de recensement, contrôle qualité et cohérence des informations.
+                </mat-card-content>
+              </mat-card>
+
+              <mat-card class="usage-card">
+                <mat-card-header>
+                  <mat-icon mat-card-avatar>assessment</mat-icon>
+                  <mat-card-title>Rapports Statistiques</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  Génération de statistiques anonymisées pour les besoins de planification et de politique publique.
+                </mat-card-content>
+              </mat-card>
+
+              <mat-card class="usage-card">
+                <mat-card-header>
+                  <mat-icon mat-card-avatar>security</mat-icon>
+                  <mat-card-title>Sécurité Système</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  Authentification des utilisateurs, contrôle d'accès, audit des actions et prévention des fraudes.
+                </mat-card-content>
+              </mat-card>
+            </div>
+          </div>
+        </section>
+
+        <!-- Partage des Données -->
+        <section id="data-sharing" class="policy-section">
+          <h2><mat-icon>share</mat-icon>Partage des Données</h2>
+          <div class="section-content">
+            <mat-card class="warning-card">
+              <mat-card-content>
+                <mat-icon>warning</mat-icon>
+                <strong>Principe fondamental :</strong> Vos données personnelles ne sont jamais vendues,
+                louées ou partagées à des fins commerciales.
+              </mat-card-content>
+            </mat-card>
+
+            <h3>Partage autorisé dans les cas suivants :</h3>
+            <mat-expansion-panel>
+              <mat-expansion-panel>
+                <mat-expansion-panel-header>
+                  <mat-panel-title>
+                    <mat-icon>gavel</mat-icon>
+                    Obligations légales
+                  </mat-panel-title>
+                </mat-expansion-panel-header>
+                <p>
+                  Lorsque la loi guinéenne l'exige ou dans le cadre d'une procédure judiciaire,
+                  administrative ou réglementaire dûment autorisée.
+                </p>
+              </mat-expansion-panel>
+
+              <mat-expansion-panel>
+                <mat-expansion-panel-header>
+                  <mat-panel-title>
+                    <mat-icon>account_balance</mat-icon>
+                    Organismes publics
+                  </mat-panel-title>
+                </mat-expansion-panel-header>
+                <p>
+                  Avec d'autres ministères ou organismes publics guinéens dans le cadre de leurs missions
+                  légales et selon les protocoles établis de protection des données.
+                </p>
+              </mat-expansion-panel>
+
+              <mat-expansion-panel>
+                <mat-expansion-panel-header>
+                  <mat-panel-title>
+                    <mat-icon>build</mat-icon>
+                    Prestataires techniques
+                  </mat-panel-title>
+                </mat-expansion-panel-header>
+                <p>
+                  Avec nos prestataires techniques (hébergement, maintenance) sous contrat strict
+                  de confidentialité et uniquement pour les besoins du service.
+                </p>
+              </mat-expansion-panel>
+            </mat-expansion-panel>
+          </div>
+        </section>
+
+        <!-- Sécurité des Données -->
+        <section id="data-security" class="policy-section">
+          <h2><mat-icon>security</mat-icon>Sécurité des Données</h2>
+          <div class="section-content">
+            <p>Nous mettons en œuvre des mesures de sécurité techniques et organisationnelles robustes :</p>
+
+            <div class="security-measures">
+              <div class="measure-category">
+                <h3><mat-icon>lock</mat-icon>Sécurité Technique</h3>
+                <ul>
+                  <li>Chiffrement AES-256 pour les données stockées</li>
+                  <li>Chiffrement TLS 1.3 pour les transmissions</li>
+                  <li>Authentification multi-facteurs obligatoire</li>
+                  <li>Sauvegarde automatique chiffrée</li>
+                  <li>Surveillance continue des accès</li>
+                </ul>
+              </div>
+
+              <div class="measure-category">
+                <h3><mat-icon>people</mat-icon>Sécurité Organisationnelle</h3>
+                <ul>
+                  <li>Formation régulière du personnel</li>
+                  <li>Contrôle d'accès basé sur les rôles (RBAC)</li>
+                  <li>Audit régulier des permissions</li>
+                  <li>Procédures de gestion des incidents</li>
+                  <li>Tests de sécurité périodiques</li>
+                </ul>
+              </div>
+            </div>
+
+            <mat-card class="security-card">
+              <mat-card-header>
+                <mat-icon mat-card-avatar>verified</mat-icon>
+                <mat-card-title>Certifications et Conformité</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                Le système SiGeC respecte les standards internationaux de sécurité ISO 27001
+                et les recommandations de l'ANSSI (Agence Nationale de la Sécurité des Systèmes d'Information).
+              </mat-card-content>
+            </mat-card>
+          </div>
+        </section>
+
+        <!-- Droits des Utilisateurs -->
+        <section id="user-rights" class="policy-section">
+          <h2><mat-icon>account_circle</mat-icon>Droits des Utilisateurs</h2>
+          <div class="section-content">
+            <p>Conformément à la législation en vigueur, vous disposez des droits suivants :</p>
+
+            <div class="rights-grid">
+              <mat-card class="right-card">
+                <mat-card-header>
+                  <mat-icon mat-card-avatar>visibility</mat-icon>
+                  <mat-card-title>Droit d'accès</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  Vous pouvez demander l'accès à toutes vos données personnelles que nous détenons.
+                </mat-card-content>
+              </mat-card>
+
+              <mat-card class="right-card">
+                <mat-card-header>
+                  <mat-icon mat-card-avatar>edit</mat-icon>
+                  <mat-card-title>Droit de rectification</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  Vous pouvez demander la correction de vos données inexactes ou incomplètes.
+                </mat-card-content>
+              </mat-card>
+
+              <mat-card class="right-card">
+                <mat-card-header>
+                  <mat-icon mat-card-avatar>delete</mat-icon>
+                  <mat-card-title>Droit d'effacement</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  Vous pouvez demander la suppression de vos données dans certaines conditions légales.
+                </mat-card-content>
+              </mat-card>
+
+              <mat-card class="right-card">
+                <mat-card-header>
+                  <mat-icon mat-card-avatar>pause</mat-icon>
+                  <mat-card-title>Droit d'opposition</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  Vous pouvez vous opposer au traitement de vos données dans certains cas spécifiques.
+                </mat-card-content>
+              </mat-card>
+            </div>
+
+            <mat-card class="contact-card">
+              <mat-card-header>
+                <mat-card-title>Exercer vos droits</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <p>Pour exercer ces droits, contactez notre Délégué à la Protection des Données :</p>
+                <div class="contact-info">
+                  <div class="contact-item">
+                    <mat-icon>email</mat-icon>
+                    <span>dpd&#64;mat.gov.gn</span>
+                  </div>
+                  <div class="contact-item">
+                    <mat-icon>phone</mat-icon>
+                    <span>+224 622 000 123</span>
+                  </div>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          </div>
+        </section>
+
+        <!-- Cookies -->
+        <section id="cookies" class="policy-section">
+          <h2><mat-icon>cookie</mat-icon>Cookies et Technologies</h2>
+          <div class="section-content">
+            <p>SiGeC utilise des cookies et technologies similaires pour améliorer votre expérience utilisateur :</p>
+
+            <mat-table [dataSource]="[
+              {type: 'Essentiels', purpose: 'Fonctionnement de base du système', retention: 'Session', required: true},
+              {type: 'Sécurité', purpose: 'Authentification et prévention des fraudes', retention: '30 jours', required: true},
+              {type: 'Préférences', purpose: 'Mémorisation de vos paramètres', retention: '1 an', required: false},
+              {type: 'Analytiques', purpose: 'Amélioration du service (anonymisés)', retention: '13 mois', required: false}
+            ]" class="cookies-table">
+              <ng-container matColumnDef="type">
+                <th mat-header-cell *matHeaderCellDef>Type</th>
+                <td mat-cell *matCellDef="let cookie">{{cookie.type}}</td>
+              </ng-container>
+              <ng-container matColumnDef="purpose">
+                <th mat-header-cell *matHeaderCellDef>Finalité</th>
+                <td mat-cell *matCellDef="let cookie">{{cookie.purpose}}</td>
+              </ng-container>
+              <ng-container matColumnDef="retention">
+                <th mat-header-cell *matHeaderCellDef>Durée</th>
+                <td mat-cell *matCellDef="let cookie">{{cookie.retention}}</td>
+              </ng-container>
+              <ng-container matColumnDef="required">
+                <th mat-header-cell *matHeaderCellDef>Obligatoire</th>
+                <td mat-cell *matCellDef="let cookie">
+                  <mat-icon [color]="cookie.required ? 'warn' : 'primary'">
+                    {{cookie.required ? 'check_circle' : 'remove_circle'}}
+                  </mat-icon>
+                </td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="['type', 'purpose', 'retention', 'required']"></tr>
+              <tr mat-row *matRowDef="let row; columns: ['type', 'purpose', 'retention', 'required']"></tr>
+            </mat-table>
+          </div>
+        </section>
+
+        <!-- Conservation des Données -->
+        <section id="data-retention" class="policy-section">
+          <h2><mat-icon>schedule</mat-icon>Conservation des Données</h2>
+          <div class="section-content">
+            <p>Les durées de conservation varient selon le type de données et les obligations légales :</p>
+
+            <mat-stepper orientation="vertical" #stepper>
+              <mat-step>
+                <ng-template matStepLabel>Données d'authentification</ng-template>
+                <p>Conservées pendant toute la durée d'activité du compte utilisateur, puis supprimées dans les 6 mois suivant la désactivation.</p>
+              </mat-step>
+              <mat-step>
+                <ng-template matStepLabel>Logs d'activité</ng-template>
+                <p>Conservés pendant 3 ans à des fins de sécurité et d'audit, conformément aux exigences réglementaires.</p>
+              </mat-step>
+              <mat-step>
+                <ng-template matStepLabel>Données de contact</ng-template>
+                <p>Conservées tant que l'utilisateur est actif dans le système, avec possibilité de modification à tout moment.</p>
+              </mat-step>
+              <mat-step>
+                <ng-template matStepLabel>Données statistiques</ng-template>
+                <p>Les données anonymisées peuvent être conservées indéfiniment à des fins historiques et statistiques.</p>
+              </mat-step>
+            </mat-stepper>
+          </div>
+        </section>
+
+        <!-- Contact -->
+        <section id="contact" class="policy-section">
+          <h2><mat-icon>contact_mail</mat-icon>Contact</h2>
+          <div class="section-content">
+            <div class="contact-grid">
+              <mat-card class="contact-card">
+                <mat-card-header>
+                  <mat-icon mat-card-avatar>person</mat-icon>
+                  <mat-card-title>Délégué à la Protection des Données</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  <div class="contact-details">
+                    <div class="contact-item">
+                      <mat-icon>person</mat-icon>
+                      <span>Dr. Mamadou KEITA</span>
+                    </div>
+                    <div class="contact-item">
+                      <mat-icon>email</mat-icon>
+                      <span>dpd&#64;mat.gov.gn</span>
+                    </div>
+                    <div class="contact-item">
+                      <mat-icon>phone</mat-icon>
+                      <span>+224 622 000 123</span>
+                    </div>
+                  </div>
+                </mat-card-content>
+              </mat-card>
+
+              <mat-card class="contact-card">
+                <mat-card-header>
+                  <mat-icon mat-card-avatar>account_balance</mat-icon>
+                  <mat-card-title>Service Juridique MAT</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  <div class="contact-details">
+                    <div class="contact-item">
+                      <mat-icon>location_on</mat-icon>
+                      <span>Quartier Almamya, Conakry</span>
+                    </div>
+                    <div class="contact-item">
+                      <mat-icon>email</mat-icon>
+                      <span>juridique&#64;mat.gov.gn</span>
+                    </div>
+                    <div class="contact-item">
+                      <mat-icon>phone</mat-icon>
+                      <span>+224 622 000 100</span>
+                    </div>
+                  </div>
+                </mat-card-content>
+              </mat-card>
+            </div>
+
+            <mat-card class="footer-notice">
+              <mat-card-content>
+                <p>
+                  <strong>Mise à jour de cette politique :</strong> Cette politique peut être modifiée pour
+                  refléter les changements dans nos pratiques ou la législation. Toute modification importante
+                  sera communiquée aux utilisateurs au moins 30 jours avant son entrée en vigueur.
+                </p>
+                <p class="last-update">
+                  Document version 2.1 - Dernière modification : {{ lastUpdated | date:'dd/MM/yyyy' }}
+                </p>
+              </mat-card-content>
+            </mat-card>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+</div>

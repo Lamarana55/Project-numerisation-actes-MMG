@@ -1,0 +1,169 @@
+<!-- ═══════════════════════════════════════════════════════════════
+     FOOTER AUTH — login / register / update-password
+     Affiché quand isAuthenticated = false
+═══════════════════════════════════════════════════════════════ -->
+<footer *ngIf="!isAuthenticated" class="footer-auth">
+  <div class="fa-line-top"></div>
+  <div class="fa-inner">
+
+    <div class="fa-left">
+      <div class="fa-flag">
+        <span class="fc-r"></span>
+        <span class="fc-y"></span>
+        <span class="fc-g"></span>
+      </div>
+      <span class="fa-copy">
+        &copy; {{ currentYear }} PN-RAVEC | Service Informatique. Tous droits réservés.
+      </span>
+    </div>
+
+    <div class="fa-right">
+      <a href="#" class="fa-link">Politique de confidentialité</a>
+      <span class="fa-sep">·</span>
+      <a href="#" class="fa-link">Support technique</a>
+      <span class="fa-sep">·</span>
+      <span class="fa-version">v1.0.0</span>
+    </div>
+
+  </div>
+</footer>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     FOOTER APP — toutes les pages après connexion
+     Affiché quand isAuthenticated = true
+═══════════════════════════════════════════════════════════════ -->
+<footer *ngIf="isAuthenticated" class="footer-app">
+
+  <!-- Barre drapeau supérieure -->
+  <div class="fapp-flag-bar">
+    <span class="fb-r"></span>
+    <span class="fb-y"></span>
+    <span class="fb-g"></span>
+  </div>
+
+  <!-- Corps principal -->
+  <div class="fapp-body">
+    <div class="fapp-container">
+
+      <!-- Colonne 1 : Identité -->
+      <div class="fapp-col fapp-identity">
+        <div class="fapp-logo-row">
+          <img src="assets/logo/logo.png" alt="PN-RAVEC" class="fapp-logo" />
+          <div class="fapp-id-text">
+            <span class="fapp-republic">République de Guinée</span>
+
+            <span class="fapp-ministry">Ministère de l’Administration du Territoire et de la Décentralisation</span>
+            <span class="fapp-program">
+              Programme National de Recensement Administratif<br />
+              à Vocation d'État Civil (<span class="fapp-accent">PN-RAVEC</span>)
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="fapp-vline"></div>
+
+      <!-- Colonne 2 : Liens officiels -->
+      <div class="fapp-col">
+        <h4 class="fapp-col-title">
+          <mat-icon>link</mat-icon>
+          Liens Officiels
+        </h4>
+        <ul class="fapp-links">
+          <li>
+            <mat-icon>language</mat-icon>
+            <a href="https://gouvernement.gov.gn/" target="_blank" class="fapp-link">Gouvernement de Guinée</a>
+          </li>
+          <li>
+            <mat-icon>apartment</mat-icon>
+            <a href="https://matd.gov.gn/" target="_blank" class="fapp-link">Ministère Administration Territoire</a>
+          </li>
+          <li>
+            <mat-icon>menu_book</mat-icon>
+            <a href="https://ravec.gov.gn/" target="_blank" class="fapp-accent">PN-RAVEC</a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="fapp-vline"></div>
+
+      <!-- Colonne 3 : Système -->
+      <div class="fapp-col">
+        <h4 class="fapp-col-title">
+          <mat-icon>info_outline</mat-icon>
+          Système
+        </h4>
+        <ul class="fapp-info">
+          <li>Version : <strong>1.0.0</strong></li>
+          <li>Statut : <span class="fapp-status-ok">Synchronisé</span></li>
+          <li>Dernière MAJ : <span class="fapp-status-ok">Maintenant</span></li>
+          <li>Session : <span class="fapp-status-ok">Active</span></li>
+        </ul>
+      </div>
+
+      <div class="fapp-vline"></div>
+
+      <!-- Colonne 4 : Support -->
+      <div class="fapp-col">
+        <h4 class="fapp-col-title">
+          <mat-icon>headset_mic</mat-icon>
+          Support
+        </h4>
+        <ul class="fapp-info">
+          <li><mat-icon  class="fapp-info-icon">help_outline</mat-icon> Centre d'Aide</li>
+          <li><mat-icon class="fapp-info-icon">mail_outline</mat-icon> Support Technique</li>
+          <li><mat-icon class="fapp-info-icon">phone</mat-icon> +224 613 00 10 33</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="fapp-hline"></div>
+
+  <!-- Devise nationale -->
+  <div class="fapp-motto">
+    <span class="fapp-motto-text">
+      " <span class="ft-r">Travail</span>-
+      <span class="ft-y">Justice</span>-
+      <span class="ft-g">Solidarité</span> "
+    </span>
+    <div class="fapp-motto-flag">
+      <span class="fm-r"></span>
+      <span class="fm-y"></span>
+      <span class="fm-g"></span>
+    </div>
+  </div>
+
+  <div class="fapp-hline"></div>
+
+  <!-- Bas de page -->
+  <div class="fapp-bottom">
+    <span class="fapp-copy">
+        &copy; {{ currentYear }} PN-RAVEC | Service Informatique. Tous droits réservés.
+    </span>
+    <div class="fapp-bottom-right">
+      <a href="#" class="fapp-bottom-link">Mentions Légales</a>
+      <a href="#" class="fapp-bottom-link">Confidentialité</a>
+      <a href="#" class="fapp-bottom-link">Accessibilité</a>
+      <div class="fapp-socials">
+        <a href="https://x.com/PnRavecGN" target="_blank" class="fapp-social" title="Twitter / X">
+          <mat-icon style="font-size:15px;width:15px;height:15px;">close</mat-icon>
+        </a>
+        <a href="https://www.facebook.com/profile.php?id=61560848722614" target="_blank" class="fapp-social" title="Facebook">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
+            <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+          </svg>
+        </a>
+        <a href="https://www.linkedin.com/company/pn-ravec-guin%C3%A9e/posts/?feedView=all" target="_blank" class="fapp-social" title="LinkedIn">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
+            <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6zM2 9h4v12H2z"/>
+            <circle cx="4" cy="4" r="2"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </div>
+
+</footer>

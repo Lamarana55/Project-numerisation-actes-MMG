@@ -1,0 +1,122 @@
+version: '3.8'
+
+services:
+  # Base de données PostgreSQL
+  postgres:
+    image: postgres:15-alpine
+    container_name: ravec-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DATABASE:-db_npi}
+      POSTGRES_USER: ${DATABASE_USER:-postgres}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-postgres}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "${DATABASE_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER:-ravec_user} -d ${DATABASE:-ravec_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ravec-network
+
+  # Backend Spring Boot
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ravec-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      # Database
+      DATABASE_IP: postgres
+      DATABASE_PORT: 5432
+      DATABASE: ${DATABASE:-ravec_db}
+      DATABASE_USER: ${DATABASE_USER:-ravec_user}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD:-changeme}
+      DDL_AUTO: ${DDL_AUTO:-update}
+      
+      # Server
+      SERVER_PORT: 8090
+      FRONT_URL: ${FRONT_URL:-http://localhost:4200}
+      
+      # JWT
+      JWT_SECURITY: ${JWT_SECURITY:-your_jwt_secret_key_here_change_in_production}
+      
+      # Email (à configurer dans .env)
+      SPRING_MAIL_USERNAME: ${SPRING_MAIL_USERNAME}
+      SPRING_MAIL_PASSWORD: ${SPRING_MAIL_PASSWORD}
+      
+      # Java options
+      JAVA_OPTS: -Xms512m -Xmx1024m -XX:+UseG1GC
+    ports:
+      - "${SERVER_PORT:-8090}:8090"
+    volumes:
+      - backend_logs:/app/logs
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8090/api/v1/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - ravec-network
+
+  # Frontend Angular
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: ravec-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "${FRONTEND_PORT:-4200}:4200"
+    environment:
+      - BACKEND_URL=http://backend:8090/api/v1
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/angular.json:/app/angular.json
+      - ./frontend/tsconfig.json:/app/tsconfig.json
+      - /app/node_modules
+    networks:
+      - ravec-network
+
+  # PgAdmin (optionnel, pour gérer la base de données)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: ravec-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@ravec.gov.gn}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
+      PGADMIN_LISTEN_PORT: 80
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - postgres
+    networks:
+      - ravec-network
+    profiles:
+      - tools
+
+volumes:
+  postgres_data:
+    driver: local
+  pgadmin_data:
+    driver: local
+  backend_logs:
+    driver: local
+
+networks:
+  ravec-network:
+    driver: bridge

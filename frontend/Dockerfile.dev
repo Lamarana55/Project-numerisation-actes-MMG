@@ -1,0 +1,31 @@
+# ============================================================
+#  Frontend Angular — Dockerfile DÉVELOPPEMENT
+#  Hot-reload via ng serve --poll (détecte les changements de fichiers)
+# ============================================================
+
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Copier les fichiers de dépendances
+COPY package*.json ./
+
+# Installer les dépendances (une seule fois grâce au cache Docker)
+RUN npm install --legacy-peer-deps
+
+# Copier le code source initial
+# (sera écrasé par le volume mount en mode dev, mais nécessaire pour le build)
+COPY . .
+
+# Exposer le port Angular dev server
+EXPOSE 4200
+
+# --host 0.0.0.0     → accessible depuis l'extérieur du container
+# --poll 1000        → surveille les changements de fichiers toutes les 1s
+#                      (nécessaire sur Windows/Mac avec Docker Desktop)
+# --disable-host-check → évite l'erreur "Invalid Host header"
+CMD ["npx", "ng", "serve", \
+     "--host", "0.0.0.0", \
+     "--port", "4200", \
+     "--poll", "1000", \
+     "--disable-host-check"]

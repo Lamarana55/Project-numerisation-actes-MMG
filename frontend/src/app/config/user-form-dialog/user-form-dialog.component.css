@@ -1,0 +1,411 @@
+/* user-form-dialog.component.css */
+
+:root {
+  --primary-color: #4a8a4e;
+  --primary-light: #6ba66f;
+  --primary-dark: #3d7441;
+  --primary-gradient: linear-gradient(135deg, #4a8a4e 0%, #6ba66f 100%);
+  --text-primary: #333;
+  --text-secondary: #666;
+  --text-muted: #999;
+  --surface-color: #ffffff;
+  --background-color: #f5f5f5;
+  --border-color: #e0e0e0;
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --shadow-strong: 0 8px 25px rgba(74, 138, 78, 0.15);
+  --error-color: #f44336;
+  --warning-color: #ff9800;
+  --success-color: #4caf50;
+}
+
+/* Container principal */
+.dialog-content {
+  padding: 0;
+  overflow-x: hidden;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.form-container {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+/* Section photo de profil */
+.profile-picture-section {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 12px;
+  border: 2px dashed var(--border-color);
+}
+
+.profile-picture-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.profile-picture-preview {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary-gradient);
+  box-shadow: 0 8px 25px rgba(74, 138, 78, 0.3);
+  overflow: hidden;
+  border: 4px solid white;
+}
+
+.profile-picture-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-picture-preview .default-avatar {
+  font-size: 4rem;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.profile-picture-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+/* Sections du formulaire */
+.personal-info-section,
+.account-info-section,
+.role-section {
+  background: var(--surface-color);
+  border-radius: 12px;
+  padding: 24px;
+  border: 1px solid var(--border-color);
+}
+
+.personal-info-section h3,
+.account-info-section h3,
+.role-section h3 {
+  margin: 0 0 20px 0;
+  color: var(--primary-color);
+  font-size: 1.3rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.role-subtitle {
+  color: var(--text-secondary);
+  margin: 0 0 20px 0;
+  font-size: 0.95rem;
+}
+
+/* Disposition des champs */
+.form-row {
+  display: flex;
+  gap: 16px;
+  width: 100%;
+}
+
+.half-width {
+  flex: 1;
+  min-width: 0;
+}
+
+.full-width {
+  width: 100%;
+}
+
+/* Section mot de passe */
+.password-section {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-color);
+}
+
+/* Sélection de rôle */
+.role-option {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 0;
+}
+
+.role-name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.role-description {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.3;
+}
+
+/* Aperçu du rôle */
+.role-preview {
+  margin-top: 20px;
+}
+
+.role-card {
+  border: 1px solid var(--primary-color);
+  background: rgba(74, 138, 78, 0.05);
+}
+
+.role-card mat-card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--primary-color);
+  font-size: 1.1rem;
+}
+
+.role-permissions {
+  margin-top: 16px;
+}
+
+.role-permissions h4 {
+  margin: 0 0 8px 0;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+}
+
+.permissions-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.permissions-chips mat-chip {
+  font-size: 0.8rem;
+  height: 28px;
+  background: rgba(74, 138, 78, 0.1) !important;
+  color: var(--primary-color) !important;
+  border: 1px solid var(--primary-color);
+}
+
+/* Actions du dialog */
+.dialog-actions {
+  padding: 16px 24px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.spinner-inline {
+  margin-right: 8px;
+}
+
+/* Personnalisation Material */
+::ng-deep .mat-mdc-form-field.mat-form-field-appearance-outline .mat-mdc-form-field-outline-thick {
+  color: var(--primary-color) !important;
+}
+
+::ng-deep .mat-mdc-form-field.mat-focused .mat-mdc-floating-label {
+  color: var(--primary-color) !important;
+}
+
+::ng-deep .mat-mdc-form-field-error {
+  color: var(--error-color) !important;
+}
+
+::ng-deep .mat-mdc-form-field-hint {
+  color: var(--text-secondary) !important;
+}
+
+::ng-deep .mat-mdc-raised-button.mat-primary {
+  background: var(--primary-gradient) !important;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(74, 138, 78, 0.3) !important;
+}
+
+::ng-deep .mat-mdc-raised-button.mat-primary:hover {
+  box-shadow: 0 6px 20px rgba(74, 138, 78, 0.4) !important;
+  transform: translateY(-1px);
+}
+
+::ng-deep .mat-mdc-button.mat-primary {
+  color: var(--primary-color) !important;
+}
+
+::ng-deep .mat-mdc-button.mat-warn {
+  color: var(--error-color) !important;
+}
+
+::ng-deep .mat-mdc-select-value {
+  color: var(--text-primary) !important;
+}
+
+::ng-deep .mat-mdc-option.mat-mdc-option-active {
+  background: rgba(74, 138, 78, 0.1) !important;
+}
+
+::ng-deep .mat-mdc-card {
+  box-shadow: var(--shadow) !important;
+}
+
+::ng-deep .mat-mdc-card-header .mat-mdc-card-title {
+  color: var(--primary-color) !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .form-container {
+    padding: 16px;
+    gap: 24px;
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .profile-picture-preview {
+    width: 100px;
+    height: 100px;
+  }
+
+  .profile-picture-preview .default-avatar {
+    font-size: 3rem;
+  }
+
+  .profile-picture-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .profile-picture-actions button {
+    width: 100%;
+  }
+
+  .personal-info-section,
+  .account-info-section,
+  .role-section {
+    padding: 16px;
+  }
+
+  .dialog-actions {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+
+  .dialog-actions button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .form-container {
+    padding: 12px;
+  }
+
+  .personal-info-section h3,
+  .account-info-section h3,
+  .role-section h3 {
+    font-size: 1.1rem;
+  }
+
+  .profile-picture-preview {
+    width: 80px;
+    height: 80px;
+  }
+
+  .profile-picture-preview .default-avatar {
+    font-size: 2.5rem;
+  }
+}
+
+/* Animations */
+.form-container {
+  animation: slideInUp 0.3s ease-out;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.profile-picture-preview {
+  transition: all 0.3s ease;
+}
+
+.profile-picture-preview:hover {
+  transform: scale(1.05);
+}
+
+.role-card {
+  transition: all 0.3s ease;
+}
+
+.role-card:hover {
+  box-shadow: 0 8px 25px rgba(74, 138, 78, 0.2) !important;
+}
+
+/* Force les couleurs pour les champs requis */
+::ng-deep .mat-mdc-form-field.mat-form-field-invalid .mat-mdc-form-field-outline-thick {
+  color: var(--error-color) !important;
+}
+
+::ng-deep .mat-mdc-form-field.mat-form-field-invalid .mat-mdc-floating-label {
+  color: var(--error-color) !important;
+}
+
+/* Amélioration des chips de permissions */
+::ng-deep .permissions-chips .mat-mdc-chip-set {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 6px !important;
+}
+
+/* Indicateur de force du mot de passe */
+.password-strength-indicator {
+  margin-top: 8px;
+  height: 4px;
+  background: var(--border-color);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.password-strength-bar {
+  height: 100%;
+  transition: all 0.3s ease;
+  border-radius: 2px;
+}
+
+.password-strength-bar.weak {
+  background: var(--error-color);
+  width: 25%;
+}
+
+.password-strength-bar.medium {
+  background: var(--warning-color);
+  width: 50%;
+}
+
+.password-strength-bar.strong {
+  background: var(--success-color);
+  width: 75%;
+}
+
+.password-strength-bar.very-strong {
+  background: var(--primary-color);
+  width: 100%;
+}

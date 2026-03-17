@@ -1,0 +1,764 @@
+/* ===== TITRE TOOLBAR ===== */
+.toolbar-title {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+  margin-left: 10px;
+}
+
+.toolbar-title-main {
+  font-size: 16px;
+  font-weight: 600;
+  color: #ffffff;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 650px;
+}
+
+.toolbar-title-acronym {
+  font-size: 13px;
+  font-weight: 400;
+  color: rgba(252, 209, 22, 1);
+  letter-spacing: 0.04em;
+}
+
+@media (max-width: 960px) {
+  .toolbar-title-main {
+    font-size: 11px;
+    max-width: 320px;
+  }
+}
+
+@media (max-width: 600px) {
+  .toolbar-title-main {
+    display: none;
+  }
+  .toolbar-title-acronym {
+    font-size: 13px;
+    font-weight: 600;
+    color: #ffffff;
+  }
+}
+
+/* Styles existants pour les boutons */
+.btn-color {
+  text-align: center;
+  color: #ffffff !important;
+  background-color: #4a8a4e !important;
+  font-weight: bold;
+}
+
+.btn-color:active {
+  transform: translateY(0);
+}
+
+.btn-dec {
+  text-align: center;
+  color: #000000 !important;
+  background-color: #ffffff !important;
+  font-weight: bold;
+}
+
+.btn-dec:hover {
+  transform: translateY(2px);
+  box-shadow: 0 8px 20px rgba(222, 12, 12, 0.4);
+  color: #ffffff !important;
+  background-color: #e00404 !important;
+}
+
+.btn-dec:active {
+  transform: translateY(0);
+}
+
+/* Styles pour la toolbar */
+mat-toolbar {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+.notification-btn, .profile-btn {
+  margin-left: 8px;
+  transition: all 0.3s ease;
+}
+
+.notification-btn:hover, .profile-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: scale(1.1);
+}
+
+/* Styles pour le menu des notifications */
+.notification-menu {
+  width: 350px;
+  max-height: 400px;
+}
+
+.notification-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background-color: #f5f5f5;
+}
+
+.notification-header h4 {
+  margin: 0;
+  color: #333;
+}
+
+.notification-list {
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+.notification-list button {
+  width: 100%;
+  padding: 12px 16px;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+  white-space: normal;
+  height: auto;
+}
+
+.notification-list button.unread {
+  background-color: #e3f2fd;
+  font-weight: bold;
+}
+
+.notification-content {
+  display: flex;
+  flex-direction: column;
+  margin-left: 12px;
+}
+
+.notification-title {
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.notification-time {
+  font-size: 12px;
+  color: #666;
+  margin-top: 4px;
+}
+
+/* Styles pour le menu profil */
+.profile-menu {
+  width: 280px;
+}
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  background-color: #4a8a4e;
+  color: white;
+}
+
+.profile-avatar {
+  font-size: 48px;
+  margin-right: 12px;
+}
+
+.profile-info {
+  display: flex;
+  word-wrap: break-word;
+  flex-direction: column;
+}
+
+.profile-name {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.profile-role {
+  font-size: 12px;
+  opacity: 0.8;
+  margin-top: 4px;
+}
+
+.logout-menu-item {
+  color: #f44336 !important;
+}
+
+.logout-menu-item .mat-icon {
+  color: #f44336 !important;
+}
+
+/* Styles pour le menu */
+.sidebar {
+  width: 280px;
+  min-width: 280px;
+  background-color: #f5f5f5;
+  border-right: 1px solid #e0e0e0;
+}
+
+.menu-item {
+  margin: 4px 8px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.menu-item:hover {
+  background-color: rgba(74, 138, 78, 0.1);
+  transform: translateX(4px);
+}
+
+.menu-parent {
+  position: relative;
+}
+
+.expand-icon {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  transition: transform 0.3s ease;
+}
+
+.menu-parent.expanded .expand-icon {
+  transform: translateY(-50%) rotate(180deg);
+}
+
+/* Styles pour les sous-menus */
+.submenu {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+  background-color: rgba(74, 138, 78, 0.05);
+  margin: 0 8px;
+  border-radius: 8px;
+}
+
+.submenu.expanded {
+  max-height: 400px;
+  transition: max-height 0.3s ease-in;
+}
+
+.submenu-item {
+  padding-left: 24px;
+  margin: 2px 8px;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.submenu-item:hover {
+  background-color: rgba(74, 138, 78, 0.15);
+  transform: translateX(8px);
+}
+
+/* Lien actif */
+.active-link {
+  color: #4a8a4e !important;
+  font-weight: bold !important;
+  background-color: rgba(74, 138, 78, 0.2) !important;
+  border-left: 4px solid #4a8a4e;
+}
+
+.active-link .mat-icon {
+  color: #4a8a4e !important;
+}
+
+/* Contenu principal */
+.main-content {
+  min-height: calc(100vh - 64px);
+  padding: 16px;
+  background-color: #fafafa;
+}
+
+/* Divider style */
+mat-divider {
+  margin: 16px 0;
+  border-top-color: #e0e0e0;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 240px;
+    min-width: 240px;
+  }
+
+  .menu-item {
+    margin: 2px 4px;
+  }
+
+  .submenu-item {
+    padding-left: 16px;
+    font-size: 13px;
+  }
+
+  .main-content {
+    padding: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .sidebar {
+    width: 200px;
+    min-width: 200px;
+  }
+
+  .menu-item span {
+    font-size: 13px;
+  }
+
+  .submenu-item span {
+    font-size: 12px;
+  }
+}
+
+/* Animation pour les icônes */
+.menu-item .mat-icon {
+  transition: color 0.3s ease;
+}
+
+.menu-item:hover .mat-icon {
+  color: #4a8a4e;
+}
+
+/* Style pour les badges */
+.mat-badge {
+  position: relative;
+}
+
+/* Amélioration visuelle de la toolbar */
+mat-toolbar {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+/* Style pour les listes imbriquées */
+.mat-nav-list {
+  padding-top: 8px;
+}
+
+.mat-list-item {
+  height: 48px;
+  font-size: 14px;
+
+}
+
+.mat-list-item.mat-list-item-with-avatar {
+  height: 56px;
+}
+
+/* Amélioration du contraste */
+.mat-list-item:focus {
+  outline: 2px solid #4a8a4e;
+  outline-offset: -2px;
+}
+
+/* Styles pour les sous-menus de niveau 2 */
+.level-2 {
+  margin-left: 20px;
+  background-color: rgba(74, 138, 78, 0.08);
+}
+
+.level-2.expanded {
+  max-height: 300px;
+}
+
+.level-2-item {
+  padding-left: 32px;
+  margin: 1px 4px;
+  font-size: 13px;
+  border-radius: 4px;
+}
+
+.level-2-item:hover {
+  background-color: rgba(74, 138, 78, 0.2);
+  transform: translateX(6px);
+}
+
+/* Couleurs spécifiques pour différents types de menus */
+.menu-item[routerLink*="validation"] .mat-icon {
+  color: #ff9800;
+}
+
+.menu-item[routerLink*="civil-acts"] .mat-icon {
+  color: #2196f3;
+}
+
+.menu-item[routerLink*="users"] .mat-icon {
+  color: #4caf50;;
+}
+
+.menu-item[routerLink*="roles"] .mat-icon,
+.menu-item[routerLink*="permissions"] .mat-icon {
+  color: #f44336;
+}
+
+.menu-item[routerLink*="localites"] .mat-icon {
+  color: #4caf50;
+}
+
+/* Animation pour les menus multi-niveaux */
+.submenu .menu-parent .expand-icon {
+  font-size: 18px;
+}
+
+/* Badge pour les éléments en attente */
+.pending-badge {
+  background-color: #ff5722;
+  color: white;
+  border-radius: 12px;
+  padding: 2px 8px;
+  font-size: 11px;
+  margin-left: auto;
+}
+
+/* Ligne de gradient rouge-jaune-vert entre toolbar et drawer-container */
+.gradient-line {
+  height: 4px;
+  background: linear-gradient(to right, #ff0000, #ffff00, #00ff00);
+  width: 100%;
+  position: relative;
+  z-index: 999;
+}
+
+/* Alternative avec des couleurs plus douces */
+.gradient-line-soft {
+  height: 3px;
+  background: linear-gradient(to right, #e74c3c, #f39c12, #27ae60);
+  width: 100%;
+  position: relative;
+  z-index: 999;
+}
+
+/* Version avec animation (optionnel) */
+.gradient-line-animated {
+  height: 4px;
+  background: linear-gradient(90deg, #ff0000, #ffff00, #00ff00);
+  background-size: 200% 200%;
+  animation: gradientShift 3s ease infinite;
+  width: 100%;
+  position: relative;
+  z-index: 999;
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* === NOUVELLES RÈGLES POUR CORRIGER L'ESPACEMENT === */
+
+/* Réduction de l'espacement général des éléments de liste */
+.mat-list-item .mat-list-item-content {
+  padding: 0 !important;
+  gap: 8px !important; /* Espacement réduit entre icône et texte */
+}
+
+/* Correction pour les icônes principales */
+.menu-item .mat-icon[matListItemIcon] {
+  margin-right: 8px !important; /* Espacement réduit après l'icône */
+  margin-left: 0 !important;
+  min-width: 24px !important;
+  width: 24px !important;
+  font-size: 20px !important;
+}
+
+/* Espacement pour les titres des éléments de menu */
+.menu-item span[matListItemTitle] {
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+}
+
+/* Correction pour les sous-menus niveau 1 */
+.submenu-item .mat-icon[matListItemIcon] {
+  margin-right: 6px !important; /* Espacement encore plus réduit pour les sous-menus */
+  min-width: 20px !important;
+  width: 20px !important;
+  font-size: 18px !important;
+}
+
+/* Correction pour les sous-menus niveau 2 */
+.level-2-item .mat-icon[matListItemIcon] {
+  margin-right: 6px !important;
+  min-width: 18px !important;
+  width: 18px !important;
+  font-size: 16px !important;
+}
+
+/* Ajustement pour les éléments avec icône d'expansion */
+.menu-parent .mat-list-item-content {
+  padding-right: 32px !important; /* Espace pour l'icône d'expansion */
+}
+
+/* Correction spécifique pour Angular Material */
+.mat-list-base .mat-list-item .mat-list-item-content,
+.mat-list-base .mat-list-option .mat-list-item-content {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  padding: 0 8px !important;
+}
+
+/* Suppression des marges automatiques indésirables */
+.mat-list-item .mat-list-text {
+  display: flex !important;
+  flex: auto !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* Alignement compact des icônes et textes */
+.mat-list-item-content > .mat-icon:first-child {
+  margin-right: 8px !important;
+  margin-left: 0 !important;
+}
+
+.mat-list-item-content > span {
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+}
+
+
+/* ===== PROFILE TRIGGER BUTTON ===== */
+.profile-trigger-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 40px;
+  padding: 6px 14px 6px 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(8px);
+  margin-left: 8px;
+}
+
+.profile-trigger-btn:hover {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+
+.profile-avatar-circle {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ffffff 0%, #d4edda 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.profile-avatar-initials {
+  font-size: 15px;
+  font-weight: 700;
+  color: #4a8a4e;
+  line-height: 1;
+}
+
+.profile-trigger-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.2;
+}
+
+.profile-trigger-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #ffffff;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-trigger-role {
+  font-size: 11px;
+  color: rgba(255,255,255,0.7);
+  font-weight: 400;
+}
+
+.profile-trigger-arrow {
+  color: rgba(255,255,255,0.7);
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  transition: transform 0.3s ease;
+}
+
+.profile-trigger-btn:hover .profile-trigger-arrow {
+  transform: rotate(180deg);
+}
+
+/* ===== PROFILE MENU PANEL ===== */
+::ng-deep .profile-menu-panel {
+  border-radius: 16px !important;
+  overflow: hidden !important;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.15), 0 4px 16px rgba(0,0,0,0.08) !important;
+  min-width: 280px !important;
+  margin-top: 8px !important;
+}
+
+::ng-deep .profile-menu-panel .mat-mdc-menu-content {
+  padding: 0 !important;
+}
+
+/* Header du menu */
+.pm-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 20px 18px 16px;
+  background: linear-gradient(135deg, #4a8a4e 0%, #5fa663 100%);
+}
+
+.pm-avatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.25);
+  border: 2px solid rgba(255,255,255,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 700;
+  color: #ffffff;
+  flex-shrink: 0;
+}
+
+.pm-user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.pm-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.pm-role {
+  font-size: 12px;
+  color: rgba(255,255,255,0.8);
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+/* Divider */
+.pm-divider {
+  height: 1px;
+  background: #f0f0f0;
+  margin: 4px 0;
+}
+
+/* Items du menu */
+.pm-item {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 10px 16px !important;
+  height: auto !important;
+  transition: background 0.2s ease !important;
+}
+
+.pm-item:hover {
+  background: #f7fdf7 !important;
+}
+
+.pm-item-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.pm-item:hover .pm-item-icon {
+  transform: scale(1.1);
+}
+
+.pm-icon-blue {
+  background: #e3f2fd;
+}
+.pm-icon-blue mat-icon { color: #1976d2; }
+
+.pm-icon-gray {
+  background: #f5f5f5;
+}
+.pm-icon-gray mat-icon { color: #757575; }
+
+.pm-icon-red {
+  background: #ffebee;
+}
+.pm-icon-red mat-icon { color: #e53935; }
+
+.pm-item-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pm-item-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  line-height: 1.2;
+}
+
+.pm-item-desc {
+  font-size: 11px;
+  color: #999;
+  font-weight: 400;
+}
+
+/* Déconnexion spécial */
+.pm-logout:hover {
+  background: #fff5f5 !important;
+}
+
+.pm-logout .pm-item-label {
+  color: #e53935;
+}
+
+
+/* === Icône alignée avec le label === */
+
+.pm-item-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pm-item-icon-inline {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.pm-item-icon-inline mat-icon {
+  font-size: 18px;
+}
+
+.pm-item:hover .pm-item-icon-inline {
+  transform: scale(1.1);
+}

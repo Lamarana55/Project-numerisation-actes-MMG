@@ -1,0 +1,70 @@
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-sm-3 col-6 mt-0 text-center">
+      <img src="assets/logo/Logo-PN-RAVEC.png" alt="Logo" class="logo">
+    </div>
+    <div class="col-sm-6 col-12 text-center mt-1 header-section">
+      <h1>République de Guinée</h1>
+      <h2>
+        <span style="color:red;">Travail</span> -
+        <span style="color:yellow;">Justice</span> -
+        <span style="color:green;">Solidarité</span>
+      </h2> <br>
+      <h1 class="mt-2">Programme National de Recensement  <br> Administratif à Vocation d'État Civil</h1>
+    </div>
+    <div class="col-sm-3 col-6 text-center mt-3">
+      <img src="assets/images/gn.png" alt="Branding" class="logo">
+    </div>
+  </div>
+
+  <div class="row justify-content-center mt-1">
+    <div class="col-lg-4 col-md-6 col-sm-8 col-12">
+      <mat-card class="login-card">
+        <mat-card-header>
+          <mat-card-title class="text-center-color">
+            <mat-icon>perm_identity</mat-icon>
+            Authentification
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <form [formGroup]="loginForm" (ngSubmit)="login()">
+            <mat-form-field appearance="fill" class="full-width">
+              <mat-label>Adresse e-mail</mat-label>
+              <input matInput formControlName="username" type="email" placeholder="Entrer votre Email" required>
+
+              <mat-error *ngIf="loginForm.get('username')?.hasError('required')">
+                L'adresse e-mail est requise.
+              </mat-error>
+              <mat-error *ngIf="loginForm.get('username')?.hasError('email')">
+                Veuillez entrer une adresse e-mail valide.
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="fill" class="full-width">
+              <mat-label>Mot de passe</mat-label>
+              <input matInput formControlName="password" type="password" placeholder="Entrer votre mot de passe" required>
+              <mat-error *ngIf="loginForm.get('password')?.hasError('required')">
+                Le mot de passe est requis.
+              </mat-error>
+            </mat-form-field>
+
+            <button class="submit-btn" type="submit" [disabled]="loginForm.invalid">
+              Connexion
+            </button>
+
+            <div class="form-group">
+              <div class="text-center text-danger font-italic" *ngIf="serverError">
+                <small>{{ serverMessage }}</small>
+              </div>
+            </div>
+          </form>
+        </mat-card-content>
+
+        <mat-card-actions class="text-center">
+          <a class="text-link" routerLink="/reset-password">Mot de passe oublié ?</a>
+          <p>Vous n'avez pas de compte? <a href="#" class="text-link"><b>S'inscrire</b></a></p>
+        </mat-card-actions>
+      </mat-card>
+    </div>
+  </div>
+</div>
