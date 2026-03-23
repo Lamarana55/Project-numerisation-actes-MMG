@@ -1,6 +1,6 @@
 /* En-tête de la page */
 .simulation-header {
-  background: linear-gradient(135deg, #4a8a4e 0%, #5fa164 100%);
+  background: linear-gradient(135deg, #00853F 0%, #5fa164 100%);
   color: white;
   padding: 30px;
   margin: -16px -16px 24px -16px;
@@ -72,7 +72,7 @@
 }
 
 .section-title {
-  color: #4a8a4e;
+  color: #00853F;
   font-size: 22px;
   font-weight: 500;
   margin-bottom: 24px;
@@ -86,7 +86,7 @@
   font-weight: 500;
   margin: 24px 0 16px 0;
   padding-left: 8px;
-  border-left: 3px solid #4a8a4e;
+  border-left: 3px solid #00853F;
 }
 
 /* Disposition des formulaires */
@@ -118,11 +118,11 @@
 }
 
 ::ng-deep .mat-form-field-appearance-outline.mat-focused .mat-form-field-outline {
-  color: #4a8a4e !important;
+  color: #00853F !important;
 }
 
 ::ng-deep .mat-form-field-appearance-outline.mat-focused .mat-form-field-label {
-  color: #4a8a4e !important;
+  color: #00853F !important;
 }
 
 /* Radio group */
@@ -161,7 +161,7 @@
   background: #f9f9f9;
   border-radius: 8px;
   padding: 8px;
-  border-left: 6px solid #4a8a4e;
+  border-left: 6px solid #00853F;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
@@ -170,7 +170,7 @@
   align-items: center;
   gap: 8px;
   font-size: 18px;
-  color: #4a8a4e;
+  color: #00853F;
 }
 
 .recap-info {
@@ -206,7 +206,7 @@
   padding: 12px 40px;
   height: 56px;
   border-radius: 28px;
-  background: linear-gradient(135deg, #4a8a4e 0%, #5fa164 100%);
+  background: linear-gradient(135deg, #00853F 0%, #5fa164 100%);
   box-shadow: 0 4px 12px rgba(74, 138, 78, 0.3);
   transition: all 0.3s ease;
 }
@@ -242,7 +242,7 @@
 
 .npi-card {
   background: linear-gradient(135deg, #f5f5f5 0%, #ffffff 100%);
-  border: 2px solid #4a8a4e;
+  border: 2px solid #00853F;
   border-radius: 16px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
@@ -251,7 +251,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  color: #4a8a4e;
+  color: #00853F;
   font-size: 20px;
 }
 
@@ -277,7 +277,7 @@
 .npi-number {
   font-size: 32px;
   font-weight: 700;
-  color: #4a8a4e;
+  color: #00853F;
   font-family: 'Courier New', monospace;
   letter-spacing: 3px;
   padding: 12px;
@@ -326,7 +326,7 @@
   padding: 12px 16px;
   font-weight: 500;
   color: #666;
-  border-left: 3px solid #4a8a4e;
+  border-left: 3px solid #00853F;
   width: 45%;
 }
 
@@ -340,23 +340,23 @@
 
 /* Stepper personnalisé */
 ::ng-deep .mat-step-header .mat-step-icon-selected {
-  background-color: #4a8a4e !important;
+  background-color: #00853F !important;
 }
 
 ::ng-deep .mat-step-header .mat-step-icon-state-done {
-  background-color: #4a8a4e !important;
+  background-color: #00853F !important;
 }
 
 ::ng-deep .mat-step-header .mat-step-icon-state-edit {
-  background-color: #4a8a4e !important;
+  background-color: #00853F !important;
 }
 
 ::ng-deep .mat-step-header .mat-step-label-selected {
-  color: #4a8a4e !important;
+  color: #00853F !important;
 }
 
 ::ng-deep .mat-stepper-horizontal-line {
-  border-top-color: #4a8a4e !important;
+  border-top-color: #00853F !important;
   opacity: 0.3;
 }
 
@@ -368,7 +368,7 @@
 
 /* Tooltip personnalisé */
 ::ng-deep .mat-tooltip {
-  background: #4a8a4e !important;
+  background: #00853F !important;
   font-size: 12px !important;
 }
 
@@ -401,7 +401,7 @@
 }
 
 .type-npi-prefix {
-  color: #4a8a4e;
+  color: #00853F;
   font-size: 22px;
 }
 
@@ -418,7 +418,7 @@
 }
 
 .npi-icon {
-  color: #4a8a4e;
+  color: #00853F;
   font-size: 28px;
   width: 28px;
   height: 28px;
@@ -448,7 +448,7 @@
 /* Trait séparateur élégant */
 .section-divider {
   height: 2px;
-  background: linear-gradient(to right, transparent, #4a8a4e, transparent);
+  background: linear-gradient(to right, transparent, #00853F, transparent);
   margin: 32px 0 24px 0;
   position: relative;
 }
@@ -470,7 +470,7 @@
   top: -9px;
   left: 50%;
   transform: translateX(-50%);
-  color: #4a8a4e;
+  color: #00853F;
   font-size: 18px;
   background: white;
   padding: 0 8px;
@@ -542,7 +542,7 @@
 
 .construction-card {
   background: linear-gradient(135deg, #f8fef8 0%, #ffffff 50%, #f0fdf4 100%);
-  border: 2px solid #4a8a4e;
+  border: 2px solid #00853F;
   border-radius: 20px;
   padding: 5px;
   box-shadow: 0 8px 32px rgba(74, 138, 78, 0.15),
@@ -590,7 +590,7 @@
   align-items: center;
   gap: 5px;
   margin-bottom: 5px;
-  color: #4a8a4e;
+  color: #00853F;
   position: relative;
   z-index: 1;
 }
@@ -646,7 +646,7 @@
   padding: 16px 20px;
   background: #ffffff;
   border-radius: 12px;
-  border: 2px solid #4a8a4e;
+  border: 2px solid #00853F;
   min-width: 85px;
   transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
   position: relative;
@@ -657,7 +657,7 @@
 
 .npi-segment.filled {
   background: #ffffff;
-  border: 2px solid #4a8a4e;
+  border: 2px solid #00853F;
   box-shadow: 0 4px 16px rgba(74, 138, 78, 0.25),
               0 0 20px rgba(74, 138, 78, 0.1);
   transform: translateY(-4px) rotateX(5deg);
@@ -729,7 +729,7 @@
 .progress-text {
   text-align: center;
   font-size: 15px;
-  color: #4a8a4e;
+  color: #00853F;
   font-weight: 600;
   animation: fadeInOut 2s ease-in-out infinite;
   text-shadow: 0 2px 4px rgba(74, 138, 78, 0.2);
@@ -754,7 +754,7 @@
 }
 
 ::ng-deep .construction-card .mat-progress-bar-fill::after {
-  background: linear-gradient(90deg, #4a8a4e, #5fa164, #4a8a4e) !important;
+  background: linear-gradient(90deg, #00853F, #5fa164, #00853F) !important;
   background-size: 200% 100% !important;
   animation: progressGradient 2s linear infinite !important;
   box-shadow: 0 0 10px rgba(74, 138, 78, 0.5);

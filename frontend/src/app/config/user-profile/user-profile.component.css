@@ -7,7 +7,7 @@
 /* Header du profil */
 .profile-header-card {
   margin-bottom: 24px;
-  background: linear-gradient(135deg, #4a8a4e 0%, #3a7a3e 100%);
+  background: linear-gradient(135deg, #00853F 0%, #3a7a3e 100%);
   color: white;
   box-shadow: 0 4px 12px rgba(74, 138, 78, 0.3);
 }
@@ -43,7 +43,7 @@
   bottom: 0;
   right: 0;
   background-color: #fff;
-  color: #4a8a4e;
+  color: #00853F;
 }
 
 .change-avatar-btn:hover {
@@ -193,7 +193,7 @@
 }
 
 .security-item mat-icon {
-  color: #4a8a4e;
+  color: #00853F;
   font-size: 24px;
   margin-top: 4px;
 }
@@ -325,7 +325,7 @@
   margin: 0 0 16px 0;
   color: #333;
   font-weight: 500;
-  border-bottom: 2px solid #4a8a4e;
+  border-bottom: 2px solid #00853F;
   padding-bottom: 8px;
 }
 

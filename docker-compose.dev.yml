@@ -1,7 +1,7 @@
 version: '3.8'
 
 # ============================================================
-#  RAVEC — Docker Compose DÉVELOPPEMENT (hot-reload activé)
+#  ravec-num — Docker Compose DÉVELOPPEMENT (hot-reload activé)
 # ============================================================
 
 services:
@@ -11,7 +11,7 @@ services:
   # ──────────────────────────────────────────
   postgres:
     image: postgres:15-alpine
-    container_name: ravec-postgres-dev
+    container_name: ravec-num-postgres-dev
     restart: unless-stopped
     environment:
       POSTGRES_DB: ${DATABASE:-db_npi}
@@ -28,7 +28,7 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - ravec-network-dev
+      - ravec-num-network-dev
 
   # ──────────────────────────────────────────
   #  Backend Spring Boot — HOT RELOAD via spring-boot-devtools
@@ -39,7 +39,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile.dev
-    container_name: ravec-backend-dev
+    container_name: ravec-num-backend-dev
     restart: unless-stopped
     depends_on:
       postgres:
@@ -51,7 +51,7 @@ services:
       DATABASE_USER: ${DATABASE_USER:-postgres}
       DATABASE_PASSWORD: ${DATABASE_PASSWORD:-postgres}
       DDL_AUTO: ${DDL_AUTO:-update}
-      SERVER_PORT: 8090
+      SERVER_PORT: 8091
       FRONT_URL: ${FRONT_URL:-http://localhost:4200}
       JWT_SECURITY: ${JWT_SECURITY:-dev_secret_key_change_in_prod}
       SPRING_MAIL_USERNAME: ${SPRING_MAIL_USERNAME:-}
@@ -60,7 +60,7 @@ services:
       SPRING_DEVTOOLS_RESTART_ENABLED: "true"
       SPRING_DEVTOOLS_LIVERELOAD_ENABLED: "true"
     ports:
-      - "${SERVER_PORT:-8090}:8090"
+      - "${SERVER_PORT:-8091}:8091"
       # Port LiveReload DevTools (interne uniquement, pas exposé sur l'hôte)
     volumes:
       # Monte tout le code source backend dans le container
@@ -69,7 +69,7 @@ services:
       # Cache Maven pour ne pas retélécharger les dépendances à chaque rebuild
       - maven_cache:/root/.m2
     networks:
-      - ravec-network-dev
+      - ravec-num-network-dev
 
   # ──────────────────────────────────────────
   #  Frontend Angular — HOT RELOAD via ng serve --poll
@@ -78,14 +78,14 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile.dev
-    container_name: ravec-frontend-dev
+    container_name: ravec-num-frontend-dev
     restart: unless-stopped
     depends_on:
       - backend
     ports:
       - "${FRONTEND_PORT:-4200}:4200"
     environment:
-      - BACKEND_URL=http://backend:8090/api/v1
+      - BACKEND_URL=http://backend:8091/api/v1
     volumes:
       # Monte le code source Angular (hot-reload)
       - ./frontend/src:/app/src
@@ -95,7 +95,7 @@ services:
       # node_modules isolé dans le container (ne pas monter depuis le host)
       - /app/node_modules
     networks:
-      - ravec-network-dev
+      - ravec-num-network-dev
 
   # ──────────────────────────────────────────
   #  PgAdmin (optionnel) — accès via profil "tools"
@@ -103,10 +103,10 @@ services:
   # ──────────────────────────────────────────
   pgadmin:
     image: dpage/pgadmin4:latest
-    container_name: ravec-pgadmin-dev
+    container_name: ravec-num-pgadmin-dev
     restart: unless-stopped
     environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@ravec.gov.gn}
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@ravec-num.gov.gn}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
       PGADMIN_LISTEN_PORT: 80
     ports:
@@ -116,7 +116,7 @@ services:
     depends_on:
       - postgres
     networks:
-      - ravec-network-dev
+      - ravec-num-network-dev
     profiles:
       - tools
 
@@ -129,5 +129,5 @@ volumes:
     driver: local
 
 networks:
-  ravec-network-dev:
+  ravec-num-network-dev:
     driver: bridge

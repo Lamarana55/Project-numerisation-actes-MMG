@@ -15,7 +15,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: linear-gradient(135deg, #4a8a4e, #5fa663);
+  background: linear-gradient(135deg, #00853F, #5fa663);
   padding: 24px 32px;
   border-radius: 12px;
   color: white;
@@ -99,7 +99,7 @@
 
 .filter-label {
   font-weight: 600;
-  color: #4a8a4e;
+  color: #00853F;
   min-width: 60px;
 }
 
@@ -111,8 +111,8 @@
 }
 
 .filter-button {
-  color: #4a8a4e;
-  border: 1px solid #4a8a4e;
+  color: #00853F;
+  border: 1px solid #00853F;
   background-color: white;
   padding: 8px 16px;
   transition: all 0.3s ease;
@@ -124,7 +124,7 @@
 }
 
 .filter-button.active-filter {
-  background-color: #4a8a4e !important;
+  background-color: #00853F !important;
   color: white !important;
 }
 
@@ -165,7 +165,7 @@
 }
 
 .notification-card.unread {
-  border-left: 4px solid #4a8a4e;
+  border-left: 4px solid #00853F;
   box-shadow: 0 2px 12px rgba(74, 138, 78, 0.15);
   background-color: #f8fdf8;
 }
@@ -221,7 +221,7 @@
 }
 
 .notification-type-icon.notification-type-info {
-  color: #4a8a4e;
+  color: #00853F;
   background-color: #e8f5e8;
 }
 
@@ -231,7 +231,7 @@
   right: 0;
   width: 12px;
   height: 12px;
-  background-color: #4a8a4e;
+  background-color: #00853F;
   border-radius: 50%;
   border: 2px solid white;
 }
@@ -279,7 +279,7 @@
 }
 
 .category-chip.category-user {
-  background-color: #4a8a4e;
+  background-color: #00853F;
 }
 
 .category-chip.category-report {
@@ -309,7 +309,7 @@
 }
 
 .action-link-btn {
-  background-color: #4a8a4e;
+  background-color: #00853F;
   color: white;
   font-size: 13px;
   padding: 6px 16px;
@@ -517,14 +517,14 @@
 
 /* Amélioration de l'accessibilité */
 .notification-card:focus-within {
-  outline: 2px solid #4a8a4e;
+  outline: 2px solid #00853F;
   outline-offset: 2px;
 }
 
 .filter-button:focus,
 .action-btn:focus,
 .notification-controls button:focus {
-  outline: 2px solid #4a8a4e;
+  outline: 2px solid #00853F;
   outline-offset: 2px;
 }
 
@@ -547,7 +547,7 @@
   left: 0;
   right: 0;
   height: 2px;
-  background: linear-gradient(90deg, #4a8a4e, #5fa663);
+  background: linear-gradient(90deg, #00853F, #5fa663);
   border-radius: 12px 12px 0 0;
 }
 
@@ -561,7 +561,7 @@
 
 /* Styles pour les tooltips personnalisés */
 .mat-tooltip {
-  background-color: #4a8a4e;
+  background-color: #00853F;
   color: white;
   font-size: 12px;
 }
@@ -577,7 +577,7 @@
 }
 
 .notifications-list::-webkit-scrollbar-thumb {
-  background: #4a8a4e;
+  background: #00853F;
   border-radius: 3px;
 }
 
@@ -587,7 +587,7 @@
 
 /* Styles pour les badges de comptage */
 .count-badge {
-  background-color: #4a8a4e;
+  background-color: #00853F;
   color: white;
   border-radius: 12px;
   padding: 2px 8px;

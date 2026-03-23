@@ -243,7 +243,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       {
         label: 'Actes Validés',
         value: data.total_valid_acte,
-        backgroundColor: '#4A8A4E',
+        backgroundColor: '#00853F',
         icon: 'verified'
       },
       {
