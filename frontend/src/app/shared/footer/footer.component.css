@@ -72,7 +72,7 @@
   letter-spacing: 0.4px;
   transition: color 0.2s;
 }
-.fa-link:hover { color: #4a8a4e; }
+.fa-link:hover { color: #00853F; }
 
 .fa-sep {
   color: #cccccc;
@@ -81,7 +81,7 @@
 
 .fa-version {
   font-size: 0.65rem;
-  color: #4a8a4e;
+  color: #00853F;
   letter-spacing: 0.8px;
   font-weight: 600;
 }
@@ -207,7 +207,7 @@
   font-size: 16px;
   width: 16px;
   height: 16px;
-  color: #4a8a4e;
+  color: #00853F;
 }
 
 /* Liste liens */
@@ -243,7 +243,7 @@
 .fapp-link:hover { color: rgba(240, 244, 241, 0.95); }
 
 .fapp-link-accent {
-  color: #4a8a4e;
+  color: #00853F;
   text-decoration: none;
   font-size: 0.78rem;
   font-weight: 700;
@@ -279,7 +279,7 @@
   flex-shrink: 0;
 }
 
-.fapp-status-ok { color: #4a8a4e; font-weight: 700; }
+.fapp-status-ok { color: #00853F; font-weight: 700; }
 
 /* Séparateur horizontal */
 .fapp-hline {

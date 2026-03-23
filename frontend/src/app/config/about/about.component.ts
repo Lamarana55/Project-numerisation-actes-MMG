@@ -189,7 +189,7 @@ export class AboutComponent implements OnInit {
    * Générer une couleur d'avatar basée sur le nom
    */
   getAvatarColor(name: string): string {
-    const colors = ['#4a8a4e', '#2196f3', '#ff9800', '#9c27b0', '#f44336', '#4caf50'];
+    const colors = ['#00853F', '#2196f3', '#ff9800', '#9c27b0', '#f44336', '#4caf50'];
     const index = name.length % colors.length;
     return colors[index];
   }

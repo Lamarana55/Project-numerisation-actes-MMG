@@ -1,10 +1,10 @@
 /* role-form-dialog.component.css */
 
 :root {
-  --primary-color: #4a8a4e;
+  --primary-color: #00853F;
   --primary-light: #6ba66f;
   --primary-dark: #3d7441;
-  --primary-gradient: linear-gradient(135deg, #4a8a4e 0%, #6ba66f 100%);
+  --primary-gradient: linear-gradient(135deg, #00853F 0%, #6ba66f 100%);
   --text-primary: #333;
   --text-secondary: #666;
   --text-muted: #999;

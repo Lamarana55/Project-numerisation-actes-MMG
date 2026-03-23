@@ -43,7 +43,7 @@
 }
 
 .text-link {
-  color: #4a8a4e;
+  color: #00853F;
   text-decoration: none;
 }
 
@@ -59,14 +59,14 @@
 
 .text-center-color {
   text-align: center;
-  color: #4a8a4e;
+  color: #00853F;
   font-weight: bold;
 }
 
 .submit-btn {
   width: 100%;
   padding: 12px;
-  background-color: #4a8a4e;
+  background-color: #00853F;
   color: white;
   border: none;
   border-radius: 4px;
