@@ -45,7 +45,6 @@ export class AuthService {
     return this.http.post<JwtResponse>(`${this.apiUrl}/signin`, { username, password })
       .pipe(
         tap(response => {
-          console.log('Réponse de connexion:', response.name);
           this.setSession(response);
           this.geodataService.clearCache();
           // Navigation automatique vers le dashboard
@@ -62,6 +61,7 @@ export class AuthService {
     sessionStorage.removeItem(this.userKey);
     this.isAuthenticatedSubject.next(false);
     this.currentUserSubject.next(null);
+    console.log("Déconnexion....")
     this.router.navigate(['/login']);
   }
 

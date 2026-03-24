@@ -7,7 +7,7 @@ services:
     container_name: ravec-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${DATABASE:-db_npi}
+      POSTGRES_DB: ${DATABASE:-db_numerisation}
       POSTGRES_USER: ${DATABASE_USER:-postgres}
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-postgres}
       PGDATA: /var/lib/postgresql/data/pgdata

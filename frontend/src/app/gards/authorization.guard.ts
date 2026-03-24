@@ -14,12 +14,10 @@ export class AuthorizationGuard implements CanActivate {
       this.router.navigateByUrl('/login');
       return false;
     }
-    
+
     const requiredRoles: string[] = route.data['roles'] || [];
     const userRoles: string[] = this.authService.roles || [];
 
-    console.log('Roles utilisateur :', userRoles);
-    console.log('Rôles requis :', requiredRoles);
 
     // Vérifiez si l'utilisateur possède au moins un rôle requis
     const hasAccess = requiredRoles.some(role => userRoles.includes(role));

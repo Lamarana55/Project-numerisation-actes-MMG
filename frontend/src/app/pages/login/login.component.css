@@ -165,3 +165,37 @@
     margin: 15px auto 0 auto;
   }
 }
+
+
+/* Texte animé - Numerisation des actes */
+.animated-subtitle {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.typewriter {
+  display: inline-block;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #4a8a4e;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  overflow: hidden;
+  white-space: nowrap;
+  border-right: 3px solid #4a8a4e;
+  width: 0;
+  animation:
+    typing 3s steps(22, end) 0.5s forwards,
+    blink-caret 0.75s step-end infinite;
+}
+
+@keyframes typing {
+  from { width: 0; }
+  to   { width: 38ch; }
+}
+
+@keyframes blink-caret {
+  from, to { border-color: transparent; }
+  50%      { border-color: #4a8a4e; }
+}
