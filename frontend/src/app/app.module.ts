@@ -76,7 +76,6 @@ import { PrivacyPolicyComponent } from './config/about/privacy-policy/privacy-po
 import { PermissionDialogComponent } from './config/permissions-list/permission-dialog/permission-dialog.component';
 import { RoleFormDialogComponent } from './config/roles-list/role-form-dialog/role-form-dialog.component';
 import { UserFormDialogComponent } from './config/user-form-dialog/user-form-dialog.component';
-import { SimulationComponent } from './simulation/simulation.component';
 import { ToastComponent } from './shared/toast/toast.component';
 
 registerLocaleData(localeFr);
@@ -106,7 +105,6 @@ registerLocaleData(localeFr);
     NotificationsComponent,
     PrivacyPolicyComponent,
     PermissionDialogComponent,
-    SimulationComponent,
     ToastComponent,
   ],
   imports: [

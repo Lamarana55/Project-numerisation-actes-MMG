@@ -23,7 +23,6 @@ import { PermissionsListComponent } from './config/permissions-list/permissions-
 import { AboutComponent } from './config/about/about.component';
 import { NotificationsComponent } from './config/notifications/notifications.component';
 import { PrivacyPolicyComponent } from './config/about/privacy-policy/privacy-policy.component';
-import { SimulationComponent } from './simulation/simulation.component';
 
 const routes: Routes = [
   // Routes publiques
@@ -48,11 +47,6 @@ const routes: Routes = [
       {
         path: 'dashboard',
         component: DashboardComponent,
-      },
-
-      {
-        path: 'simulation-npi',
-        component: SimulationComponent,
       },
       // === GESTION DES UTILISATEURS ===
       {

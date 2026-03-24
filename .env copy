@@ -4,7 +4,7 @@
 ; DATABASE_PASSWORD=root
 ; DATABASE_IP=localhost
 
-DATABASE=db_npi
+DATABASE=db_numerisation
 ;DATABASE=db_prod
 ;DATABASE_USER=pn_ravec_user
 ;DATABASE_PASSWORD=PN*Ravec2@2!!*

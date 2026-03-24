@@ -10,7 +10,11 @@
         <span style="color:yellow;">Justice</span> -
         <span style="color:green;">Solidarité</span>
       </h2> <br>
-      <h1 class="mt-2">Programme National de Recensement  <br> Administratif à Vocation d'État Civil</h1>
+      <h1 class="mt-2">Programme National de Recensement <br> Administratif à Vocation d'État Civil</h1>
+      <!-- Après </h1> du titre "Programme National..." -->
+      <div class="animated-subtitle">
+        <span class="typewriter">Numérisation des anciens actes</span>
+      </div>
     </div>
     <div class="col-sm-3 col-6 text-center mt-3">
       <img src="assets/images/gn.png" alt="Branding" class="logo">
@@ -30,7 +34,7 @@
           <form [formGroup]="loginForm" (ngSubmit)="login()">
             <mat-form-field appearance="fill" class="full-width">
               <mat-label>Adresse e-mail</mat-label>
-              <input matInput formControlName="username" type="email" placeholder="Entrer votre Email" required>
+              <input matInput formControlName="username" type="email" placeholder="Entrer votre Email" required autocomplete="off">
 
               <mat-error *ngIf="loginForm.get('username')?.hasError('required')">
                 L'adresse e-mail est requise.
@@ -42,7 +46,8 @@
 
             <mat-form-field appearance="fill" class="full-width">
               <mat-label>Mot de passe</mat-label>
-              <input matInput formControlName="password" type="password" placeholder="Entrer votre mot de passe" required>
+              <input matInput formControlName="password" type="password" placeholder="Entrer votre mot de passe"
+                required autocomplete="off">
               <mat-error *ngIf="loginForm.get('password')?.hasError('required')">
                 Le mot de passe est requis.
               </mat-error>

@@ -25,8 +25,7 @@ export class LoginComponent implements OnInit {
     // Vérifier si l'utilisateur est déjà connecté
     if (this.authService.isAuthenticated) {
       console.log('Utilisateur déjà connecté, redirection...');
-      // this.router.navigateByUrl('/admin/dashboard');
-      this.router.navigateByUrl('/admin/simulation-npi');
+      this.router.navigateByUrl('/admin/dashboard');
       return;
     }
 
@@ -52,11 +51,10 @@ export class LoginComponent implements OnInit {
 
     this.authService.login(username, password).subscribe({
       next: (response) => {
-        console.log('Connexion réussie:', response);
         this.loading = false;
         // La navigation est déjà gérée dans le service AuthService
         // Mais on peut forcer si nécessaire
-        this.router.navigateByUrl('/admin/simulation-npi');
+        this.router.navigateByUrl('/admin/dashboard');
       },
       error: (err) => {
         console.error('Erreur de connexion:', err);

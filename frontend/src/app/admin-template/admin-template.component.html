@@ -15,7 +15,7 @@
   <button [matMenuTriggerFor]="profileMenu" class="profile-trigger-btn">
     <div class="profile-avatar-circle">
       <span class="profile-avatar-initials">
-        {{ authService.username?.charAt(0)?.toUpperCase() || 'U' }}
+        {{ authService.username.charAt(0).toUpperCase() || 'U' }}
       </span>
     </div>
     <div class="profile-trigger-info">
@@ -29,7 +29,7 @@
     <!-- Header -->
     <div class="pm-header" (click)="$event.stopPropagation()">
       <div class="pm-avatar">
-        <span>{{ authService.username?.charAt(0)?.toUpperCase() || 'U' }}</span>
+        <span>{{ authService.username.charAt(0).toUpperCase() || 'U' }}</span>
       </div>
       <div class="pm-user-info">
         <span class="pm-name">{{ authService.username }}</span>
@@ -87,20 +87,19 @@
 <!-- Ligne de gradient rouge-jaune-vert -->
 <div class="gradient-line"></div>
 <mat-drawer-container>
-  <mat-drawer #myDrawer opened="true" mode="side" position="start" class="sidebar">
+  <mat-drawer #myDrawer opened="false" mode="side" position="start" class="sidebar">
     <mat-nav-list>
       <!-- Dashboard -->
       <a mat-list-item routerLink="/admin/dashboard" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }" class="menu-item">
         <mat-icon matListItemIcon>dashboard</mat-icon>
         <span matListItemTitle>Tableau de bord</span>
       </a>
-
-      <!-- Simulation NPI du RAVEC -->
-      <a mat-list-item routerLink="/admin/simulation-npi" routerLinkActive="active-link"
-        [routerLinkActiveOptions]="{ exact: true }" class="menu-item">
-        <mat-icon matListItemIcon>calculate</mat-icon>
-        <span matListItemTitle>Simulation NPI RAVEC</span>
-      </a>
+      <!-- Listes des Actes (menu principal avec sous-menu) -->
+      <mat-list-item *ngIf="authService.roles!.includes('CAN_VIEW_COLLECTES_AVEC_ACTES')" (click)="toggleActesSubmenu()" class="menu-item menu-parent">
+        <mat-icon matListItemIcon>assignment_ind</mat-icon>
+        <span matListItemTitle>Numérisations</span>
+        <mat-icon class="expand-icon">{{ showActesSubmenu ? 'expand_less' : 'expand_more' }}</mat-icon>
+      </mat-list-item>
 
       <!-- Paramétrages -->
       <mat-list-item *ngIf="canViewSettings()" (click)="toggleSettingsSubmenu()" class="menu-item menu-parent">
