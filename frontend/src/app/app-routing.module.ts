@@ -9,7 +9,6 @@ import { SendmailResetComponent } from './pages/sendmail-reset/sendmail-reset.co
 import { RegisterComponent } from './pages/register/register.component';
 import { UpdatePasswordComponent } from './pages/update-password/update-password.component';
 
-
 // Composants de gestion des utilisateurs
 import { UserListComponent } from './config/user-list/user-list.component';
 import { UserProfileComponent } from './config/user-profile/user-profile.component';
@@ -23,6 +22,7 @@ import { PermissionsListComponent } from './config/permissions-list/permissions-
 import { AboutComponent } from './config/about/about.component';
 import { NotificationsComponent } from './config/notifications/notifications.component';
 import { PrivacyPolicyComponent } from './config/about/privacy-policy/privacy-policy.component';
+import { NumerisationIndexationComponent } from './numerisation-indexation/numerisation-indexation.component';
 
 const routes: Routes = [
   // Routes publiques
@@ -42,30 +42,41 @@ const routes: Routes = [
       {
         path: '',
         redirectTo: 'dashboard',
-        pathMatch: 'full'
+        pathMatch: 'full',
       },
       {
         path: 'dashboard',
         component: DashboardComponent,
+      },
+      // Numérisation et Indexation
+      {
+        path: 'numerisation',
+        component: NumerisationIndexationComponent,
+        data: { title: 'Numérisation', tab: 'numerisation' },
+      },
+      {
+        path: 'numerisation-indexation',
+        component: NumerisationIndexationComponent,
+        data: { title: 'Numérisation & Indexation OCR', tab: 'indexation' },
       },
       // === GESTION DES UTILISATEURS ===
       {
         path: 'users/list',
         component: UserListComponent,
         canActivate: [AuthorizationGuard],
-        data: { roles: ["CAN_MANAGE_USERS"] }
+        data: { roles: ['CAN_MANAGE_USERS'] },
       },
       {
         path: 'users/create',
         component: UserCreateComponent,
         canActivate: [AuthorizationGuard],
-        data: { roles: ["CAN_MANAGE_USERS"] }
+        data: { roles: ['CAN_MANAGE_USERS'] },
       },
       {
         path: 'users/:id',
         component: UserProfileComponent,
         canActivate: [AuthorizationGuard],
-        data: { roles: ["CAN_MANAGE_USERS"] }
+        data: { roles: ['CAN_MANAGE_USERS'] },
       },
 
       // === GESTION DES RÔLES ET PERMISSIONS ===
@@ -73,20 +84,20 @@ const routes: Routes = [
         path: 'roles/list',
         component: RolesListComponent,
         canActivate: [AuthorizationGuard],
-        data: { roles: ["CAN_MANAGE_ROLES"] }
+        data: { roles: ['CAN_MANAGE_ROLES'] },
       },
       {
         path: 'permissions/list',
         component: PermissionsListComponent,
         canActivate: [AuthorizationGuard],
-        data: { roles: ["CAN_MANAGE_PERMISSIONS"] }
+        data: { roles: ['CAN_MANAGE_PERMISSIONS'] },
       },
       // === GESTION DES LOCALITÉS ===
       {
         path: 'localites/list',
         component: UserListComponent,
         canActivate: [AuthorizationGuard],
-        data: { roles: ["CAN_MANAGE_LOCALITES"] }
+        data: { roles: ['CAN_MANAGE_LOCALITES'] },
       },
 
       // === RAPPORTS ===
@@ -96,19 +107,19 @@ const routes: Routes = [
         path: 'settings/system',
         component: UserProfileComponent, // Remplacer par SystemSettingsComponent quand créé
         canActivate: [AuthorizationGuard],
-        data: { roles: ["CAN_MANAGE_SETTINGS"] }
+        data: { roles: ['CAN_MANAGE_SETTINGS'] },
       },
       {
         path: 'settings/account',
         component: UserProfileComponent,
         canActivate: [AuthorizationGuard],
-        data: { roles: ["CAN_VIEW_PROFILE"] }
+        data: { roles: ['CAN_VIEW_PROFILE'] },
       },
 
       // === PROFIL UTILISATEUR ===
       {
         path: 'profile',
-        component: UserProfileComponent
+        component: UserProfileComponent,
       },
 
       // === AIDE ET SUPPORT ===
@@ -118,27 +129,28 @@ const routes: Routes = [
           { path: 'about', component: AboutComponent },
           { path: 'privacy', component: PrivacyPolicyComponent },
           { path: 'conditions', component: PrivacyPolicyComponent },
-          { path: 'probleme', component: PrivacyPolicyComponent }
-        ]
+          { path: 'probleme', component: PrivacyPolicyComponent },
+        ],
       },
       // === NOTIFICATIONS ===
       {
         path: 'notifications',
-        component: NotificationsComponent
-      }
-    ]
+        component: NotificationsComponent,
+      },
+    ],
   },
 
-
   // Route de fallback
-  { path: '**', redirectTo: '/login' }
+  { path: '**', redirectTo: '/login' },
 ];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes, {
-    enableTracing: false, // Mettre à true pour déboguer le routing
-    onSameUrlNavigation: 'reload'
-  })],
-  exports: [RouterModule]
+  imports: [
+    RouterModule.forRoot(routes, {
+      enableTracing: false, // Mettre à true pour déboguer le routing
+      onSameUrlNavigation: 'reload',
+    }),
+  ],
+  exports: [RouterModule],
 })
 export class AppRoutingModule {}

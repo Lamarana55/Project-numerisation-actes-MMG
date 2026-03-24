@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { catchError, map, Observable, throwError } from 'rxjs';
 
 @Injectable({
@@ -10,6 +10,12 @@ export class ApiService {
   private apiUrl = environment.apiURL;
 
   constructor(private httpClient: HttpClient) {}
+
+  saveActe(payload: any): Observable<any> {
+  return this.httpClient.post(`${this.apiUrl}/actes/indexation`, payload, {
+    headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
+  });
+}
 
   getActe(): Observable<any> {
     return this.httpClient.get(`${this.apiUrl}/ravec/info`).pipe(
