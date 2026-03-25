@@ -1,533 +1,430 @@
 <div class="container-fluid m-1">
+  <div class="card">
 
-  <!-- ══════════════════════════════════════════════════════════ HEADER ══════ -->
-  <div class="page-header">
-    <div class="page-header-left">
-      <h4 class="page-title"><span class="title-icon">📄</span> Numérisation & Indexation</h4>
-      <p class="page-subtitle">Numérisez un acte et indexez ses métadonnées automatiquement par OCR</p>
+    <!-- ══ ZONE D'UPLOAD ════════════════════════════════════════════════════ -->
+    <div class="card-body" *ngIf="!selectedFile">
+      <div class="upload-container" (dragover)="onDragOver($event)" (drop)="onDrop($event)">
+        <input type="file" id="fileInput" accept=".jpg,.jpeg,.png,.webp,.pdf"
+               (change)="onFileSelected($event)" hidden>
+        <div class="upload-icon">📂</div>
+        <h5 class="upload-title">Déposez l'acte de naissance ici</h5>
+        <p class="upload-subtitle">ou cliquez pour sélectionner un fichier</p>
+        <label for="fileInput" class="btn-upload">
+          <mat-icon style="vertical-align:middle;margin-right:6px;font-size:18px">upload_file</mat-icon>
+          Choisir un fichier
+        </label>
+        <p class="upload-formats">JPG · PNG · WEBP · PDF — max 20 Mo</p>
+      </div>
     </div>
-    <div class="tab-nav">
-      <button class="tab-btn" [class.active]="activeTab === 'numerisation'" (click)="switchTab('numerisation')">
-        <span class="tab-icon">📷</span> Numérisation
-      </button>
-      <button class="tab-btn" [class.active]="activeTab === 'indexation'"
-        [class.disabled]="ocrStep === 'idle'" (click)="ocrStep !== 'idle' && switchTab('indexation')">
-        <span class="tab-icon">🔍</span> Indexation
-        <span class="badge-ocr" *ngIf="ocrStep === 'done'">OCR ✓</span>
-      </button>
-    </div>
-  </div>
 
-  <!-- ══════════════════════════════════════════ ONGLET NUMÉRISATION ═══════ -->
-  <div *ngIf="activeTab === 'numerisation'">
-    <div class="row">
+    <!-- ══ FORMULAIRE + IMAGE ════════════════════════════════════════════════ -->
+    <div class="card-body" *ngIf="selectedFile">
 
-      <!-- Zone d'upload -->
-      <div class="col-md-5">
-        <div class="card upload-card">
-          <div class="card-body">
+      <!-- Barre d'info fichier -->
+      <div class="file-info-bar">
+        <mat-icon>{{ selectedFile.type === 'application/pdf' ? 'picture_as_pdf' : 'image' }}</mat-icon>
+        <span class="file-info-name">{{ selectedFile.name }}</span>
+        <span class="file-info-size">{{ (selectedFile.size / 1024 / 1024).toFixed(2) }} Mo</span>
+      </div>
 
-            <div class="drop-zone" [class.has-file]="selectedFile"
-              (dragover)="onDragOver($event)" (drop)="onDrop($event)">
-              <input type="file" id="fileInput" accept=".jpg,.jpeg,.png,.webp,.pdf"
-                (change)="onFileSelected($event)" hidden>
+      <div class="row h-100">
 
-              <ng-container *ngIf="!selectedFile">
-                <div class="drop-icon">📂</div>
-                <h6 class="drop-title">Déposez votre document ici</h6>
-                <p class="drop-subtitle">ou cliquez pour parcourir</p>
-                <label for="fileInput" class="btn-upload">📤 Choisir un fichier</label>
-                <p class="drop-formats">JPG · PNG · WEBP · PDF — max 10 Mo</p>
-              </ng-container>
+        <!-- ── Colonne formulaire ─────────────────────────────────────────── -->
+        <div class="col-md-6 data-column">
+          <div class="data-sections-container">
 
-              <ng-container *ngIf="selectedFile">
-                <div class="file-info">
-                  <div class="file-icon">{{ selectedFile.type === 'application/pdf' ? '📄' : '🖼️' }}</div>
-                  <div class="file-details">
-                    <strong>{{ selectedFile.name }}</strong>
-                    <span class="file-size">{{ (selectedFile.size / 1024 / 1024).toFixed(2) }} Mo</span>
+            <!-- ── Section Personne Concernée ── -->
+            <div class="data-section">
+              <div class="section-title">👤 Personne Concernée</div>
+              <div class="section-body">
+
+                <!-- ▸ Sous-partie 1 : Informations sur la personne -->
+                <div class="subsection-header blue">🪪 Informations sur la personne</div>
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="data-item">
+                      <span class="data-label">Prénoms :</span>
+                      <span class="data-value" *ngIf="!isEditing">{{ data.prenoms }}</span>
+                      <input *ngIf="isEditing" [(ngModel)]="data.prenoms" class="form-control">
+                    </div>
+                    <div class="data-item">
+                      <span class="data-label">Nom :</span>
+                      <span class="data-value" *ngIf="!isEditing">{{ data.nom_membre | uppercase }}</span>
+                      <input *ngIf="isEditing" [(ngModel)]="data.nom_membre" class="form-control">
+                    </div>
+                    <div class="data-item">
+                      <span class="data-label">Date naissance :</span>
+                      <input *ngIf="isEditing" type="text" [ngModel]="data.date_de_nais_membre"
+                        (ngModelChange)="data.date_de_nais_membre = $event"
+                        (input)="formatDateOnInput($event, 'date_de_nais_membre')"
+                        (keydown)="handleDateKeydown($event, 'date_de_nais_membre')"
+                        placeholder="JJ/MM/AAAA" maxlength="10" class="form-control"
+                        (blur)="validateMemberDate()">
+                      <span class="data-value" *ngIf="!isEditing">{{ data.date_de_nais_membre || 'Non renseignée' }}</span>
+                    </div>
+                    <div class="data-item">
+                      <span class="data-label">Heure naissance :</span>
+                      <input *ngIf="isEditing" type="time"
+                        [ngModel]="toTimeInputFormat(data.heure_naissance)"
+                        (ngModelChange)="data.heure_naissance = fromTimeInputFormat($event)"
+                        class="form-control">
+                      <span class="data-value" *ngIf="!isEditing">{{ getDisplayHour(data.heure_naissance) }}</span>
+                    </div>
                   </div>
-                  <button class="btn-clear" (click)="clearFile()">✕</button>
+                  <div class="col-md-6">
+                    <div class="data-item">
+                      <span class="data-label">Rang naissance :</span>
+                      <span class="data-value" *ngIf="!isEditing">{{ data.rang_de_naissance }}</span>
+                      <input *ngIf="isEditing" type="number" min="1" max="50"
+                        [(ngModel)]="data.rang_de_naissance" class="form-control">
+                    </div>
+                    <div class="data-item">
+                      <span class="data-label">Genre :</span>
+                      <span class="data-value" *ngIf="!isEditing">{{ getGenreDisplay(data.genre_membre!) }}</span>
+                      <select *ngIf="isEditing" [(ngModel)]="data.genre_membre" class="form-control">
+                        <option value="M">Masculin</option>
+                        <option value="F">Féminin</option>
+                      </select>
+                    </div>
+                    <div class="data-item">
+                      <span class="data-label">Nationalité :</span>
+                      <span class="data-value" *ngIf="!isEditing">{{ getNationalite(data.nationalite_du_membre!) }}</span>
+                      <select *ngIf="isEditing" [(ngModel)]="data.nationalite_du_membre" class="form-control">
+                        <option *ngFor="let p of allPays" [value]="p.code">{{ p.nom }}</option>
+                      </select>
+                    </div>
+                    <div class="data-item">
+                      <span class="data-label">Profession :</span>
+                      <span class="data-value" *ngIf="!isEditing">{{ getProfession(data.code_profession, data.genre_membre!) }}</span>
+                      <select *ngIf="isEditing" [(ngModel)]="data.code_profession" class="form-control">
+                        <option value="">-- Sélectionner --</option>
+                        <option *ngFor="let p of professions" [value]="p.code">
+                          {{ data.genre_membre === 'F' ? p.feminin : p.masculin }}
+                        </option>
+                      </select>
+                    </div>
+                  </div>
                 </div>
-                <label for="fileInput" class="btn-change">🔄 Changer de fichier</label>
-              </ng-container>
+
+                <div class="subsection-divider"></div>
+
+                <!-- ▸ Sous-partie 2 : Informations sur l'acte -->
+                <div class="subsection-header green">📄 Informations sur l'acte</div>
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="data-item">
+                      <span class="data-label">Année registre :</span>
+                      <span class="data-value" *ngIf="!isEditing">{{ data.annee_registre }}</span>
+                      <input *ngIf="isEditing" type="number" [(ngModel)]="data.annee_registre" class="form-control">
+                    </div>
+                    <div class="data-item">
+                      <span class="data-label">N° registre :</span>
+                      <span class="data-value" *ngIf="!isEditing">{{ data.numero_registre }}</span>
+                      <input *ngIf="isEditing" [(ngModel)]="data.numero_registre" class="form-control">
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="data-item">
+                      <span class="data-label">N° acte :</span>
+                      <span class="data-value" *ngIf="!isEditing">{{ data.numero_acte }}</span>
+                      <input *ngIf="isEditing" [(ngModel)]="data.numero_acte" class="form-control">
+                    </div>
+                    <div class="data-item">
+                      <span class="data-label">N° feuillet :</span>
+                      <span class="data-value" *ngIf="!isEditing">{{ data.feuillet }}</span>
+                      <input *ngIf="isEditing" [(ngModel)]="data.feuillet" class="form-control">
+                    </div>
+                    <div class="data-item">
+                      <span class="data-label">Date des faits :</span>
+                      <input *ngIf="isEditing" type="text" [ngModel]="data.date_etablissement_acte"
+                        (ngModelChange)="data.date_etablissement_acte = $event"
+                        (input)="formatDateOnInput($event, 'date_etablissement_acte')"
+                        (keydown)="handleDateKeydown($event, 'date_etablissement_acte')"
+                        placeholder="JJ/MM/AAAA" maxlength="10" class="form-control"
+                        (blur)="validateFactDate()">
+                      <span class="data-value" *ngIf="!isEditing">{{ data.date_etablissement_acte || 'Non renseignée' }}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="subsection-divider"></div>
+
+                <!-- ▸ Sous-partie 3 : Lieu de naissance -->
+                <div class="subsection-header amber">📍 Lieu de naissance</div>
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="data-item">
+                      <span class="data-label">Pays :</span>
+                      <span class="data-value" *ngIf="!isEditing">{{ getNomPays(data.pays_de_naissance!) }}</span>
+                      <select *ngIf="isEditing" [(ngModel)]="data.pays_de_naissance" class="form-control"
+                        (change)="onPaysNaissanceChange(data.pays_de_naissance!)">
+                        <option value="GN">Guinée</option>
+                        <option *ngFor="let p of allPays" [value]="p.code">{{ p.nom }}</option>
+                      </select>
+                    </div>
+                    <div class="data-item" *ngIf="isGuinee()">
+                      <span class="data-label">Région :</span>
+                      <span class="data-value" *ngIf="!isEditing">{{ getNomRegion(data.region_naissance!) }}</span>
+                      <select *ngIf="isEditing" [(ngModel)]="data.region_naissance" class="form-control"
+                        (change)="onRegionNaissanceChange(data.region_naissance!)">
+                        <option value="">-- Sélectionner --</option>
+                        <option *ngFor="let r of allRegions" [value]="r.code">{{ r.nom }}</option>
+                      </select>
+                    </div>
+                    <div class="data-item" *ngIf="isGuinee()">
+                      <span class="data-label">Préfecture :</span>
+                      <span class="data-value" *ngIf="!isEditing">{{ getNomPrefecture(data.prefecture_naissance!, prefecturesNaissance) }}</span>
+                      <select *ngIf="isEditing" [(ngModel)]="data.prefecture_naissance" class="form-control"
+                        [disabled]="!data.region_naissance || isLoadingPrefecturesNaissance"
+                        (change)="onPrefectureNaissanceChange(data.prefecture_naissance!)">
+                        <option value="">{{ isLoadingPrefecturesNaissance ? '⏳ Chargement...' : '-- Sélectionner --' }}</option>
+                        <option *ngFor="let p of prefecturesNaissance" [value]="p.code">{{ p.nom }}</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="data-item" *ngIf="isGuinee()">
+                      <span class="data-label">Commune :</span>
+                      <span class="data-value" *ngIf="!isEditing">{{ getNomCommune(data.commune_de_nais!, communesNaissance) }}</span>
+                      <select *ngIf="isEditing" [(ngModel)]="data.commune_de_nais" class="form-control"
+                        [disabled]="!data.prefecture_naissance || isLoadingCommunesNaissance"
+                        (change)="onCommuneNaissanceChange(data.commune_de_nais!)">
+                        <option value="">{{ isLoadingCommunesNaissance ? '⏳ Chargement...' : '-- Sélectionner --' }}</option>
+                        <option *ngFor="let c of communesNaissance" [value]="c.code">{{ c.nom }}</option>
+                      </select>
+                    </div>
+                    <div class="data-item" *ngIf="isGuinee()">
+                      <span class="data-label">Quartier :</span>
+                      <span class="data-value" *ngIf="!isEditing">{{ getNomQuartier(data.district_de_nais!, quartiersNaissance) }}</span>
+                      <div *ngIf="isEditing && isLoadingQuartiersNaissance" class="form-control">
+                        <span style="color:#4a8a4e;font-size:0.82rem">⏳ Chargement...</span>
+                      </div>
+                      <select *ngIf="isEditing && !isLoadingQuartiersNaissance"
+                        [(ngModel)]="data.district_de_nais" class="form-control"
+                        [disabled]="!data.commune_de_nais">
+                        <option value="">-- Sélectionner --</option>
+                        <option *ngFor="let q of quartiersNaissance" [value]="q.code">{{ q.nom }}</option>
+                      </select>
+                      <small *ngIf="isEditing && !isLoadingQuartiersNaissance && !data.commune_de_nais"
+                        class="text-muted" style="display:block;margin-top:3px">
+                        Sélectionnez d'abord une commune
+                      </small>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
             </div>
 
-            <!-- Action OCR -->
-            <div class="ocr-action">
-              <button class="btn-ocr" (click)="extractWithOCR()"
-                [disabled]="!selectedFile || ocrStep === 'ocr'" [class.loading]="ocrStep === 'ocr'">
-                <span *ngIf="ocrStep !== 'ocr'">🤖 Extraire les métadonnées (OCR IA)</span>
-                <span *ngIf="ocrStep === 'ocr'">
-                  <span class="spinner-sm"></span> Analyse en cours...
-                </span>
+            <!-- ── Section Parents ── -->
+            <div class="data-section">
+              <div class="section-title">👨‍👩‍👧‍👦 Informations des Parents</div>
+              <div class="section-body">
+                <div class="row">
+                  <!-- Père -->
+                  <div class="col-md-6">
+                    <div class="subsection-header blue">👨 Père</div>
+                    <div class="data-item">
+                      <span class="data-label">Prénom :</span>
+                      <span class="data-value" *ngIf="!isEditing">{{ data.prenoms_pere }}</span>
+                      <input *ngIf="isEditing" [(ngModel)]="data.prenoms_pere" class="form-control">
+                    </div>
+                    <div class="data-item">
+                      <span class="data-label">Nom :</span>
+                      <span class="data-value" *ngIf="!isEditing">{{ data.nom_pere }}</span>
+                      <input *ngIf="isEditing" [(ngModel)]="data.nom_pere" class="form-control">
+                    </div>
+                    <div class="data-item">
+                      <span class="data-label">Date naissance :</span>
+                      <input *ngIf="isEditing" type="text" [ngModel]="data.date_de_nais_pere"
+                        (ngModelChange)="data.date_de_nais_pere = $event"
+                        (input)="formatDateOnInput($event, 'date_de_nais_pere')"
+                        (keydown)="handleDateKeydown($event, 'date_de_nais_pere')"
+                        placeholder="JJ/MM/AAAA" maxlength="10" class="form-control"
+                        (blur)="validateParentDate('date_de_nais_pere')">
+                      <span class="data-value" *ngIf="!isEditing">{{ data.date_de_nais_pere || 'Non renseignée' }}</span>
+                    </div>
+                    <div class="data-item">
+                      <span class="data-label">Nationalité :</span>
+                      <span class="data-value" *ngIf="!isEditing">{{ getNationalite(data.nationalite_pere!) }}</span>
+                      <select *ngIf="isEditing" [(ngModel)]="data.nationalite_pere" class="form-control">
+                        <option *ngFor="let p of allPays" [value]="p.code">{{ p.nom }}</option>
+                      </select>
+                    </div>
+                    <div class="data-item">
+                      <span class="data-label">Profession :</span>
+                      <span class="data-value" *ngIf="!isEditing">{{ getProfession(data.code_profession_pere, 'M') }}</span>
+                      <select *ngIf="isEditing" [(ngModel)]="data.code_profession_pere" class="form-control">
+                        <option value="">-- Sélectionner --</option>
+                        <option *ngFor="let p of professions" [value]="p.code">{{ p.masculin }}</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <!-- Mère -->
+                  <div class="col-md-6">
+                    <div class="subsection-header blue">👩 Mère</div>
+                    <div class="data-item">
+                      <span class="data-label">Prénom :</span>
+                      <span class="data-value" *ngIf="!isEditing">{{ data.prenoms_mere }}</span>
+                      <input *ngIf="isEditing" [(ngModel)]="data.prenoms_mere" class="form-control">
+                    </div>
+                    <div class="data-item">
+                      <span class="data-label">Nom :</span>
+                      <span class="data-value" *ngIf="!isEditing">{{ data.nom_mere }}</span>
+                      <input *ngIf="isEditing" [(ngModel)]="data.nom_mere" class="form-control">
+                    </div>
+                    <div class="data-item">
+                      <span class="data-label">Date naissance :</span>
+                      <input *ngIf="isEditing" type="text" [ngModel]="data.date_de_nais_mere"
+                        (ngModelChange)="data.date_de_nais_mere = $event"
+                        (input)="formatDateOnInput($event, 'date_de_nais_mere')"
+                        (keydown)="handleDateKeydown($event, 'date_de_nais_mere')"
+                        placeholder="JJ/MM/AAAA" maxlength="10" class="form-control"
+                        (blur)="validateParentDate('date_de_nais_mere')">
+                      <span class="data-value" *ngIf="!isEditing">{{ data.date_de_nais_mere || 'Non renseignée' }}</span>
+                    </div>
+                    <div class="data-item">
+                      <span class="data-label">Nationalité :</span>
+                      <span class="data-value" *ngIf="!isEditing">{{ getNationalite(data.nationalite_mere!) }}</span>
+                      <select *ngIf="isEditing" [(ngModel)]="data.nationalite_mere" class="form-control">
+                        <option *ngFor="let p of allPays" [value]="p.code">{{ p.nom }}</option>
+                      </select>
+                    </div>
+                    <div class="data-item">
+                      <span class="data-label">Profession :</span>
+                      <span class="data-value" *ngIf="!isEditing">{{ getProfession(data.code_profession_mere, 'F') }}</span>
+                      <select *ngIf="isEditing" [(ngModel)]="data.code_profession_mere" class="form-control">
+                        <option value="">-- Sélectionner --</option>
+                        <option *ngFor="let p of professions" [value]="p.code">{{ p.feminin }}</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <!-- Domicile pleine largeur -->
+                  <div class="col-md-12">
+                    <div class="data-item" style="margin-top:6px">
+                      <span class="data-label">Domicile des parents :</span>
+                      <span class="data-value" *ngIf="!isEditing">{{ data.domicileParent }}</span>
+                      <input *ngIf="isEditing" [(ngModel)]="data.domicileParent" class="form-control"
+                        placeholder="Saisir le domicile des parents">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ── Section Déclarant & Officier ── -->
+            <div class="data-section">
+              <div class="section-title">📝 Déclarant & Officier</div>
+              <div class="section-body">
+                <div class="row">
+                  <!-- Déclarant -->
+                  <div class="col-md-6">
+                    <div class="subsection-header green">📋 Déclarant</div>
+                    <div class="data-item">
+                      <span class="data-label">Prénom :</span>
+                      <span class="data-value" *ngIf="!isEditing">{{ data.prenom_1_declarant }}</span>
+                      <input *ngIf="isEditing" [(ngModel)]="data.prenom_1_declarant" class="form-control">
+                    </div>
+                    <div class="data-item">
+                      <span class="data-label">Nom :</span>
+                      <span class="data-value" *ngIf="!isEditing">{{ data.nom_declarant }}</span>
+                      <input *ngIf="isEditing" [(ngModel)]="data.nom_declarant" class="form-control">
+                    </div>
+                    <div class="data-item">
+                      <span class="data-label">Lien parenté :</span>
+                      <span class="data-value" *ngIf="!isEditing">{{ data.lien_de_prarente_avec_le_declarant }}</span>
+                      <input *ngIf="isEditing" [(ngModel)]="data.lien_de_prarente_avec_le_declarant" class="form-control">
+                    </div>
+                  </div>
+                  <!-- OEC -->
+                  <div class="col-md-6">
+                    <div class="subsection-header amber">⚖️ Officier OEC</div>
+                    <div class="data-item">
+                      <span class="data-label">Prénom :</span>
+                      <span class="data-value" *ngIf="!isEditing">{{ data.prenom_1_officier }}</span>
+                      <input *ngIf="isEditing" [(ngModel)]="data.prenom_1_officier" class="form-control">
+                    </div>
+                    <div class="data-item">
+                      <span class="data-label">Nom :</span>
+                      <span class="data-value" *ngIf="!isEditing">{{ data.nom_officier }}</span>
+                      <input *ngIf="isEditing" [(ngModel)]="data.nom_officier" class="form-control">
+                    </div>
+                    <div class="data-item">
+                      <span class="data-label">Profession :</span>
+                      <span class="data-value" *ngIf="!isEditing">{{ data.profession_officier }}</span>
+                      <input *ngIf="isEditing" [(ngModel)]="data.profession_officier" class="form-control">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ── Colonne image avec zoom ─────────────────────────────────────── -->
+        <div class="col-md-6 p-0 image-column">
+          <div class="image-container"
+               (wheel)="onImageWheel($event)"
+               (mousedown)="onImageMouseDown($event)"
+               (mousemove)="onImageMouseMove($event)"
+               (mouseup)="onImageMouseUp()"
+               (mouseleave)="onImageMouseUp()">
+
+            <!-- Contrôles de zoom -->
+            <div class="zoom-controls">
+              <button class="zoom-btn" (click)="rotateImage()" title="Pivoter l'image" mat-icon-button>
+                <mat-icon>rotate_right</mat-icon>
               </button>
-
-              <div class="ocr-status" *ngIf="ocrMessage"
-                [ngClass]="{ 'status-ocr': ocrStep==='ocr', 'status-done': ocrStep==='done', 'status-error': ocrStep==='error' }">
-                {{ ocrMessage }}
-              </div>
-
-              <!-- Jauge de confiance -->
-              <div class="confidence-bar" *ngIf="ocrStep === 'done'">
-                <span class="conf-label">Confiance OCR :</span>
-                <div class="conf-track">
-                  <div class="conf-fill" [style.width.%]="ocrConfidence * 100"
-                    [ngClass]="{ 'conf-high': ocrConfidence>=0.85, 'conf-medium': ocrConfidence>=0.65 && ocrConfidence<0.85, 'conf-low': ocrConfidence<0.65 }">
-                  </div>
-                </div>
-                <span [ngClass]="confidenceClass" class="conf-value">
-                  {{ confidenceIcon }} {{ Math.round(ocrConfidence * 100) }}%
-                </span>
-              </div>
-
-              <div class="ocr-hint">
-                <strong>💡 Comment ça marche ?</strong>
-                <ol>
-                  <li>Téléversez le scan ou la photo de l'acte</li>
-                  <li>Cliquez « Extraire les métadonnées »</li>
-                  <li>L'IA remplit automatiquement le formulaire</li>
-                  <li>Sélectionnez la géolocalisation en cascade</li>
-                  <li>Corrigez si besoin, puis sauvegardez</li>
-                </ol>
-              </div>
+              <button class="zoom-btn" (click)="zoomIn()" title="Zoom avant">+</button>
+              <button class="zoom-btn" (click)="zoomOut()" title="Zoom arrière">−</button>
+              <button class="zoom-btn" (click)="resetZoom()" title="Réinitialiser" mat-icon-button>
+                <mat-icon>cached</mat-icon>
+              </button>
             </div>
 
-          </div>
-        </div>
-      </div>
+            <!-- Indicateur de zoom — centré en bas -->
+            <div class="zoom-indicator">{{ Math.round(zoomLevel * 100) }}%</div>
 
-      <!-- Prévisualisation -->
-      <div class="col-md-7 p-0">
-        <div class="image-container" *ngIf="previewUrl"
-          (wheel)="onImageWheel($event)" (mousedown)="onImageMouseDown($event)"
-          (mousemove)="onImageMouseMove($event)" (mouseup)="onImageMouseUp()" (mouseleave)="onImageMouseUp()">
-          <div class="zoom-controls">
-            <button class="zoom-btn" (click)="rotateImage()">🔄</button>
-            <button class="zoom-btn" (click)="zoomIn()">+</button>
-            <button class="zoom-btn" (click)="zoomOut()">−</button>
-            <button class="zoom-btn" (click)="resetZoom()">↺</button>
-          </div>
-          <div class="zoom-indicator">{{ Math.round(zoomLevel * 100) }}%</div>
-          <img [src]="previewUrl" alt="Aperçu" class="zoomable-image" [style.transform]="getImageTransform()" />
-          <div class="ocr-overlay" *ngIf="ocrStep === 'ocr'">
-            <div class="ocr-overlay-content">
-              <div class="scanner-animation"><div class="scan-line"></div></div>
-              <p>🤖 Analyse IA en cours...</p>
+            <!-- Image WRAPPER : centre l'image par défaut à 100% -->
+            <div class="image-wrapper">
+              <img [src]="getImageSrc()" alt="Image Acte" class="zoomable-image"
+                   [style.transform]="getImageTransform()" (load)="onImageLoad()" />
+            </div>
+
+            <!-- Bouton changer de fichier -->
+            <div class="change-file-btn">
+              <input type="file" id="fileInputChange" accept=".jpg,.jpeg,.png,.webp,.pdf"
+                     (change)="onFileSelected($event)" hidden>
+              <label for="fileInputChange" class="btn-change-file" title="Changer de fichier">
+                <mat-icon>swap_horiz</mat-icon>
+              </label>
             </div>
           </div>
         </div>
-        <div class="no-preview" *ngIf="!previewUrl">
-          <div class="no-preview-icon">🖼️</div>
-          <p>L'aperçu apparaîtra ici</p>
-        </div>
+
       </div>
+
+      <!-- ── Actions ────────────────────────────────────────────────────────── -->
+      <div class="actions">
+        <button *ngIf="!isEditing" mat-raised-button class="btn-edit" (click)="startEditing()">
+          ✏️ Modifier
+        </button>
+        <button *ngIf="isEditing" mat-raised-button class="btn-cancel" (click)="cancelEditing()">
+          Fermer
+        </button>
+        <button mat-raised-button class="btn-action" (click)="saveActe()" [disabled]="isSaving">
+          <span *ngIf="!isSaving">💾 Sauvegarder</span>
+          <span *ngIf="isSaving">⏳ Sauvegarde en cours...</span>
+        </button>
+        <button mat-raised-button class="btn-reset" (click)="resetForm()">
+          🔄 Réinitialiser
+        </button>
+      </div>
+
     </div>
+
   </div>
-
-  <!-- ══════════════════════════════════════════ ONGLET INDEXATION ═════════ -->
-  <div *ngIf="activeTab === 'indexation'">
-    <div class="row">
-
-      <!-- ─ Formulaire ─ -->
-      <div class="col-md-6 data-column">
-        <div class="data-sections-container">
-
-          <div class="alert-partial" *ngIf="ocrConfidence < 0.7 && ocrStep === 'done'">
-            ⚠️ Confiance OCR faible ({{ Math.round(ocrConfidence * 100) }}%). Vérifiez attentivement chaque champ.
-          </div>
-
-          <!-- ══ 1. Identification de l'acte ══ -->
-          <div class="data-section">
-            <div class="section-title">📋 Identification de l'acte</div>
-            <div class="row">
-              <div class="col-md-6">
-                <div class="data-item">
-                  <span class="data-label">N° Certificat :</span>
-                  <input [(ngModel)]="data.numero_certificat" class="form-control" placeholder="B1993…" />
-                </div>
-                <div class="data-item">
-                  <span class="data-label">N° ID National :</span>
-                  <input [(ngModel)]="data.numero_identification_national" class="form-control" />
-                </div>
-                <div class="data-item">
-                  <span class="data-label">N° Acte :</span>
-                  <input [(ngModel)]="data.numero_acte" class="form-control" />
-                </div>
-                <div class="data-item">
-                  <span class="data-label">N° Registre :</span>
-                  <input [(ngModel)]="data.numero_registre" class="form-control" />
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="data-item">
-                  <span class="data-label">Année registre :</span>
-                  <input [(ngModel)]="data.annee_registre" class="form-control" placeholder="AAAA" />
-                </div>
-                <div class="data-item">
-                  <span class="data-label">N° Feuillet :</span>
-                  <input [(ngModel)]="data.feuillet" class="form-control" />
-                </div>
-                <div class="data-item">
-                  <span class="data-label">Date des faits :</span>
-                  <input type="text" [(ngModel)]="data.date_etablissement_acte" class="form-control"
-                    placeholder="JJ/MM/AAAA" maxlength="10"
-                    (input)="formatDateOnInput($event, 'date_etablissement_acte')"
-                    (keydown)="handleDateKeydown($event, 'date_etablissement_acte')" />
-                </div>
-                <div class="data-item">
-                  <span class="data-label">Date dressé :</span>
-                  <input type="text" [(ngModel)]="data.date_dresse" class="form-control"
-                    placeholder="JJ/MM/AAAA" maxlength="10"
-                    (input)="formatDateOnInput($event, 'date_dresse')"
-                    (keydown)="handleDateKeydown($event, 'date_dresse')" />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- ══ 2. Zone de collecte (cascade géographique) ══ -->
-          <div class="data-section">
-            <div class="section-title">📍 Zone de collecte</div>
-            <div class="row">
-              <div class="col-md-6">
-                <!-- Région de collecte -->
-                <div class="data-item">
-                  <span class="data-label">Région :</span>
-                  <select [(ngModel)]="data.region_collecte" class="form-control"
-                    (change)="onRegionCollecteChange(data.region_collecte!)">
-                    <option value="">-- Sélectionner --</option>
-                    <option *ngFor="let r of allRegions" [value]="r.code">{{ r.nom }}</option>
-                  </select>
-                </div>
-                <!-- Préfecture de collecte -->
-                <div class="data-item">
-                  <span class="data-label">Préfecture :</span>
-                  <select [(ngModel)]="data.prefecture_collecte" class="form-control"
-                    [disabled]="!data.region_collecte || isLoadingPrefecturesCollecte"
-                    (change)="onPrefectureCollecteChange(data.prefecture_collecte!)">
-                    <option value="">
-                      {{ isLoadingPrefecturesCollecte ? '⏳ Chargement…' : '-- Sélectionner --' }}
-                    </option>
-                    <option *ngFor="let p of prefecturesCollecte" [value]="p.code">{{ p.nom }}</option>
-                  </select>
-                </div>
-              </div>
-              <div class="col-md-6">
-                <!-- Commune de collecte -->
-                <div class="data-item">
-                  <span class="data-label">Commune :</span>
-                  <select [(ngModel)]="data.commune" class="form-control"
-                    [disabled]="!data.prefecture_collecte || isLoadingCommunesCollecte"
-                    (change)="onCommuneCollecteChange(data.commune!)">
-                    <option value="">
-                      {{ isLoadingCommunesCollecte ? '⏳ Chargement…' : '-- Sélectionner --' }}
-                    </option>
-                    <option *ngFor="let c of communesCollecte" [value]="c.code">{{ c.nom }}</option>
-                  </select>
-                </div>
-                <!-- Quartier de collecte -->
-                <div class="data-item">
-                  <span class="data-label">Quartier :</span>
-                  <select [(ngModel)]="data.district" class="form-control"
-                    [disabled]="!data.commune || isLoadingQuartiersCollecte">
-                    <option value="">
-                      {{ isLoadingQuartiersCollecte ? '⏳ Chargement…' : '-- Sélectionner --' }}
-                    </option>
-                    <option *ngFor="let q of quartiersCollecte" [value]="q.code">{{ q.nom }}</option>
-                  </select>
-                </div>
-                <!-- Officier -->
-                <div class="data-item">
-                  <span class="data-label">Officier OEC :</span>
-                  <input [(ngModel)]="data.officier_etat_civil" class="form-control"
-                    placeholder="MME CAMARA AMITOU FOFANA" />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- ══ 3. Personne concernée (Enfant) ══ -->
-          <div class="data-section">
-            <div class="section-title">👤 Personne concernée (Enfant)</div>
-            <div class="row">
-              <div class="col-md-6">
-                <div class="data-item">
-                  <span class="data-label required-field">Prénoms :</span>
-                  <input [(ngModel)]="data.prenoms" class="form-control" placeholder="MAMADOU LAMARANA" />
-                </div>
-                <div class="data-item">
-                  <span class="data-label required-field">Nom :</span>
-                  <input [(ngModel)]="data.nom_membre" class="form-control" placeholder="DIALLO" />
-                </div>
-                <div class="data-item">
-                  <span class="data-label required-field">Date naissance :</span>
-                  <input type="text" [(ngModel)]="data.date_de_nais_membre" class="form-control"
-                    placeholder="JJ/MM/AAAA" maxlength="10"
-                    (input)="formatDateOnInput($event, 'date_de_nais_membre')"
-                    (keydown)="handleDateKeydown($event, 'date_de_nais_membre')" />
-                </div>
-                <div class="data-item">
-                  <span class="data-label">Heure naissance :</span>
-                  <input type="time" [(ngModel)]="data.heure_naissance" class="form-control" />
-                </div>
-                <div class="data-item">
-                  <span class="data-label">Rang naissance :</span>
-                  <input type="number" [(ngModel)]="data.rang_de_naissance"
-                    class="form-control" min="1" max="50" />
-                </div>
-                <div class="data-item">
-                  <span class="data-label">Genre :</span>
-                  <select [(ngModel)]="data.genre_membre" class="form-control">
-                    <option value="M">Masculin</option>
-                    <option value="F">Féminin</option>
-                  </select>
-                </div>
-                <div class="data-item">
-                  <span class="data-label">Nationalité :</span>
-                  <select [(ngModel)]="data.nationalite_du_membre" class="form-control">
-                    <option *ngFor="let p of allPays" [value]="p.code">{{ p.nom }}</option>
-                  </select>
-                </div>
-              </div>
-
-              <!-- Lieu de naissance (cascade Pays → Région → Préf → Commune → Quartier) -->
-              <div class="col-md-6">
-                <div class="subsection-geo-title">📌 Lieu de naissance</div>
-
-                <!-- Pays de naissance -->
-                <div class="data-item">
-                  <span class="data-label">Pays :</span>
-                  <select [(ngModel)]="data.pays_de_naissance" class="form-control"
-                    (change)="onPaysNaissanceChange(data.pays_de_naissance!)">
-                    <option value="GN">Guinée</option>
-                    <option *ngFor="let p of allPays" [value]="p.code">{{ p.nom }}</option>
-                  </select>
-                </div>
-
-                <!-- ─ Si Guinée : hiérarchie Région → Préfecture → Commune → Quartier ─ -->
-                <ng-container *ngIf="isGuinee()">
-                  <div class="data-item">
-                    <span class="data-label">Région :</span>
-                    <select [(ngModel)]="data.region_naissance" class="form-control"
-                      (change)="onRegionNaissanceChange(data.region_naissance!)">
-                      <option value="">-- Sélectionner --</option>
-                      <option *ngFor="let r of allRegions" [value]="r.code">{{ r.nom }}</option>
-                    </select>
-                  </div>
-                  <div class="data-item">
-                    <span class="data-label">Préfecture :</span>
-                    <select [(ngModel)]="data.prefecture_naissance" class="form-control"
-                      [disabled]="!data.region_naissance || isLoadingPrefecturesNaissance"
-                      (change)="onPrefectureNaissanceChange(data.prefecture_naissance!)">
-                      <option value="">
-                        {{ isLoadingPrefecturesNaissance ? '⏳ Chargement…' : '-- Sélectionner --' }}
-                      </option>
-                      <option *ngFor="let p of prefecturesNaissance" [value]="p.code">{{ p.nom }}</option>
-                    </select>
-                  </div>
-                  <div class="data-item">
-                    <span class="data-label">Commune :</span>
-                    <select [(ngModel)]="data.commune_de_nais" class="form-control"
-                      [disabled]="!data.prefecture_naissance || isLoadingCommunesNaissance"
-                      (change)="onCommuneNaissanceChange(data.commune_de_nais!)">
-                      <option value="">
-                        {{ isLoadingCommunesNaissance ? '⏳ Chargement…' : '-- Sélectionner --' }}
-                      </option>
-                      <option *ngFor="let c of communesNaissance" [value]="c.code">{{ c.nom }}</option>
-                    </select>
-                  </div>
-                  <div class="data-item">
-                    <span class="data-label">Quartier :</span>
-                    <select [(ngModel)]="data.quartier_naissance" class="form-control"
-                      [disabled]="!data.commune_de_nais || isLoadingQuartiersNaissance">
-                      <option value="">
-                        {{ isLoadingQuartiersNaissance ? '⏳ Chargement…' : '-- Sélectionner --' }}
-                      </option>
-                      <option *ngFor="let q of quartiersNaissance" [value]="q.code">{{ q.nom }}</option>
-                    </select>
-                  </div>
-                </ng-container>
-
-                <!-- ─ Si pays étranger : ville ─ -->
-                <ng-container *ngIf="!isGuinee()">
-                  <div class="data-item">
-                    <span class="data-label">Ville :</span>
-                    <select *ngIf="villesByPays.length" [(ngModel)]="data.ville_naissance" class="form-control">
-                      <option value="">{{ isLoadingVilles ? '⏳ Chargement…' : '-- Sélectionner --' }}</option>
-                      <option *ngFor="let v of villesByPays" [value]="v.code">{{ v.nom }}</option>
-                    </select>
-                    <input *ngIf="!villesByPays.length" [(ngModel)]="data.ville_naissance"
-                      class="form-control" placeholder="Nom de la ville" />
-                  </div>
-                </ng-container>
-              </div>
-            </div>
-          </div>
-
-          <!-- ══ 4. Père ══ -->
-          <div class="data-section">
-            <div class="section-title">👨 Père</div>
-            <div class="row">
-              <div class="col-md-6">
-                <div class="data-item">
-                  <span class="data-label">Prénoms :</span>
-                  <input [(ngModel)]="data.prenoms_pere" class="form-control" />
-                </div>
-                <div class="data-item">
-                  <span class="data-label">Nom :</span>
-                  <input [(ngModel)]="data.nom_pere" class="form-control" />
-                </div>
-                <div class="data-item">
-                  <span class="data-label">Date naissance :</span>
-                  <input type="text" [(ngModel)]="data.date_de_nais_pere" class="form-control"
-                    placeholder="JJ/MM/AAAA" maxlength="10"
-                    (input)="formatDateOnInput($event, 'date_de_nais_pere')"
-                    (keydown)="handleDateKeydown($event, 'date_de_nais_pere')" />
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="data-item">
-                  <span class="data-label">Nationalité :</span>
-                  <select [(ngModel)]="data.nationalite_pere" class="form-control">
-                    <option *ngFor="let p of allPays" [value]="p.code">{{ p.nom }}</option>
-                  </select>
-                </div>
-                <div class="data-item">
-                  <span class="data-label">Profession :</span>
-                  <select [(ngModel)]="data.code_profession_pere" class="form-control">
-                    <option value="">-- Sélectionner --</option>
-                    <option *ngFor="let p of professions" [value]="p.code">{{ p.masculin }}</option>
-                  </select>
-                </div>
-                <!-- Valeur OCR brute (en lecture seule pour aide au choix) -->
-                <div class="data-item" *ngIf="data.profession_pere_texte">
-                  <span class="data-label">OCR (brut) :</span>
-                  <span class="data-value ocr-raw">{{ data.profession_pere_texte }}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- ══ 5. Mère ══ -->
-          <div class="data-section">
-            <div class="section-title">👩 Mère</div>
-            <div class="row">
-              <div class="col-md-6">
-                <div class="data-item">
-                  <span class="data-label">Prénoms :</span>
-                  <input [(ngModel)]="data.prenoms_mere" class="form-control" />
-                </div>
-                <div class="data-item">
-                  <span class="data-label">Nom :</span>
-                  <input [(ngModel)]="data.nom_mere" class="form-control" />
-                </div>
-                <div class="data-item">
-                  <span class="data-label">Date naissance :</span>
-                  <input type="text" [(ngModel)]="data.date_de_nais_mere" class="form-control"
-                    placeholder="JJ/MM/AAAA" maxlength="10"
-                    (input)="formatDateOnInput($event, 'date_de_nais_mere')"
-                    (keydown)="handleDateKeydown($event, 'date_de_nais_mere')" />
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="data-item">
-                  <span class="data-label">Nationalité :</span>
-                  <select [(ngModel)]="data.nationalite_mere" class="form-control">
-                    <option *ngFor="let p of allPays" [value]="p.code">{{ p.nom }}</option>
-                  </select>
-                </div>
-                <div class="data-item">
-                  <span class="data-label">Profession :</span>
-                  <select [(ngModel)]="data.code_profession_mere" class="form-control">
-                    <option value="">-- Sélectionner --</option>
-                    <option *ngFor="let p of professions" [value]="p.code">{{ p.feminin }}</option>
-                  </select>
-                </div>
-                <div class="data-item" *ngIf="data.profession_mere_texte">
-                  <span class="data-label">OCR (brut) :</span>
-                  <span class="data-value ocr-raw">{{ data.profession_mere_texte }}</span>
-                </div>
-                <div class="data-item">
-                  <span class="data-label">Domicile parents :</span>
-                  <input [(ngModel)]="data.domicileParent" class="form-control"
-                    placeholder="Quartier, secteur…" />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- ══ 6. Déclarant & Officier ══ -->
-          <div class="data-section">
-            <div class="section-title">📝 Déclarant & Officier</div>
-            <div class="row">
-              <div class="col-md-6">
-                <h6 class="subsection-title">📋 Déclarant</h6>
-                <div class="data-item">
-                  <span class="data-label">Prénom :</span>
-                  <input [(ngModel)]="data.prenom_1_declarant" class="form-control" />
-                </div>
-                <div class="data-item">
-                  <span class="data-label">Nom :</span>
-                  <input [(ngModel)]="data.nom_declarant" class="form-control" />
-                </div>
-                <div class="data-item">
-                  <span class="data-label">Lien parenté :</span>
-                  <input [(ngModel)]="data.lien_de_prarente_avec_le_declarant" class="form-control"
-                    placeholder="PÈRE, MÈRE…" />
-                </div>
-              </div>
-              <div class="col-md-6">
-                <h6 class="subsection-title">⚖️ Officier OEC</h6>
-                <div class="data-item">
-                  <span class="data-label">Prénom :</span>
-                  <input [(ngModel)]="data.prenom_1_officier" class="form-control" />
-                </div>
-                <div class="data-item">
-                  <span class="data-label">Nom :</span>
-                  <input [(ngModel)]="data.nom_officier" class="form-control" />
-                </div>
-                <div class="data-item">
-                  <span class="data-label">Titre/Fonction :</span>
-                  <input [(ngModel)]="data.profession_officier" class="form-control"
-                    placeholder="Officier de l'État Civil" />
-                </div>
-              </div>
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      <!-- ─ Prévisualisation indexation ─ -->
-      <div class="col-md-6 p-0 image-column">
-        <div class="image-container" *ngIf="previewUrl"
-          (wheel)="onImageWheel($event)" (mousedown)="onImageMouseDown($event)"
-          (mousemove)="onImageMouseMove($event)" (mouseup)="onImageMouseUp()" (mouseleave)="onImageMouseUp()">
-          <div class="zoom-controls">
-            <button class="zoom-btn" (click)="rotateImage()">🔄</button>
-            <button class="zoom-btn" (click)="zoomIn()">+</button>
-            <button class="zoom-btn" (click)="zoomOut()">−</button>
-            <button class="zoom-btn" (click)="resetZoom()">↺</button>
-          </div>
-          <div class="zoom-indicator">{{ Math.round(zoomLevel * 100) }}%</div>
-          <img [src]="previewUrl" alt="Document" class="zoomable-image" [style.transform]="getImageTransform()" />
-        </div>
-        <div class="no-preview" *ngIf="!previewUrl">
-          <div class="no-preview-icon">🖼️</div><p>Aucun document chargé</p>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- ─ Barre d'actions ─ -->
-    <div class="actions">
-      <button class="btn-cancel" (click)="resetForm()">🔄 Recommencer</button>
-      <button class="btn-action" (click)="saveIndexation()" [disabled]="isSaving">
-        <span *ngIf="!isSaving">💾 Sauvegarder l'acte indexé</span>
-        <span *ngIf="isSaving"><span class="spinner-sm"></span> Sauvegarde…</span>
-      </button>
-    </div>
-  </div>
-
 </div>

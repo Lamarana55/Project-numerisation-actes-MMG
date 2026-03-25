@@ -5,33 +5,21 @@ import { ToastComponent } from '../shared/toast/toast.component';
 import { GeodataService } from '../services/geodata.service';
 import { Profession, ProfessionService } from '../services/profession.service';
 import { ApiService } from '../services/api.service';
-import {
-  RegionDTO,
-  PrefectureDTO,
-  CommuneDTO,
-  QuartierDTO,
-  PaysDTO,
-} from '../models/geodata';
+import { RegionDTO, PrefectureDTO, CommuneDTO, QuartierDTO, PaysDTO } from '../models/geodata';
 
-// ─── Modèle de données de l'acte ─────────────────────────────────────────────
-export interface ActeNaissanceData {
+export interface ActeData {
   // Identification
-  numero_certificat?: string;
-  numero_identification_national?: string;
   numero_acte?: string;
   numero_registre?: string;
   annee_registre?: string;
   feuillet?: string;
   date_etablissement_acte?: string;
-  date_dresse?: string;
 
   // Zone de collecte
   region_collecte?: string;
   prefecture_collecte?: string;
   commune?: string;
   district?: string;
-  ville_prefecture?: string;
-  officier_etat_civil?: string;
 
   // Enfant
   prenoms?: string;
@@ -40,16 +28,15 @@ export interface ActeNaissanceData {
   heure_naissance?: string;
   rang_de_naissance?: string | number;
   genre_membre?: string;
+  code_profession?: number | string;
+  nationalite_du_membre?: string;
 
-  // Lieu de naissance de l'enfant
+  // Lieu de naissance enfant
   pays_de_naissance?: string;
   region_naissance?: string;
   prefecture_naissance?: string;
   commune_de_nais?: string;
-  quartier_naissance?: string;
-  ville_naissance?: string;
-
-  nationalite_du_membre?: string;
+  district_de_nais?: string;
 
   // Père
   prenoms_pere?: string;
@@ -57,7 +44,6 @@ export interface ActeNaissanceData {
   date_de_nais_pere?: string;
   nationalite_pere?: string;
   code_profession_pere?: number | string;
-  profession_pere_texte?: string;
 
   // Mère
   prenoms_mere?: string;
@@ -65,7 +51,6 @@ export interface ActeNaissanceData {
   date_de_nais_mere?: string;
   nationalite_mere?: string;
   code_profession_mere?: number | string;
-  profession_mere_texte?: string;
   domicileParent?: string;
 
   // Déclarant
@@ -79,21 +64,6 @@ export interface ActeNaissanceData {
   profession_officier?: string;
 }
 
-export type OcrStep = 'idle' | 'ocr' | 'done' | 'error';
-
-// ─── Config toast ─────────────────────────────────────────────────────────────
-interface ToastConfig {
-  message: string;
-  icon: string;
-  panelClass: string;
-}
-
-const TOAST: Record<'success' | 'error' | 'warning', ToastConfig> = {
-  success: { message: '', icon: 'check_circle',  panelClass: 'success-snackbar' },
-  error:   { message: '', icon: 'error',          panelClass: 'error-snackbar'   },
-  warning: { message: '', icon: 'warning',        panelClass: 'info-snackbar'    },
-};
-
 @Component({
   selector: 'app-numerisation-indexation',
   templateUrl: './numerisation-indexation.component.html',
@@ -101,23 +71,17 @@ const TOAST: Record<'success' | 'error' | 'warning', ToastConfig> = {
 })
 export class NumerisationIndexationComponent implements OnInit {
 
-  // ─── UI state ────────────────────────────────────────────────────────────────
-  activeTab: 'numerisation' | 'indexation' = 'numerisation';
-  ocrStep: OcrStep = 'idle';
-  ocrMessage = '';
-  ocrConfidence = 0;
-  isSaving = false;
-
-  // ─── Fichier ──────────────────────────────────────────────────────────────────
+  // ── État général ──────────────────────────────────────────────────────────
   selectedFile: File | null = null;
   previewUrl: string | null = null;
   fileBase64: string | null = null;
-  fileMediaType: 'image/jpeg' | 'image/png' | 'image/webp' | 'application/pdf' = 'image/jpeg';
+  fileMediaType = 'image/jpeg';
 
-  // ─── Données OCR ──────────────────────────────────────────────────────────────
-  data: ActeNaissanceData = {};
+  data: ActeData = {};
+  isEditing = false;
+  isSaving = false;
 
-  // ─── Référentiels géographiques ───────────────────────────────────────────────
+  // ── Référentiels géographiques ────────────────────────────────────────────
   allRegions: RegionDTO[] = [];
   allPays: PaysDTO[] = [];
 
@@ -133,16 +97,14 @@ export class NumerisationIndexationComponent implements OnInit {
   prefecturesNaissance: PrefectureDTO[] = [];
   communesNaissance: CommuneDTO[] = [];
   quartiersNaissance: QuartierDTO[] = [];
-  villesByPays: any[] = [];
   isLoadingPrefecturesNaissance = false;
   isLoadingCommunesNaissance = false;
   isLoadingQuartiersNaissance = false;
-  isLoadingVilles = false;
 
-  // ─── Professions ──────────────────────────────────────────────────────────────
+  // ── Professions / nationalités ────────────────────────────────────────────
   professions: Profession[] = [];
 
-  // ─── Zoom image ───────────────────────────────────────────────────────────────
+  // ── Zoom image ────────────────────────────────────────────────────────────
   zoomLevel = 1;
   maxZoom = 3;
   minZoom = 0.5;
@@ -163,80 +125,107 @@ export class NumerisationIndexationComponent implements OnInit {
 
   ngOnInit(): void {
     forkJoin({
-      regions:    this.geodataService.getAllRegions(),
-      pays:       this.geodataService.getAllPays(),
+      regions:     this.geodataService.getAllRegions(),
+      pays:        this.geodataService.getAllPays(),
       professions: this.professionService.getProfessions(),
     }).subscribe({
       next: ({ regions, pays, professions }) => {
-        this.allRegions   = regions;
-        this.allPays      = pays;
-        this.professions  = professions;
+        this.allRegions  = regions;
+        this.allPays     = pays;
+        this.professions = professions;
       },
-      error: (err) => console.error('Erreur chargement référentiels :', err),
+      error: () => this.showError('Erreur lors du chargement des référentiels.'),
     });
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // TOAST — wrappers utilisant ToastComponent
+  // UPLOAD DU FICHIER
   // ═══════════════════════════════════════════════════════════════════════════
 
-  private toast(type: 'success' | 'error' | 'warning', message: string): void {
-    const cfg = TOAST[type];
-    this.snackBar.openFromComponent(ToastComponent, {
-      data:               { message, icon: cfg.icon, type },
-      panelClass:         [cfg.panelClass],
-      duration:           4000,
-      horizontalPosition: 'end',
-      verticalPosition:   'top',
-    });
+  onFileSelected(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (file) this.processFile(file);
   }
 
-  private showSuccess(msg: string): void { this.toast('success', msg); }
-  private showError(msg: string):   void { this.toast('error',   msg); }
-  private showWarning(msg: string): void { this.toast('warning', msg); }
+  onDragOver(event: DragEvent): void { event.preventDefault(); event.stopPropagation(); }
+
+  onDrop(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    const file = event.dataTransfer?.files?.[0];
+    if (file) this.processFile(file);
+  }
+
+  private processFile(file: File): void {
+    const allowed = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
+    if (!allowed.includes(file.type)) {
+      this.showError('Format non supporté. Utilisez JPG, PNG, WEBP ou PDF.');
+      return;
+    }
+    if (file.size > 20 * 1024 * 1024) {
+      this.showError('Fichier trop volumineux (max 20 Mo).');
+      return;
+    }
+    this.selectedFile = file;
+    this.fileMediaType = file.type;
+    this.data = {};
+    this.isEditing = true; // on passe directement en mode saisie
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const result = e.target?.result as string;
+      this.previewUrl = result;
+      this.fileBase64 = result.split(',')[1];
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // ÉDITION — même pattern qu'avec-actes
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  startEditing(): void  { this.isEditing = true; }
+  cancelEditing(): void { this.isEditing = false; }
 
   // ═══════════════════════════════════════════════════════════════════════════
   // CASCADE GÉOGRAPHIQUE — Zone de collecte
   // ═══════════════════════════════════════════════════════════════════════════
 
-  onRegionCollecteChange(codeRegion: string): void {
+  onRegionCollecteChange(code: string): void {
     this.data.prefecture_collecte = '';
     this.data.commune = '';
     this.data.district = '';
     this.prefecturesCollecte = [];
     this.communesCollecte = [];
     this.quartiersCollecte = [];
-    if (!codeRegion) return;
-
+    if (!code) return;
     this.isLoadingPrefecturesCollecte = true;
-    this.geodataService.getPrefecturesByRegion(codeRegion).subscribe({
-      next: (d) => { this.prefecturesCollecte = d; this.isLoadingPrefecturesCollecte = false; },
+    this.geodataService.getPrefecturesByRegion(code).subscribe({
+      next: d => { this.prefecturesCollecte = d; this.isLoadingPrefecturesCollecte = false; },
       error: () => (this.isLoadingPrefecturesCollecte = false),
     });
   }
 
-  onPrefectureCollecteChange(codePrefecture: string): void {
+  onPrefectureCollecteChange(code: string): void {
     this.data.commune = '';
     this.data.district = '';
     this.communesCollecte = [];
     this.quartiersCollecte = [];
-    if (!codePrefecture) return;
-
+    if (!code) return;
     this.isLoadingCommunesCollecte = true;
-    this.geodataService.getCommunesByPrefecture(codePrefecture).subscribe({
-      next: (d) => { this.communesCollecte = d; this.isLoadingCommunesCollecte = false; },
+    this.geodataService.getCommunesByPrefecture(code).subscribe({
+      next: d => { this.communesCollecte = d; this.isLoadingCommunesCollecte = false; },
       error: () => (this.isLoadingCommunesCollecte = false),
     });
   }
 
-  onCommuneCollecteChange(codeCommune: string): void {
+  onCommuneCollecteChange(code: string): void {
     this.data.district = '';
     this.quartiersCollecte = [];
-    if (!codeCommune) return;
-
+    if (!code) return;
     this.isLoadingQuartiersCollecte = true;
-    this.geodataService.getQuartiersByCommune(codeCommune).subscribe({
-      next: (d) => { this.quartiersCollecte = d; this.isLoadingQuartiersCollecte = false; },
+    this.geodataService.getQuartiersByCommune(code).subscribe({
+      next: d => { this.quartiersCollecte = d; this.isLoadingQuartiersCollecte = false; },
       error: () => (this.isLoadingQuartiersCollecte = false),
     });
   }
@@ -249,290 +238,135 @@ export class NumerisationIndexationComponent implements OnInit {
     return !this.data.pays_de_naissance || this.data.pays_de_naissance === 'GN';
   }
 
-  onPaysNaissanceChange(codePays: string): void {
+  onPaysNaissanceChange(code: string): void {
     this.data.region_naissance = '';
     this.data.prefecture_naissance = '';
     this.data.commune_de_nais = '';
-    this.data.quartier_naissance = '';
-    this.data.ville_naissance = '';
+    this.data.district_de_nais = '';
     this.prefecturesNaissance = [];
     this.communesNaissance = [];
     this.quartiersNaissance = [];
-    this.villesByPays = [];
-    if (!codePays || codePays === 'GN') return;
-
-    this.isLoadingVilles = true;
-    this.geodataService.getVillesByPays(codePays).subscribe({
-      next: (d) => { this.villesByPays = d; this.isLoadingVilles = false; },
-      error: () => (this.isLoadingVilles = false),
-    });
   }
 
-  onRegionNaissanceChange(codeRegion: string): void {
+  onRegionNaissanceChange(code: string): void {
     this.data.prefecture_naissance = '';
     this.data.commune_de_nais = '';
-    this.data.quartier_naissance = '';
+    this.data.district_de_nais = '';
     this.prefecturesNaissance = [];
     this.communesNaissance = [];
     this.quartiersNaissance = [];
-    if (!codeRegion) return;
-
+    if (!code) return;
     this.isLoadingPrefecturesNaissance = true;
-    this.geodataService.getPrefecturesByRegion(codeRegion).subscribe({
-      next: (d) => { this.prefecturesNaissance = d; this.isLoadingPrefecturesNaissance = false; },
+    this.geodataService.getPrefecturesByRegion(code).subscribe({
+      next: d => { this.prefecturesNaissance = d; this.isLoadingPrefecturesNaissance = false; },
       error: () => (this.isLoadingPrefecturesNaissance = false),
     });
   }
 
-  onPrefectureNaissanceChange(codePrefecture: string): void {
+  onPrefectureNaissanceChange(code: string): void {
     this.data.commune_de_nais = '';
-    this.data.quartier_naissance = '';
+    this.data.district_de_nais = '';
     this.communesNaissance = [];
     this.quartiersNaissance = [];
-    if (!codePrefecture) return;
-
+    if (!code) return;
     this.isLoadingCommunesNaissance = true;
-    this.geodataService.getCommunesByPrefecture(codePrefecture).subscribe({
-      next: (d) => { this.communesNaissance = d; this.isLoadingCommunesNaissance = false; },
+    this.geodataService.getCommunesByPrefecture(code).subscribe({
+      next: d => { this.communesNaissance = d; this.isLoadingCommunesNaissance = false; },
       error: () => (this.isLoadingCommunesNaissance = false),
     });
   }
 
-  onCommuneNaissanceChange(codeCommune: string): void {
-    this.data.quartier_naissance = '';
+  onCommuneNaissanceChange(code: string): void {
+    this.data.district_de_nais = '';
     this.quartiersNaissance = [];
-    if (!codeCommune) return;
-
+    if (!code) return;
     this.isLoadingQuartiersNaissance = true;
-    this.geodataService.getQuartiersByCommune(codeCommune).subscribe({
-      next: (d) => { this.quartiersNaissance = d; this.isLoadingQuartiersNaissance = false; },
+    this.geodataService.getQuartiersByCommune(code).subscribe({
+      next: d => { this.quartiersNaissance = d; this.isLoadingQuartiersNaissance = false; },
       error: () => (this.isLoadingQuartiersNaissance = false),
     });
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // HELPERS D'AFFICHAGE
+  // HELPERS D'AFFICHAGE — même API qu'avec-actes
   // ═══════════════════════════════════════════════════════════════════════════
 
+  getNomRegion(code: string): string {
+    return this.allRegions.find(r => r.code === code)?.nom ?? '—';
+  }
+
+  getNomPrefecture(code: string, list: PrefectureDTO[]): string {
+    return list.find(p => p.code === code)?.nom ?? '—';
+  }
+
+  getNomCommune(code: string, list: CommuneDTO[]): string {
+    return list.find(c => c.code === code)?.nom ?? '—';
+  }
+
+  getNomQuartier(code: string, list: QuartierDTO[]): string {
+    return list.find(q => q.code === code)?.nom ?? '—';
+  }
+
   getNomPays(code: string): string {
-    return this.allPays.find((p) => p.code === code)?.nom ?? code ?? '—';
+    return this.allPays.find(p => p.code === code)?.nom ?? '—';
   }
 
   getNationalite(code: string): string {
     return this.professionService.getNationalite(code);
   }
 
-  getProfessionLabel(code: number | string | undefined, genre: 'M' | 'F' = 'M'): string {
+  getProfession(code: number | string | undefined, genre: string): string {
     if (!code) return '—';
-    const n = typeof code === 'string' ? parseInt(code) : code;
-    return this.professionService.getProfessionBySex(n, genre, this.professions);
+    const n = typeof code === 'string' ? parseInt(code) : code as number;
+    return this.professionService.getProfessionBySex(n, genre === 'F' ? 'F' : 'M', this.professions);
+  }
+
+  getGenreDisplay(genre: string): string {
+    return this.normalizeGenre(genre) === 'F' ? 'Féminin' : 'Masculin';
+  }
+
+  normalizeGenre(genre: string): 'M' | 'F' {
+    if (!genre) return 'M';
+    const c = genre.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    return c === 'f' || c === 'feminin' ? 'F' : 'M';
+  }
+
+  getDisplayHour(time?: string): string {
+    if (!time) return '—';
+    if (/^\d{2}:\d{2}$/.test(time)) return time;
+    const parts = time.split(':');
+    if (parts.length === 2) return `${parts[0].padStart(2,'0')}:${parts[1].padStart(2,'0')}`;
+    return time;
+  }
+
+  toTimeInputFormat(time?: string): string {
+    return this.getDisplayHour(time) === '—' ? '' : this.getDisplayHour(time);
+  }
+
+  fromTimeInputFormat(time: string): string { return time || ''; }
+
+  getImageSrc(): string {
+    if (!this.previewUrl) return '';
+    return this.previewUrl;
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // GESTION DU FICHIER
+  // ZOOM & ROTATION — identique à avec-actes
   // ═══════════════════════════════════════════════════════════════════════════
 
-  onFileSelected(event: Event): void {
-    const f = (event.target as HTMLInputElement).files?.[0];
-    if (f) this.processFile(f);
-  }
-
-  onDragOver(event: DragEvent): void { event.preventDefault(); event.stopPropagation(); }
-
-  onDrop(event: DragEvent): void {
-    event.preventDefault();
-    event.stopPropagation();
-    const f = event.dataTransfer?.files?.[0];
-    if (f) this.processFile(f);
-  }
-
-  private processFile(file: File): void {
-    const allowed = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
-    if (!allowed.includes(file.type)) {
-      this.showError('Format non supporté. Utilisez JPG, PNG, WEBP ou PDF.');
-      return;
-    }
-    if (file.size > 10 * 1024 * 1024) {
-      this.showError('Fichier trop volumineux (max 10 Mo).');
-      return;
-    }
-    this.selectedFile = file;
-    this.fileMediaType = file.type as any;
-    this.ocrStep = 'idle';
-    this.data = {};
-    this.resetGeoData();
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const result = e.target?.result as string;
-      this.previewUrl = result;
-      this.fileBase64 = result.split(',')[1];
-    };
-    reader.readAsDataURL(file);
-  }
-
-  clearFile(): void {
-    this.selectedFile = null;
-    this.previewUrl = null;
-    this.fileBase64 = null;
-    this.data = {};
-    this.ocrStep = 'idle';
-    this.ocrMessage = '';
-    this.ocrConfidence = 0;
-    this.resetGeoData();
-  }
-
-  private resetGeoData(): void {
-    this.prefecturesCollecte = [];
-    this.communesCollecte = [];
-    this.quartiersCollecte = [];
-    this.prefecturesNaissance = [];
-    this.communesNaissance = [];
-    this.quartiersNaissance = [];
-    this.villesByPays = [];
-  }
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // OCR VIA ANTHROPIC API
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  async extractWithOCR(): Promise<void> {
-    if (!this.fileBase64) {
-      this.showWarning("Sélectionnez d'abord un document.");
-      return;
-    }
-
-    this.ocrStep = 'ocr';
-    this.ocrMessage = 'Analyse du document par intelligence artificielle...';
-
-    const prompt = `Tu es un expert en lecture d'actes d'état civil de la République de Guinée.
-Analyse cet acte de naissance et extrais toutes les informations visibles.
-Retourne UNIQUEMENT un objet JSON valide (sans markdown, sans backticks) avec ces champs :
-
-{
-  "numero_certificat": "",
-  "numero_identification_national": "",
-  "numero_acte": "",
-  "numero_registre": "",
-  "annee_registre": "",
-  "feuillet": "",
-  "date_etablissement_acte": "JJ/MM/AAAA",
-  "date_dresse": "JJ/MM/AAAA",
-  "ville_prefecture": "",
-  "officier_etat_civil": "",
-  "prenoms": "",
-  "nom_membre": "",
-  "date_de_nais_membre": "JJ/MM/AAAA",
-  "heure_naissance": "HH:MM",
-  "rang_de_naissance": "",
-  "genre_membre": "M ou F",
-  "nationalite_du_membre": "GN",
-  "pays_de_naissance": "GN",
-  "prenoms_pere": "",
-  "nom_pere": "",
-  "date_de_nais_pere": "JJ/MM/AAAA",
-  "nationalite_pere": "GN",
-  "profession_pere_texte": "",
-  "prenoms_mere": "",
-  "nom_mere": "",
-  "date_de_nais_mere": "JJ/MM/AAAA",
-  "nationalite_mere": "GN",
-  "profession_mere_texte": "",
-  "domicileParent": "",
-  "prenom_1_declarant": "",
-  "nom_declarant": "",
-  "lien_de_prarente_avec_le_declarant": "",
-  "prenom_1_officier": "",
-  "nom_officier": "",
-  "profession_officier": "",
-  "confidence": 0.95
-}
-
-Règles :
-- Dates au format JJ/MM/AAAA. Si inconnue : "".
-- genre_membre : "M" ou "F".
-- nationalite : code ISO-2 (ex: GN pour Guinée).
-- pays_de_naissance : code ISO-2.
-- confidence : nombre entre 0 et 1.
-- Champ absent ou illisible → "".`;
-
-    try {
-      const contentBlock: any =
-        this.fileMediaType === 'application/pdf'
-          ? { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: this.fileBase64 } }
-          : { type: 'image',    source: { type: 'base64', media_type: this.fileMediaType,  data: this.fileBase64 } };
-
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 1500,
-          messages: [{ role: 'user', content: [contentBlock, { type: 'text', text: prompt }] }],
-        }),
-      });
-
-      if (!response.ok) throw new Error(`Erreur API HTTP ${response.status}`);
-
-      const result = await response.json();
-      const text = result.content
-        ?.filter((b: any) => b.type === 'text')
-        .map((b: any) => b.text)
-        .join('') ?? '';
-
-      const cleanJson = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-      const parsed = JSON.parse(cleanJson);
-
-      this.ocrConfidence = parsed.confidence ?? 0;
-      delete parsed.confidence;
-
-      // Normaliser le genre
-      if (parsed.genre_membre) {
-        const g = (parsed.genre_membre as string).toLowerCase();
-        parsed.genre_membre = g.startsWith('f') || g.includes('fémin') ? 'F' : 'M';
-      }
-
-      this.data = { ...parsed };
-
-      // Déclencher la cascade pays si étranger
-      if (parsed.pays_de_naissance && parsed.pays_de_naissance !== 'GN') {
-        this.onPaysNaissanceChange(parsed.pays_de_naissance);
-      }
-
-      this.ocrStep = 'done';
-      this.ocrMessage = `Extraction terminée — confiance : ${Math.round(this.ocrConfidence * 100)}%`;
-      this.activeTab = 'indexation';
-
-      this.showSuccess('Données extraites ! Complétez la géolocalisation et vérifiez les professions.');
-
-    } catch (err: any) {
-      console.error('OCR error:', err);
-      this.ocrStep = 'error';
-      this.ocrMessage = `Extraction échouée : ${err.message}`;
-      this.showError("Impossible d'extraire les données. Vérifiez le document.");
-    }
-  }
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // ONGLETS
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  switchTab(tab: 'numerisation' | 'indexation'): void {
-    this.activeTab = tab;
-  }
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // ZOOM & ROTATION
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  zoomIn(): void  { this.zoomLevel = Math.min(this.maxZoom, this.zoomLevel + 0.25); }
-  zoomOut(): void { this.zoomLevel = Math.max(this.minZoom, this.zoomLevel - 0.25); }
-  resetZoom(): void { this.zoomLevel = 1; this.panX = 0; this.panY = 0; this.rotation = 0; }
+  zoomIn():    void { this.zoomLevel = Math.min(this.maxZoom, this.zoomLevel + 0.25); }
+  zoomOut():   void { this.zoomLevel = Math.max(this.minZoom, this.zoomLevel - 0.25); }
   rotateImage(): void { this.rotation = (this.rotation + 90) % 360; }
 
-  onImageWheel(event: WheelEvent): void {
-    event.preventDefault();
-    const d = event.deltaY > 0 ? -0.1 : 0.1;
+  resetZoom(): void {
+    this.zoomLevel = 1; this.panX = 0; this.panY = 0; this.rotation = 0;
+  }
+
+  onImageLoad(): void {}
+
+  onImageWheel(e: WheelEvent): void {
+    e.preventDefault();
+    const d = e.deltaY > 0 ? -0.1 : 0.1;
     this.zoomLevel = Math.min(this.maxZoom, Math.max(this.minZoom, this.zoomLevel + d));
   }
 
@@ -549,14 +383,14 @@ Règles :
   onImageMouseUp(): void { this.isDragging = false; }
 
   getImageTransform(): string {
-    return `translate(${this.panX}px, ${this.panY}px) scale(${this.zoomLevel}) rotate(${this.rotation}deg)`;
+    return `translate(${this.panX}px,${this.panY}px) scale(${this.zoomLevel}) rotate(${this.rotation}deg)`;
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // FORMATAGE DES DATES
+  // FORMATAGE DES DATES — identique à avec-actes
   // ═══════════════════════════════════════════════════════════════════════════
 
-  formatDateOnInput(event: any, fieldName: keyof ActeNaissanceData): void {
+  formatDateOnInput(event: any, fieldName: keyof ActeData): void {
     const input = event.target as HTMLInputElement;
     let v = input.value.replace(/\D/g, '');
     if (v.length > 8) v = v.substring(0, 8);
@@ -567,7 +401,7 @@ Règles :
     setTimeout(() => input.setSelectionRange(f.length, f.length), 0);
   }
 
-  handleDateKeydown(event: KeyboardEvent, fieldName: keyof ActeNaissanceData): void {
+  handleDateKeydown(event: KeyboardEvent, fieldName: keyof ActeData): void {
     const input = event.target as HTMLInputElement;
     const pos = input.selectionStart ?? 0;
     if (event.key === 'Backspace' && pos > 0 && input.value[pos - 1] === '/') {
@@ -577,11 +411,41 @@ Règles :
     }
   }
 
+  validateMemberDate(): void {
+    const v = this.data.date_de_nais_membre;
+    if (!v) { this.showWarning('La date de naissance est obligatoire.'); return; }
+    const year = parseInt(v.split('/')[2]);
+    if (!year || year < 1900) {
+      this.showError("L'année de naissance doit être valide (> 1900).");
+      this.data.date_de_nais_membre = '';
+    }
+  }
+
+  validateFactDate(): void {
+    const v = this.data.date_etablissement_acte;
+    if (!v) return;
+    const year = parseInt(v.split('/')[2]);
+    if (!year || year < 1900) {
+      this.showError("L'année de la date des faits doit être valide (> 1900).");
+      this.data.date_etablissement_acte = '';
+    }
+  }
+
+  validateParentDate(fieldName: keyof ActeData): void {
+    const v = (this.data as any)[fieldName];
+    if (!v || v === '00/00/0000') return;
+    const year = parseInt(v.split('/')[2]);
+    if (year > 0 && year < 1900) {
+      this.showWarning("L'année doit être > 1900 ou 00/00/0000 si inconnue.");
+      (this.data as any)[fieldName] = '00/00/0000';
+    }
+  }
+
   // ═══════════════════════════════════════════════════════════════════════════
-  // SAUVEGARDE
+  // SAUVEGARDE & RÉINITIALISATION
   // ═══════════════════════════════════════════════════════════════════════════
 
-  saveIndexation(): void {
+  saveActe(): void {
     if (!this.data.nom_membre || !this.data.prenoms || !this.data.date_de_nais_membre) {
       this.showWarning('Nom, prénoms et date de naissance sont obligatoires.');
       return;
@@ -591,17 +455,15 @@ Règles :
       ...this.data,
       image_base64: this.fileBase64,
       media_type:   this.fileMediaType,
-      date_indexation: new Date().toISOString(),
     };
     this.apiService.saveActe(payload).subscribe({
       next: () => {
         this.isSaving = false;
-        this.showSuccess('Acte indexé et sauvegardé avec succès !');
+        this.showSuccess('Acte sauvegardé avec succès !');
         this.resetForm();
       },
-      error: (err) => {
+      error: () => {
         this.isSaving = false;
-        console.error('Erreur sauvegarde:', err);
         this.showError('Erreur lors de la sauvegarde. Veuillez réessayer.');
       },
     });
@@ -612,24 +474,32 @@ Règles :
     this.previewUrl = null;
     this.fileBase64 = null;
     this.data = {};
-    this.ocrStep = 'idle';
-    this.ocrMessage = '';
-    this.ocrConfidence = 0;
-    this.activeTab = 'numerisation';
-    this.resetGeoData();
+    this.isEditing = false;
+    this.isSaving = false;
+    this.prefecturesCollecte = [];
+    this.communesCollecte = [];
+    this.quartiersCollecte = [];
+    this.prefecturesNaissance = [];
+    this.communesNaissance = [];
+    this.quartiersNaissance = [];
     this.resetZoom();
   }
 
-  // ─── Helpers UI ──────────────────────────────────────────────────────────────
-  get confidenceClass(): string {
-    if (this.ocrConfidence >= 0.85) return 'text-success';
-    if (this.ocrConfidence >= 0.65) return 'text-warning';
-    return 'text-danger';
-  }
+  // ═══════════════════════════════════════════════════════════════════════════
+  // TOASTS — ToastComponent (même pattern que le reste du projet)
+  // ═══════════════════════════════════════════════════════════════════════════
 
-  get confidenceIcon(): string {
-    if (this.ocrConfidence >= 0.85) return '✅';
-    if (this.ocrConfidence >= 0.65) return '⚠️';
-    return '❌';
+  private showSuccess(msg: string): void { this.toast('success', 'check_circle', msg); }
+  private showError(msg: string):   void { this.toast('error', 'error', msg); }
+  private showWarning(msg: string): void { this.toast('warning', 'warning', msg); }
+
+  private toast(type: string, icon: string, message: string): void {
+    this.snackBar.openFromComponent(ToastComponent, {
+      data: { message, icon, type },
+      panelClass: [`${type === 'warning' ? 'info' : type}-snackbar`],
+      duration: 4000,
+      horizontalPosition: 'end',
+      verticalPosition: 'top',
+    });
   }
 }
