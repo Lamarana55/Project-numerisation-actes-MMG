@@ -94,12 +94,11 @@
         <mat-icon matListItemIcon>dashboard</mat-icon>
         <span matListItemTitle>Tableau de bord</span>
       </a>
-      <!-- Listes des Actes (menu principal avec sous-menu) -->
-      <mat-list-item *ngIf="authService.roles!.includes('CAN_VIEW_COLLECTES_AVEC_ACTES')" (click)="toggleActesSubmenu()" class="menu-item menu-parent">
-        <mat-icon matListItemIcon>assignment_ind</mat-icon>
-        <span matListItemTitle>Numérisations</span>
-        <mat-icon class="expand-icon">{{ showActesSubmenu ? 'expand_less' : 'expand_more' }}</mat-icon>
-      </mat-list-item>
+      <!-- Numerisation(menu principal avec sous-menu) -->
+     <a mat-list-item routerLink="/admin/numerisation-indexation" routerLinkActive="active-link" class="menu-item">
+        <mat-icon matListItemIcon>auto_fix_high</mat-icon>
+        <span matListItemTitle>Numérisation & Indexation</span>
+      </a>
 
       <!-- Paramétrages -->
       <mat-list-item *ngIf="canViewSettings()" (click)="toggleSettingsSubmenu()" class="menu-item menu-parent">
