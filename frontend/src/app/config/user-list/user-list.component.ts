@@ -534,6 +534,14 @@ export class UserListComponent implements OnInit, OnDestroy {
     }
   }
 
+  get activeUsersCount(): number {
+    return this.users.filter(u => u.statut === 'Activated').length;
+  }
+
+  get inactiveUsersCount(): number {
+    return this.users.filter(u => u.statut === 'Desactivated').length;
+  }
+
   /**
    * Vérifie si l'utilisateur a un rôle spécifique - NOUVEAU
    */
