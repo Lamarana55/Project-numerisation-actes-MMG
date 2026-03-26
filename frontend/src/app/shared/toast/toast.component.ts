@@ -41,7 +41,6 @@ import {
         width: 30px;
         height: 30px;
         border-radius: 50%;
-        // background: rgba(255, 255, 255, 0.2);
         flex-shrink: 0;
       }
 

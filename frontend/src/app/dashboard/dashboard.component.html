@@ -1,0 +1,205 @@
+<div class="dash-container">
+
+  <!-- ══ EN-TÊTE ════════════════════════════════════════════════════════════ -->
+  <div class="dash-header">
+    <div>
+      <h1 class="dash-title">Tableau de bord — Numérisation & Indexation</h1>
+      <p class="dash-subtitle">République de Guinée · RAVEC · {{ today }}</p>
+    </div>
+    <span class="dash-badge-total">{{ fmt(totalActes) }} actes au total</span>
+  </div>
+
+  <!-- ══ KPIs ════════════════════════════════════════════════════════════════ -->
+  <div class="kpi-grid">
+
+    <!-- Actes -->
+    <div class="kpi-card kpi-card--accent">
+      <p class="kpi-label">Actes numérisés & indexés</p>
+      <p class="kpi-value">{{ fmt(totalActes) }}</p>
+      <p class="kpi-trend">↑ {{ variation }}% vs mois précédent</p>
+    </div>
+
+    <!-- Hommes -->
+    <div class="kpi-card">
+      <div class="kpi-dot" style="background:#378ADD"></div>
+      <p class="kpi-label">Hommes</p>
+      <p class="kpi-value">{{ fmt(totalHommes) }}</p>
+      <div class="kpi-progress-row">
+        <div class="kpi-track">
+          <div class="kpi-fill" style="background:#378ADD" [style.width.%]="tauxHommes"></div>
+        </div>
+        <span class="kpi-pct">{{ tauxHommes }}%</span>
+      </div>
+    </div>
+
+    <!-- Femmes -->
+    <div class="kpi-card">
+      <div class="kpi-dot" style="background:#E24B4A"></div>
+      <p class="kpi-label">Femmes</p>
+      <p class="kpi-value">{{ fmt(totalFemmes) }}</p>
+      <div class="kpi-progress-row">
+        <div class="kpi-track">
+          <div class="kpi-fill" style="background:#E24B4A" [style.width.%]="tauxFemmes"></div>
+        </div>
+        <span class="kpi-pct">{{ tauxFemmes }}%</span>
+      </div>
+    </div>
+
+    <!-- Communes couvertes -->
+    <div class="kpi-card">
+      <div class="kpi-dot" style="background:#9B59B6"></div>
+      <p class="kpi-label">Communes couvertes</p>
+      <p class="kpi-value">{{ filteredComs.length }}</p>
+      <p class="kpi-sublabel">sur l'ensemble du territoire</p>
+    </div>
+
+  </div>
+
+  <!-- ══ BARRE DE FILTRES ════════════════════════════════════════════════════ -->
+  <div class="filter-bar">
+    <span class="filter-label">Filtrer :</span>
+
+    <select [(ngModel)]="selectedRegionId" (ngModelChange)="onRegionChange()" class="filter-select">
+      <option value="">Toutes les régions</option>
+      <option *ngFor="let r of regionOptions" [value]="r.id">{{ r.nom }}</option>
+    </select>
+
+    <select [(ngModel)]="selectedPrefId" (ngModelChange)="onPrefChange()"
+      class="filter-select" [disabled]="!selectedRegionId">
+      <option value="">Toutes les préfectures</option>
+      <option *ngFor="let p of prefOptions" [value]="p.id">{{ p.nom }}</option>
+    </select>
+
+    <select [(ngModel)]="selectedComNom" (ngModelChange)="onComChange()"
+      class="filter-select" [disabled]="!selectedPrefId">
+      <option value="">Toutes les communes</option>
+      <option *ngFor="let c of comOptions" [value]="c.nom">{{ c.nom }}</option>
+    </select>
+
+    <button class="btn-reset-filter" (click)="resetFilters()">Réinitialiser</button>
+
+    <span class="filter-breadcrumb" *ngIf="filterLabel">{{ filterLabel }}</span>
+  </div>
+
+  <!-- ══ ROW 1 : Barres communes + Donut ════════════════════════════════════ -->
+  <div class="row-2col">
+
+    <!-- Graphique barres -->
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <span class="chart-title">Actes par commune (top 10)</span>
+        <span class="chart-note">chaque couleur représente une région</span>
+      </div>
+      <div class="chart-wrap" style="height:320px">
+        <canvas baseChart [data]="barData" [options]="barOptions" type="bar"></canvas>
+      </div>
+    </div>
+
+    <!-- Donut H/F -->
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <span class="chart-title">Répartition hommes / femmes</span>
+      </div>
+      <div class="chart-wrap" style="height:200px">
+        <canvas baseChart [data]="donutData" [options]="donutOptions" type="doughnut"></canvas>
+      </div>
+      <div class="donut-stats">
+        <div class="donut-stat">
+          <p class="donut-val">{{ fmt(totalHommes) }}</p>
+          <p class="donut-lbl">Hommes</p>
+          <p class="donut-pct" style="color:#378ADD">{{ tauxHommes }}%</p>
+        </div>
+        <div class="donut-sep"></div>
+        <div class="donut-stat">
+          <p class="donut-val">{{ fmt(totalFemmes) }}</p>
+          <p class="donut-lbl">Femmes</p>
+          <p class="donut-pct" style="color:#E24B4A">{{ tauxFemmes }}%</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══ ROW 2 : Évolution mensuelle ════════════════════════════════════════ -->
+  <div class="chart-card">
+    <div class="chart-card-header">
+      <span class="chart-title">Évolution mensuelle des actes — 12 derniers mois</span>
+      <div class="chart-legend">
+        <span class="legend-line" style="background:#4a8a4e"></span>
+        <span class="legend-txt">Actes numérisés & indexés</span>
+      </div>
+    </div>
+    <div class="chart-wrap" style="height:190px">
+      <canvas baseChart [data]="lineData" [options]="lineOptions" type="line"></canvas>
+    </div>
+  </div>
+
+  <!-- ══ ROW 3 : Répartition par région ════════════════════════════════════ -->
+  <div class="chart-card">
+    <div class="chart-card-header">
+      <span class="chart-title">Actes par région</span>
+    </div>
+    <div class="region-bars">
+      <div class="region-row" *ngFor="let r of regionStats">
+        <div class="region-dot" [style.background]="r.couleur"></div>
+        <span class="region-name">{{ r.nom }}</span>
+        <div class="region-track">
+          <div class="region-fill" [style.width.%]="pct(r.actes, totalActes)" [style.background]="r.couleur"></div>
+        </div>
+        <span class="region-pct">{{ pct(r.actes, totalActes) }}%</span>
+        <span class="region-count">{{ fmt(r.actes) }} actes</span>
+        <span class="region-hf">
+          <span class="hf-m">H {{ pct(r.hommes, r.hommes + r.femmes) }}%</span>
+          <span class="hf-f">F {{ pct(r.femmes, r.hommes + r.femmes) }}%</span>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ ROW 4 : Tableau des communes ══════════════════════════════════════ -->
+  <div class="chart-card">
+    <div class="chart-card-header">
+      <span class="chart-title">Détail par commune</span>
+      <span class="table-count">{{ filteredComs.length }} commune(s)</span>
+    </div>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Commune</th>
+            <th class="text-right">Actes</th>
+            <th class="text-right">Hommes</th>
+            <th class="text-right">% H</th>
+            <th class="text-right">Femmes</th>
+            <th class="text-right">% F</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let c of filteredComs" class="table-row">
+            <td class="com-name">{{ c.nom }}</td>
+            <td class="text-right fw-600">{{ fmt(c.actes) }}</td>
+            <td class="text-right">{{ fmt(c.hommes) }}</td>
+            <td class="text-right">
+              <span class="hf-badge hf-badge--m">{{ pct(c.hommes, c.hommes + c.femmes) }}%</span>
+            </td>
+            <td class="text-right">{{ fmt(c.femmes) }}</td>
+            <td class="text-right">
+              <span class="hf-badge hf-badge--f">{{ pct(c.femmes, c.hommes + c.femmes) }}%</span>
+            </td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr class="table-total">
+            <td><strong>Total</strong></td>
+            <td class="text-right"><strong>{{ fmt(totalActes) }}</strong></td>
+            <td class="text-right"><strong>{{ fmt(totalHommes) }}</strong></td>
+            <td class="text-right"><strong>{{ tauxHommes }}%</strong></td>
+            <td class="text-right"><strong>{{ fmt(totalFemmes) }}</strong></td>
+            <td class="text-right"><strong>{{ tauxFemmes }}%</strong></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+</div>
