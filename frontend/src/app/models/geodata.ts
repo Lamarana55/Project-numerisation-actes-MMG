@@ -19,7 +19,7 @@ export interface PrefectureDTO {
 export interface CommuneDTO {
   code: string;
   nom: string;
-  prefectureCode: string;
+  codePrefecture: string;
 }
 
 export interface QuartierDTO {

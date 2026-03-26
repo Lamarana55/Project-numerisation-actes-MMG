@@ -24,6 +24,7 @@ public class GeoDataService {
     private final CommuneRepository communeRepository;
     private final QuartierRepository quartierRepository;
 
+
     /**
      * Récupère toutes les régions
      */
@@ -41,6 +42,16 @@ public class GeoDataService {
         log.info("Récupération de tous les pays");
         return paysRepository.findAll().stream()
                 .map(this::toPaysDTO)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Récupère toutes les communes
+     */
+    public List<CommuneDTO> getAllCommunes() {
+        log.info("Récupération de toutes les communes");
+        return communeRepository.findAll().stream()
+                .map(this::toCommuneDTO)
                 .collect(Collectors.toList());
     }
 

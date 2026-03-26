@@ -50,6 +50,16 @@ public class GeoDataController {
     }
 
     /**
+     * GET /geodata/communes
+     * Récupère toutes les communes
+     */
+    @GetMapping("/communes")
+    @Operation(summary = "Liste des communes", description = "Récupère toutes les communes enregistrées")
+    public ResponseEntity<List<CommuneDTO>> getAllCommunes() {
+        return ResponseEntity.ok(geoDataService.getAllCommunes());
+    }
+
+    /**
      * GET /geodata/prefectures/{codePrefecture}/communes
      * Récupère toutes les communes d'une préfecture donnée
      */

@@ -1,27 +1,30 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ChartConfiguration, ChartData } from 'chart.js';
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
-import { Subject } from 'rxjs';
+import { Subject, forkJoin, of } from 'rxjs';
+import { switchMap, map, catchError, takeUntil } from 'rxjs/operators';
 import { GeodataService } from '../services/geodata.service';
 import { RegionDTO, PrefectureDTO, CommuneDTO } from '../models/geodata';
 
-// ─── Modèles ──────────────────────────────────────────────────────────────────
+// ─── Modèles internes ─────────────────────────────────────────────────────────
 export interface CommuneStat {
-  nom:     string;
-  actes:   number;  // numérisés ET indexés en même temps
-  hommes:  number;
-  femmes:  number;
+  code:           string;
+  nom:            string;
+  prefectureCode: string;
+  actes:          number;
+  hommes:         number;
+  femmes:         number;
 }
 
-export interface PrefMock {
-  id:       string;
-  nom:      string;
-  regionId: string;
-  coms:     CommuneStat[];
+export interface PrefData {
+  code:       string;
+  nom:        string;
+  regionCode: string;
+  coms:       CommuneStat[];
 }
 
 export interface RegionStat {
-  id:      string;
+  code:    string;
   nom:     string;
   couleur: string;
   actes:   number;
@@ -34,86 +37,7 @@ export interface MonthStat {
   actes: number;
 }
 
-// ─── Données mock  (à remplacer par DashboardService) ─────────────────────────
-const MOCK_REGIONS_META: Omit<RegionStat, 'actes' | 'hommes' | 'femmes'>[] = [
-  { id: 'conakry',   nom: 'Conakry',   couleur: '#4a8a4e' },
-  { id: 'kindia',    nom: 'Kindia',    couleur: '#378ADD' },
-  { id: 'labe',      nom: 'Labé',      couleur: '#EF9F27' },
-  { id: 'mamou',     nom: 'Mamou',     couleur: '#9B59B6' },
-  { id: 'faranah',   nom: 'Faranah',   couleur: '#16A085' },
-  { id: 'kankan',    nom: 'Kankan',    couleur: '#E24B4A' },
-  { id: 'nzerekore', nom: 'Nzérékoré', couleur: '#E67E22' },
-  { id: 'boke',      nom: 'Boké',      couleur: '#34495E' },
-];
-
-const MOCK_PREFS: PrefMock[] = [
-  { id: 'cnk', nom: 'Conakry',     regionId: 'conakry', coms: [
-    { nom: 'Kaloum',  actes: 347, hommes: 183, femmes: 164 },
-    { nom: 'Ratoma',  actes: 281, hommes: 149, femmes: 132 },
-    { nom: 'Dixinn',  actes: 238, hommes: 126, femmes: 112 },
-    { nom: 'Matam',   actes: 214, hommes: 113, femmes: 101 },
-    { nom: 'Matoto',  actes: 185, hommes:  98, femmes:  87 },
-  ]},
-  { id: 'knd', nom: 'Kindia',      regionId: 'kindia', coms: [
-    { nom: 'Kindia',  actes: 125, hommes:  66, femmes:  59 },
-    { nom: 'Coyah',   actes:  74, hommes:  39, femmes:  35 },
-    { nom: 'Dubréka', actes:  59, hommes:  31, femmes:  28 },
-  ]},
-  { id: 'frc', nom: 'Forécariah',  regionId: 'kindia', coms: [
-    { nom: 'Forécariah', actes: 50, hommes: 26, femmes: 24 },
-    { nom: 'Télimélé',   actes: 42, hommes: 22, femmes: 20 },
-  ]},
-  { id: 'lbe', nom: 'Labé',        regionId: 'labe', coms: [
-    { nom: 'Labé',    actes:  94, hommes: 50, femmes: 44 },
-    { nom: 'Lélouma', actes:  39, hommes: 21, femmes: 18 },
-  ]},
-  { id: 'mli', nom: 'Mali',        regionId: 'labe', coms: [
-    { nom: 'Mali',   actes: 51, hommes: 27, femmes: 24 },
-    { nom: 'Koubia', actes: 35, hommes: 18, femmes: 17 },
-  ]},
-  { id: 'mmou', nom: 'Mamou',      regionId: 'mamou', coms: [
-    { nom: 'Mamou',  actes: 71, hommes: 38, femmes: 33 },
-    { nom: 'Dalaba', actes: 43, hommes: 23, femmes: 20 },
-    { nom: 'Pita',   actes: 50, hommes: 26, femmes: 24 },
-  ]},
-  { id: 'frn', nom: 'Faranah',     regionId: 'faranah', coms: [
-    { nom: 'Faranah',     actes: 71, hommes: 38, femmes: 33 },
-    { nom: 'Kissidougou', actes: 62, hommes: 33, femmes: 29 },
-  ]},
-  { id: 'dng', nom: 'Dinguiraye',  regionId: 'faranah', coms: [
-    { nom: 'Dinguiraye', actes: 39, hommes: 21, femmes: 18 },
-    { nom: 'Dabola',     actes: 49, hommes: 26, femmes: 23 },
-  ]},
-  { id: 'kkn', nom: 'Kankan',      regionId: 'kankan', coms: [
-    { nom: 'Kankan',    actes: 122, hommes: 65, femmes: 57 },
-    { nom: 'Kérouané',  actes:  63, hommes: 33, femmes: 30 },
-    { nom: 'Kouroussa', actes:  50, hommes: 26, femmes: 24 },
-  ]},
-  { id: 'sig', nom: 'Siguiri',     regionId: 'kankan', coms: [
-    { nom: 'Siguiri',  actes: 71, hommes: 38, femmes: 33 },
-    { nom: 'Mandiana', actes: 50, hommes: 26, femmes: 24 },
-  ]},
-  { id: 'nzk', nom: 'Nzérékoré',  regionId: 'nzerekore', coms: [
-    { nom: 'Nzérékoré', actes: 107, hommes: 57, femmes: 50 },
-    { nom: 'Lola',      actes:  57, hommes: 30, femmes: 27 },
-    { nom: 'Yomou',     actes:  36, hommes: 19, femmes: 17 },
-  ]},
-  { id: 'mct', nom: 'Macenta',     regionId: 'nzerekore', coms: [
-    { nom: 'Macenta',  actes: 71, hommes: 38, femmes: 33 },
-    { nom: 'Guékédou', actes: 62, hommes: 33, femmes: 29 },
-    { nom: 'Beyla',    actes: 42, hommes: 22, femmes: 20 },
-  ]},
-  { id: 'bke', nom: 'Boké',        regionId: 'boke', coms: [
-    { nom: 'Boké',  actes: 71, hommes: 38, femmes: 33 },
-    { nom: 'Boffa', actes: 50, hommes: 26, femmes: 24 },
-    { nom: 'Fria',  actes: 42, hommes: 22, femmes: 20 },
-  ]},
-  { id: 'gao', nom: 'Gaoual',      regionId: 'boke', coms: [
-    { nom: 'Gaoual',   actes: 35, hommes: 18, femmes: 17 },
-    { nom: 'Koundara', actes: 29, hommes: 15, femmes: 14 },
-  ]},
-];
-
+// ─── Données mensuelles (statiques — à remplacer par un endpoint stats) ───────
 const MONTHLY_DATA: MonthStat[] = [
   { mois: 'Avr 25', actes: 142 },
   { mois: 'Mai 25', actes: 168 },
@@ -129,6 +53,13 @@ const MONTHLY_DATA: MonthStat[] = [
   { mois: 'Mar 26', actes: 212 },
 ];
 
+// ─── Palette de couleurs par région ───────────────────────────────────────────
+const REGION_COLORS = [
+  '#4a8a4e', '#378ADD', '#EF9F27', '#9B59B6',
+  '#16A085', '#E24B4A', '#E67E22', '#34495E',
+  '#1ABC9C', '#D35400', '#2C3E50', '#8E44AD',
+];
+
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
@@ -142,15 +73,22 @@ export class DashboardComponent implements OnInit, OnDestroy {
   // ─── Date ────────────────────────────────────────────────────────────────────
   today = new Date().toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
 
+  // ─── Données géographiques chargées depuis l'API ──────────────────────────────
+  apiRegions:     RegionStat[]  = [];
+  allPrefData:    PrefData[]    = [];
+  allApiCommunes: CommuneStat[] = [];
+  private prefRegionMap = new Map<string, string>(); // prefCode → regionCode
+
+  // ─── État de chargement ───────────────────────────────────────────────────────
+  loadingData = false;
+
   // ─── Filtres ─────────────────────────────────────────────────────────────────
-  selectedRegionId = '';
-  selectedPrefId   = '';
-  selectedComNom   = '';
+  selectedRegionCode = '';
+  selectedPrefCode   = '';
+  selectedComCode    = '';
 
-  prefOptions: PrefMock[]    = [];
+  prefOptions: PrefData[]    = [];
   comOptions:  CommuneStat[] = [];
-
-  get regionOptions() { return MOCK_REGIONS_META; }
 
   // ─── KPIs ────────────────────────────────────────────────────────────────────
   totalActes  = 0;
@@ -163,6 +101,27 @@ export class DashboardComponent implements OnInit, OnDestroy {
   // ─── Données pour le template ────────────────────────────────────────────────
   filteredComs: CommuneStat[] = [];
   regionStats:  RegionStat[]  = [];
+
+  // ─── Pagination ───────────────────────────────────────────────────────────────
+  pageSize    = 10;
+  currentPage = 0;
+
+  get totalPages(): number {
+    return Math.ceil(this.filteredComs.length / this.pageSize);
+  }
+
+  get pagedComs(): CommuneStat[] {
+    const start = this.currentPage * this.pageSize;
+    return this.filteredComs.slice(start, start + this.pageSize);
+  }
+
+  get pages(): number[] {
+    return Array.from({ length: this.totalPages }, (_, i) => i);
+  }
+
+  prevPage(): void { if (this.currentPage > 0) this.currentPage--; }
+  nextPage(): void { if (this.currentPage < this.totalPages - 1) this.currentPage++; }
+  goToPage(p: number): void { this.currentPage = p; }
 
   // ── Graphique barres (communes) ───────────────────────────────────────────────
   barData: ChartData<'bar'> = { labels: [], datasets: [] };
@@ -180,8 +139,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
     },
     scales: {
       x: { grid: { display: false }, ticks: { font: { size: 10 }, maxRotation: 38 } },
-      y: { grid: { color: 'rgba(0,0,0,0.06)' },
-           ticks: { font: { size: 10 }, callback: v => Number(v).toLocaleString('fr-FR') } },
+      y: {
+        grid: { color: 'rgba(0,0,0,0.06)' },
+        ticks: { font: { size: 10 }, callback: v => Number(v).toLocaleString('fr-FR') },
+      },
     },
   };
 
@@ -236,15 +197,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
     },
     scales: {
       x: { grid: { display: false }, ticks: { font: { size: 10 } } },
-      y: { grid: { color: 'rgba(0,0,0,0.06)' },
-           ticks: { font: { size: 10 }, callback: v => Number(v).toLocaleString('fr-FR') } },
+      y: {
+        grid: { color: 'rgba(0,0,0,0.06)' },
+        ticks: { font: { size: 10 }, callback: v => Number(v).toLocaleString('fr-FR') },
+      },
     },
   };
 
   constructor(private geodataService: GeodataService) {}
 
   ngOnInit(): void {
-    this.computeAll();
+    this.loadData();
   }
 
   ngOnDestroy(): void {
@@ -253,23 +216,94 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
+  // CHARGEMENT DES DONNÉES
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  private loadData(): void {
+    this.loadingData = true;
+
+    forkJoin({
+      regions:  this.geodataService.getAllRegions(),
+      communes: this.geodataService.getAllCommunes(),
+    }).pipe(
+      takeUntil(this.destroy$),
+      switchMap(({ regions, communes }) => {
+        if (!regions.length) {
+          return of({ regions, communes, prefsByRegion: [] as { regionCode: string; prefs: PrefectureDTO[] }[] });
+        }
+        return forkJoin(
+          regions.map(r =>
+            this.geodataService.getPrefecturesByRegion(r.code).pipe(
+              map(prefs => ({ regionCode: r.code, prefs })),
+              catchError(() => of({ regionCode: r.code, prefs: [] as PrefectureDTO[] }))
+            )
+          )
+        ).pipe(map(prefsByRegion => ({ regions, communes, prefsByRegion })));
+      })
+    ).subscribe({
+      next: ({ regions, communes, prefsByRegion }) => {
+        this.buildGeoTree(regions, prefsByRegion, communes);
+        this.loadingData = false;
+        this.computeAll();
+      },
+      error: () => { this.loadingData = false; },
+    });
+  }
+
+  private buildGeoTree(
+    regions: RegionDTO[],
+    prefsByRegion: { regionCode: string; prefs: PrefectureDTO[] }[],
+    communes: CommuneDTO[]
+  ): void {
+    // 1. Régions avec couleurs déterministes
+    this.apiRegions = regions.map((r, i) => ({
+      code:    r.code,
+      nom:     r.nom,
+      couleur: REGION_COLORS[i % REGION_COLORS.length],
+      actes: 0, hommes: 0, femmes: 0,
+    }));
+
+    // 2. Map prefecture → region
+    this.prefRegionMap.clear();
+    prefsByRegion.forEach(({ regionCode, prefs }) => {
+      prefs.forEach(p => this.prefRegionMap.set(p.code, regionCode));
+    });
+
+    // 3. Communes avec stats déterministes basées sur le code
+    this.allApiCommunes = communes.map(c => {
+      const stat = this.mockStat(c.code);
+      return { code: c.code, nom: c.nom, prefectureCode: c.codePrefecture, ...stat };
+    });
+
+    // 4. Structure préfectures avec leurs communes
+    this.allPrefData = prefsByRegion.flatMap(({ regionCode, prefs }) =>
+      prefs.map(p => ({
+        code:       p.code,
+        nom:        p.nom,
+        regionCode,
+        coms:       this.allApiCommunes.filter(c => c.prefectureCode === p.code),
+      }))
+    );
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
   // FILTRES
   // ═══════════════════════════════════════════════════════════════════════════
 
   onRegionChange(): void {
-    this.selectedPrefId = '';
-    this.selectedComNom = '';
-    this.prefOptions = this.selectedRegionId
-      ? MOCK_PREFS.filter(p => p.regionId === this.selectedRegionId)
+    this.selectedPrefCode = '';
+    this.selectedComCode  = '';
+    this.prefOptions = this.selectedRegionCode
+      ? this.allPrefData.filter(p => p.regionCode === this.selectedRegionCode)
       : [];
     this.comOptions = [];
     this.computeAll();
   }
 
   onPrefChange(): void {
-    this.selectedComNom = '';
-    const pref = MOCK_PREFS.find(p => p.id === this.selectedPrefId);
-    this.comOptions = pref ? pref.coms : [];
+    this.selectedComCode = '';
+    const pref = this.allPrefData.find(p => p.code === this.selectedPrefCode);
+    this.comOptions = pref?.coms ?? [];
     this.computeAll();
   }
 
@@ -278,11 +312,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   resetFilters(): void {
-    this.selectedRegionId = '';
-    this.selectedPrefId   = '';
-    this.selectedComNom   = '';
-    this.prefOptions      = [];
-    this.comOptions       = [];
+    this.selectedRegionCode = '';
+    this.selectedPrefCode   = '';
+    this.selectedComCode    = '';
+    this.prefOptions        = [];
+    this.comOptions         = [];
     this.computeAll();
   }
 
@@ -291,26 +325,27 @@ export class DashboardComponent implements OnInit, OnDestroy {
   // ═══════════════════════════════════════════════════════════════════════════
 
   private getFilteredComs(): CommuneStat[] {
-    if (this.selectedComNom) {
-      const c = this.getAllComs().find(c => c.nom === this.selectedComNom);
-      return c ? [c] : [];
+    if (this.selectedComCode) {
+      return this.allApiCommunes.filter(c => c.code === this.selectedComCode);
     }
-    if (this.selectedPrefId) {
-      return MOCK_PREFS.find(p => p.id === this.selectedPrefId)?.coms ?? [];
+    if (this.selectedPrefCode) {
+      return this.allApiCommunes.filter(c => c.prefectureCode === this.selectedPrefCode);
     }
-    if (this.selectedRegionId) {
-      return MOCK_PREFS.filter(p => p.regionId === this.selectedRegionId).flatMap(p => p.coms);
+    if (this.selectedRegionCode) {
+      const prefCodes = new Set(
+        this.allPrefData
+          .filter(p => p.regionCode === this.selectedRegionCode)
+          .map(p => p.code)
+      );
+      return this.allApiCommunes.filter(c => prefCodes.has(c.prefectureCode));
     }
-    return this.getAllComs();
-  }
-
-  private getAllComs(): CommuneStat[] {
-    return MOCK_PREFS.flatMap(p => p.coms);
+    return this.allApiCommunes;
   }
 
   private computeAll(): void {
     const coms = this.getFilteredComs();
     this.filteredComs = [...coms].sort((a, b) => b.actes - a.actes);
+    this.currentPage  = 0;
 
     this.totalActes  = coms.reduce((s, c) => s + c.actes,  0);
     this.totalHommes = coms.reduce((s, c) => s + c.hommes, 0);
@@ -329,20 +364,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
     const top = [...coms].sort((a, b) => b.actes - a.actes).slice(0, 10);
     this.barData = {
       labels: top.map(c => c.nom),
-      datasets: [
-        {
-          label: 'Actes',
-          data: top.map(c => c.actes),
-          backgroundColor: top.map(c => {
-            // coloration par région
-            const pref = MOCK_PREFS.find(p => p.coms.some(x => x.nom === c.nom));
-            const meta = MOCK_REGIONS_META.find(r => r.id === pref?.regionId);
-            return meta?.couleur ?? '#4a8a4e';
-          }),
-          borderRadius: 4,
-          borderSkipped: false,
-        },
-      ],
+      datasets: [{
+        label: 'Actes',
+        data:  top.map(c => c.actes),
+        backgroundColor: top.map(c => this.getRegionColor(c)),
+        borderRadius: 4,
+        borderSkipped: false,
+      }],
     };
   }
 
@@ -354,12 +382,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   private updateRegionStats(): void {
-    const regs = this.selectedRegionId
-      ? MOCK_REGIONS_META.filter(r => r.id === this.selectedRegionId)
-      : MOCK_REGIONS_META;
+    const regions = this.selectedRegionCode
+      ? this.apiRegions.filter(r => r.code === this.selectedRegionCode)
+      : this.apiRegions;
 
-    this.regionStats = regs.map(r => {
-      const coms = MOCK_PREFS.filter(p => p.regionId === r.id).flatMap(p => p.coms);
+    this.regionStats = regions.map(r => {
+      const prefCodes = new Set(
+        this.allPrefData.filter(p => p.regionCode === r.code).map(p => p.code)
+      );
+      const coms = this.allApiCommunes.filter(c => prefCodes.has(c.prefectureCode));
       return {
         ...r,
         actes:  coms.reduce((s, c) => s + c.actes,  0),
@@ -372,6 +403,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
   // ═══════════════════════════════════════════════════════════════════════════
   // HELPERS TEMPLATE
   // ═══════════════════════════════════════════════════════════════════════════
+
+  getRegionColor(com: CommuneStat): string {
+    const regionCode = this.prefRegionMap.get(com.prefectureCode);
+    return this.apiRegions.find(r => r.code === regionCode)?.couleur ?? '#9ca3af';
+  }
 
   tauxHF(r: RegionStat): number {
     const tot = r.hommes + r.femmes;
@@ -386,11 +422,39 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return b > 0 ? Math.round((a / b) * 100) : 0;
   }
 
+  get activeFilterCount(): number {
+    return [this.selectedRegionCode, this.selectedPrefCode, this.selectedComCode]
+      .filter(v => !!v).length;
+  }
+
   get filterLabel(): string {
     const parts: string[] = [];
-    if (this.selectedRegionId) parts.push(MOCK_REGIONS_META.find(r => r.id === this.selectedRegionId)?.nom ?? '');
-    if (this.selectedPrefId)   parts.push(MOCK_PREFS.find(p => p.id === this.selectedPrefId)?.nom ?? '');
-    if (this.selectedComNom)   parts.push(this.selectedComNom);
+    if (this.selectedRegionCode)
+      parts.push(this.apiRegions.find(r => r.code === this.selectedRegionCode)?.nom ?? '');
+    if (this.selectedPrefCode)
+      parts.push(this.allPrefData.find(p => p.code === this.selectedPrefCode)?.nom ?? '');
+    if (this.selectedComCode)
+      parts.push(this.allApiCommunes.find(c => c.code === this.selectedComCode)?.nom ?? '');
     return parts.join(' › ');
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // STATS DÉTERMINISTES (à remplacer par un endpoint /stats quand disponible)
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  private mockStat(code: string): { actes: number; hommes: number; femmes: number } {
+    const h = this.hashCode(code);
+    const actes  = 20 + (h % 300);
+    const tauxH  = 45 + (h % 11);   // entre 45 % et 55 %
+    const hommes = Math.round(actes * tauxH / 100);
+    return { actes, hommes, femmes: actes - hommes };
+  }
+
+  private hashCode(s: string): number {
+    let h = 0;
+    for (let i = 0; i < s.length; i++) {
+      h = Math.imul(31, h) + s.charCodeAt(i) | 0;
+    }
+    return Math.abs(h);
   }
 }

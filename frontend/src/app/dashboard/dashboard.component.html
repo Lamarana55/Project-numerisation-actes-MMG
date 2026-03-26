@@ -1,204 +1,373 @@
-<div class="dash-container">
+<div class="dash-root">
 
-  <!-- ══ EN-TÊTE ════════════════════════════════════════════════════════════ -->
-  <div class="dash-header">
-    <div>
-      <h1 class="dash-title">Tableau de bord — Numérisation & Indexation</h1>
-      <p class="dash-subtitle">République de Guinée · RAVEC · {{ today }}</p>
+  <!-- ══════════════════════════════════════════════════════════════════════
+       TOPBAR
+  ══════════════════════════════════════════════════════════════════════════ -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-icon">
+        <mat-icon>article</mat-icon>
+      </div>
+      <div class="topbar-text">
+        <h1 class="topbar-title">Numérisation & Indexation des actes</h1>
+        <p class="topbar-sub">
+          <span class="topbar-flag">
+            <span class="tf-r"></span>
+            <span class="tf-y"></span>
+            <span class="tf-g"></span>
+          </span>
+          République de Guinée
+          <span class="topbar-sub-dot">·</span>
+          RAVEC
+          <span class="topbar-sub-dot">·</span>
+          {{ today }}
+        </p>
+      </div>
     </div>
-    <span class="dash-badge-total">{{ fmt(totalActes) }} actes au total</span>
-  </div>
+    <div class="topbar-right">
+      <div class="total-pill total-pill--blue">
+        <span class="total-pill-num">{{ filteredComs.length }}</span>
+        <span class="total-pill-lbl">communes couvertes</span>
+      </div>
+      <div class="total-pill">
+        <span class="total-pill-num">{{ fmt(totalActes) }}</span>
+        <span class="total-pill-lbl">actes enregistrés</span>
+      </div>
+    </div>
+  </header>
 
-  <!-- ══ KPIs ════════════════════════════════════════════════════════════════ -->
-  <div class="kpi-grid">
+  <!-- ══════════════════════════════════════════════════════════════════════
+       BARRE DE FILTRES
+  ══════════════════════════════════════════════════════════════════════════ -->
+  <section class="filter-section">
+    <div class="filter-bar">
 
-    <!-- Actes -->
-    <div class="kpi-card kpi-card--accent">
-      <p class="kpi-label">Actes numérisés & indexés</p>
-      <p class="kpi-value">{{ fmt(totalActes) }}</p>
-      <p class="kpi-trend">↑ {{ variation }}% vs mois précédent</p>
+      <!-- Label gauche -->
+      <div class="filter-bar-label">
+        <mat-icon class="filter-header-ico">tune</mat-icon>
+        <span class="filter-header-title">Filtres</span>
+        <span class="filter-active-count" *ngIf="activeFilterCount > 0">{{ activeFilterCount }}</span>
+      </div>
+
+      <div class="filter-divider"></div>
+
+      <!-- Région -->
+      <div class="filter-group">
+        <label class="filter-field-label">
+          <span class="filter-step">1</span> Région
+        </label>
+        <div class="filter-select-wrap" [class.active]="selectedRegionCode">
+          <mat-icon class="filter-ico">place</mat-icon>
+          <select [(ngModel)]="selectedRegionCode" (ngModelChange)="onRegionChange()"
+            class="filter-sel" [disabled]="loadingData">
+            <option value="">Toutes les régions</option>
+            <option *ngFor="let r of apiRegions" [value]="r.code">{{ r.nom }}</option>
+          </select>
+          <mat-icon class="filter-chevron">expand_more</mat-icon>
+        </div>
+      </div>
+
+      <div class="filter-arrow"><mat-icon>chevron_right</mat-icon></div>
+
+      <!-- Préfecture -->
+      <div class="filter-group">
+        <label class="filter-field-label">
+          <span class="filter-step">2</span> Préfecture
+        </label>
+        <div class="filter-select-wrap" [class.active]="selectedPrefCode" [class.disabled]="!selectedRegionCode">
+          <mat-icon class="filter-ico">location_city</mat-icon>
+          <select [(ngModel)]="selectedPrefCode" (ngModelChange)="onPrefChange()"
+            class="filter-sel" [disabled]="!selectedRegionCode">
+            <option value="">{{ selectedRegionCode ? 'Toutes' : '—' }}</option>
+            <option *ngFor="let p of prefOptions" [value]="p.code">{{ p.nom }}</option>
+          </select>
+          <mat-icon class="filter-chevron">expand_more</mat-icon>
+        </div>
+      </div>
+
+      <div class="filter-arrow"><mat-icon>chevron_right</mat-icon></div>
+
+      <!-- Commune -->
+      <div class="filter-group">
+        <label class="filter-field-label">
+          <span class="filter-step">3</span> Commune
+        </label>
+        <div class="filter-select-wrap" [class.active]="selectedComCode" [class.disabled]="!selectedPrefCode">
+          <mat-icon class="filter-ico">home_work</mat-icon>
+          <select [(ngModel)]="selectedComCode" (ngModelChange)="onComChange()"
+            class="filter-sel" [disabled]="!selectedPrefCode">
+            <option value="">{{ selectedPrefCode ? 'Toutes' : '—' }}</option>
+            <option *ngFor="let c of comOptions" [value]="c.code">{{ c.nom }}</option>
+          </select>
+          <mat-icon class="filter-chevron">expand_more</mat-icon>
+        </div>
+      </div>
+
+      <!-- Crumb -->
+      <div class="filter-crumb" *ngIf="filterLabel">
+        <mat-icon style="font-size:13px;width:13px;height:13px;flex-shrink:0">filter_list</mat-icon>
+        {{ filterLabel }}
+      </div>
+
+      <!-- Spacer -->
+      <div class="filter-spacer"></div>
+
+      <!-- Bouton reset (icône seule) -->
+      <button class="btn-reset-icon" (click)="resetFilters()"
+        [class.visible]="filterLabel" title="Effacer les filtres">
+        <mat-icon>filter_alt_off</mat-icon>
+      </button>
+
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       KPI ROW
+  ══════════════════════════════════════════════════════════════════════════ -->
+  <section class="kpi-row">
+
+    <!-- Actes total -->
+    <div class="kpi kpi--primary">
+      <div class="kpi-icon-wrap kpi-icon-wrap--green">
+        <mat-icon>description</mat-icon>
+      </div>
+      <div class="kpi-body">
+        <span class="kpi-lbl">Actes enregistrés</span>
+        <span class="kpi-num">{{ fmt(totalActes) }}</span>
+        <span class="kpi-chip chip-green">↑ {{ variation }}% ce mois</span>
+      </div>
     </div>
 
     <!-- Hommes -->
-    <div class="kpi-card">
-      <div class="kpi-dot" style="background:#378ADD"></div>
-      <p class="kpi-label">Hommes</p>
-      <p class="kpi-value">{{ fmt(totalHommes) }}</p>
-      <div class="kpi-progress-row">
-        <div class="kpi-track">
-          <div class="kpi-fill" style="background:#378ADD" [style.width.%]="tauxHommes"></div>
+    <div class="kpi kpi--blue">
+      <div class="kpi-icon-wrap kpi-icon-wrap--blue">
+        <mat-icon>person</mat-icon>
+      </div>
+      <div class="kpi-body">
+        <span class="kpi-lbl">Hommes</span>
+        <span class="kpi-num">{{ fmt(totalHommes) }}</span>
+        <div class="kpi-bar-row">
+          <div class="kpi-bar"><div class="kpi-bar-fill" style="background:#378ADD" [style.width.%]="tauxHommes"></div></div>
+          <span class="kpi-bar-pct" style="color:#378ADD">{{ tauxHommes }}%</span>
         </div>
-        <span class="kpi-pct">{{ tauxHommes }}%</span>
       </div>
     </div>
 
     <!-- Femmes -->
-    <div class="kpi-card">
-      <div class="kpi-dot" style="background:#E24B4A"></div>
-      <p class="kpi-label">Femmes</p>
-      <p class="kpi-value">{{ fmt(totalFemmes) }}</p>
-      <div class="kpi-progress-row">
-        <div class="kpi-track">
-          <div class="kpi-fill" style="background:#E24B4A" [style.width.%]="tauxFemmes"></div>
+    <div class="kpi kpi--red">
+      <div class="kpi-icon-wrap kpi-icon-wrap--red">
+        <mat-icon>person</mat-icon>
+      </div>
+      <div class="kpi-body">
+        <span class="kpi-lbl">Femmes</span>
+        <span class="kpi-num">{{ fmt(totalFemmes) }}</span>
+        <div class="kpi-bar-row">
+          <div class="kpi-bar"><div class="kpi-bar-fill" style="background:#E24B4A" [style.width.%]="tauxFemmes"></div></div>
+          <span class="kpi-bar-pct" style="color:#E24B4A">{{ tauxFemmes }}%</span>
         </div>
-        <span class="kpi-pct">{{ tauxFemmes }}%</span>
       </div>
     </div>
 
-    <!-- Communes couvertes -->
-    <div class="kpi-card">
-      <div class="kpi-dot" style="background:#9B59B6"></div>
-      <p class="kpi-label">Communes couvertes</p>
-      <p class="kpi-value">{{ filteredComs.length }}</p>
-      <p class="kpi-sublabel">sur l'ensemble du territoire</p>
+    <!-- Communes -->
+    <div class="kpi kpi--purple">
+      <div class="kpi-icon-wrap kpi-icon-wrap--purple">
+        <mat-icon>map</mat-icon>
+      </div>
+      <div class="kpi-body">
+        <span class="kpi-lbl">Communes couvertes</span>
+        <span class="kpi-num">{{ filteredComs.length }}</span>
+        <span class="kpi-chip chip-purple">territoire national</span>
+      </div>
     </div>
 
-  </div>
+  </section>
 
-  <!-- ══ BARRE DE FILTRES ════════════════════════════════════════════════════ -->
-  <div class="filter-bar">
-    <span class="filter-label">Filtrer :</span>
+  <!-- ══════════════════════════════════════════════════════════════════════
+       ROW GRAPHIQUES PRINCIPAUX
+  ══════════════════════════════════════════════════════════════════════════ -->
+  <section class="charts-row">
 
-    <select [(ngModel)]="selectedRegionId" (ngModelChange)="onRegionChange()" class="filter-select">
-      <option value="">Toutes les régions</option>
-      <option *ngFor="let r of regionOptions" [value]="r.id">{{ r.nom }}</option>
-    </select>
-
-    <select [(ngModel)]="selectedPrefId" (ngModelChange)="onPrefChange()"
-      class="filter-select" [disabled]="!selectedRegionId">
-      <option value="">Toutes les préfectures</option>
-      <option *ngFor="let p of prefOptions" [value]="p.id">{{ p.nom }}</option>
-    </select>
-
-    <select [(ngModel)]="selectedComNom" (ngModelChange)="onComChange()"
-      class="filter-select" [disabled]="!selectedPrefId">
-      <option value="">Toutes les communes</option>
-      <option *ngFor="let c of comOptions" [value]="c.nom">{{ c.nom }}</option>
-    </select>
-
-    <button class="btn-reset-filter" (click)="resetFilters()">Réinitialiser</button>
-
-    <span class="filter-breadcrumb" *ngIf="filterLabel">{{ filterLabel }}</span>
-  </div>
-
-  <!-- ══ ROW 1 : Barres communes + Donut ════════════════════════════════════ -->
-  <div class="row-2col">
-
-    <!-- Graphique barres -->
-    <div class="chart-card">
-      <div class="chart-card-header">
-        <span class="chart-title">Actes par commune (top 10)</span>
-        <span class="chart-note">chaque couleur représente une région</span>
+    <!-- Barres communes -->
+    <div class="panel panel--lg">
+      <div class="panel-head">
+        <div class="panel-title-block">
+          <span class="panel-title">Actes par commune</span>
+          <span class="panel-sub">top 10 · couleur = région</span>
+        </div>
       </div>
-      <div class="chart-wrap" style="height:320px">
+      <div class="chart-area" style="height:300px">
         <canvas baseChart [data]="barData" [options]="barOptions" type="bar"></canvas>
       </div>
     </div>
 
-    <!-- Donut H/F -->
-    <div class="chart-card">
-      <div class="chart-card-header">
-        <span class="chart-title">Répartition hommes / femmes</span>
+    <!-- Donut -->
+    <div class="panel panel--sm">
+      <div class="panel-head">
+        <div class="panel-title-block">
+          <span class="panel-title">Répartition H / F</span>
+        </div>
       </div>
-      <div class="chart-wrap" style="height:200px">
+      <div class="chart-area" style="height:180px">
         <canvas baseChart [data]="donutData" [options]="donutOptions" type="doughnut"></canvas>
       </div>
-      <div class="donut-stats">
-        <div class="donut-stat">
-          <p class="donut-val">{{ fmt(totalHommes) }}</p>
-          <p class="donut-lbl">Hommes</p>
-          <p class="donut-pct" style="color:#378ADD">{{ tauxHommes }}%</p>
+      <div class="donut-legend">
+        <div class="dl-item">
+          <div class="dl-bar" style="background:#378ADD"></div>
+          <div>
+            <span class="dl-num">{{ fmt(totalHommes) }}</span>
+            <span class="dl-lbl">Hommes · <strong style="color:#378ADD">{{ tauxHommes }}%</strong></span>
+          </div>
         </div>
-        <div class="donut-sep"></div>
-        <div class="donut-stat">
-          <p class="donut-val">{{ fmt(totalFemmes) }}</p>
-          <p class="donut-lbl">Femmes</p>
-          <p class="donut-pct" style="color:#E24B4A">{{ tauxFemmes }}%</p>
+        <div class="dl-item">
+          <div class="dl-bar" style="background:#E24B4A"></div>
+          <div>
+            <span class="dl-num">{{ fmt(totalFemmes) }}</span>
+            <span class="dl-lbl">Femmes · <strong style="color:#E24B4A">{{ tauxFemmes }}%</strong></span>
+          </div>
         </div>
       </div>
     </div>
 
-  </div>
+  </section>
 
-  <!-- ══ ROW 2 : Évolution mensuelle ════════════════════════════════════════ -->
-  <div class="chart-card">
-    <div class="chart-card-header">
-      <span class="chart-title">Évolution mensuelle des actes — 12 derniers mois</span>
-      <div class="chart-legend">
-        <span class="legend-line" style="background:#4a8a4e"></span>
-        <span class="legend-txt">Actes numérisés & indexés</span>
+  <!-- ══════════════════════════════════════════════════════════════════════
+       ÉVOLUTION MENSUELLE
+  ══════════════════════════════════════════════════════════════════════════ -->
+  <div class="panel">
+    <div class="panel-head">
+      <div class="panel-title-block">
+        <span class="panel-title">Évolution mensuelle</span>
+        <span class="panel-sub">12 derniers mois</span>
+      </div>
+      <div class="legend-inline">
+        <span class="li-dot" style="background:#4a8a4e"></span>
+        <span class="li-txt">Actes numérisés & indexés</span>
       </div>
     </div>
-    <div class="chart-wrap" style="height:190px">
+    <div class="chart-area" style="height:180px">
       <canvas baseChart [data]="lineData" [options]="lineOptions" type="line"></canvas>
     </div>
   </div>
 
-  <!-- ══ ROW 3 : Répartition par région ════════════════════════════════════ -->
-  <div class="chart-card">
-    <div class="chart-card-header">
-      <span class="chart-title">Actes par région</span>
+  <!-- ══════════════════════════════════════════════════════════════════════
+       RÉGIONS
+  ══════════════════════════════════════════════════════════════════════════ -->
+  <div class="panel">
+    <div class="panel-head">
+      <div class="panel-title-block">
+        <span class="panel-title">Répartition par région</span>
+        <span class="panel-sub">part du total national</span>
+      </div>
     </div>
-    <div class="region-bars">
-      <div class="region-row" *ngFor="let r of regionStats">
-        <div class="region-dot" [style.background]="r.couleur"></div>
-        <span class="region-name">{{ r.nom }}</span>
-        <div class="region-track">
-          <div class="region-fill" [style.width.%]="pct(r.actes, totalActes)" [style.background]="r.couleur"></div>
+    <div class="region-grid">
+      <div class="region-item" *ngFor="let r of regionStats">
+        <div class="ri-top">
+          <div class="ri-dot" [style.background]="r.couleur"></div>
+          <span class="ri-name">{{ r.nom }}</span>
+          <span class="ri-actes">{{ fmt(r.actes) }}</span>
+          <span class="ri-pct">{{ pct(r.actes, totalActes) }}%</span>
         </div>
-        <span class="region-pct">{{ pct(r.actes, totalActes) }}%</span>
-        <span class="region-count">{{ fmt(r.actes) }} actes</span>
-        <span class="region-hf">
-          <span class="hf-m">H {{ pct(r.hommes, r.hommes + r.femmes) }}%</span>
-          <span class="hf-f">F {{ pct(r.femmes, r.hommes + r.femmes) }}%</span>
-        </span>
+        <div class="ri-track">
+          <div class="ri-fill" [style.width.%]="pct(r.actes, totalActes)" [style.background]="r.couleur"></div>
+        </div>
+        <div class="ri-hf">
+          <span class="hf-pill hf-m">H {{ pct(r.hommes, r.hommes + r.femmes) }}%</span>
+          <span class="hf-pill hf-f">F {{ pct(r.femmes, r.hommes + r.femmes) }}%</span>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- ══ ROW 4 : Tableau des communes ══════════════════════════════════════ -->
-  <div class="chart-card">
-    <div class="chart-card-header">
-      <span class="chart-title">Détail par commune</span>
-      <span class="table-count">{{ filteredComs.length }} commune(s)</span>
+  <!-- ══════════════════════════════════════════════════════════════════════
+       TABLEAU DÉTAIL PAR COMMUNE
+  ══════════════════════════════════════════════════════════════════════════ -->
+  <div class="panel">
+    <div class="panel-head">
+      <div class="panel-title-block">
+        <span class="panel-title">Détail par commune</span>
+        <span class="panel-count-badge">{{ filteredComs.length }}</span>
+      </div>
+      <div class="pagination-info" *ngIf="totalPages > 1">
+        Page {{ currentPage + 1 }} / {{ totalPages }}
+      </div>
     </div>
-    <div class="table-wrap">
-      <table class="data-table">
+
+    <div *ngIf="loadingData" class="communes-loading">
+      <span>Chargement des communes...</span>
+    </div>
+
+    <div class="table-scroll" *ngIf="!loadingData">
+      <table class="dt">
         <thead>
           <tr>
-            <th>Commune</th>
-            <th class="text-right">Actes</th>
-            <th class="text-right">Hommes</th>
-            <th class="text-right">% H</th>
-            <th class="text-right">Femmes</th>
-            <th class="text-right">% F</th>
+            <th class="dt-th">Commune</th>
+            <th class="dt-th dt-r">Actes</th>
+            <th class="dt-th dt-r">Hommes</th>
+            <th class="dt-th dt-r">% H</th>
+            <th class="dt-th dt-r">Femmes</th>
+            <th class="dt-th dt-r">% F</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let c of filteredComs" class="table-row">
-            <td class="com-name">{{ c.nom }}</td>
-            <td class="text-right fw-600">{{ fmt(c.actes) }}</td>
-            <td class="text-right">{{ fmt(c.hommes) }}</td>
-            <td class="text-right">
-              <span class="hf-badge hf-badge--m">{{ pct(c.hommes, c.hommes + c.femmes) }}%</span>
+          <tr *ngFor="let c of pagedComs; let i = index" class="dt-row" [class.dt-row-alt]="i % 2 === 1">
+            <td class="dt-td dt-name">
+              <div class="dt-name-dot" [style.background]="getRegionColor(c)"></div>
+              {{ c.nom }}
             </td>
-            <td class="text-right">{{ fmt(c.femmes) }}</td>
-            <td class="text-right">
-              <span class="hf-badge hf-badge--f">{{ pct(c.femmes, c.hommes + c.femmes) }}%</span>
+            <td class="dt-td dt-r dt-bold">{{ fmt(c.actes) }}</td>
+            <td class="dt-td dt-r">{{ fmt(c.hommes) }}</td>
+            <td class="dt-td dt-r">
+              <div class="pct-cell">
+                <div class="pct-mini-bar">
+                  <div class="pct-mini-fill pct-mini-fill--m" [style.width.%]="pct(c.hommes, c.hommes + c.femmes)"></div>
+                </div>
+                <span class="pct-val" style="color:#1a6db5">{{ pct(c.hommes, c.hommes + c.femmes) }}%</span>
+              </div>
+            </td>
+            <td class="dt-td dt-r">{{ fmt(c.femmes) }}</td>
+            <td class="dt-td dt-r">
+              <div class="pct-cell">
+                <div class="pct-mini-bar">
+                  <div class="pct-mini-fill pct-mini-fill--f" [style.width.%]="pct(c.femmes, c.hommes + c.femmes)"></div>
+                </div>
+                <span class="pct-val" style="color:#a32d2d">{{ pct(c.femmes, c.hommes + c.femmes) }}%</span>
+              </div>
             </td>
           </tr>
         </tbody>
         <tfoot>
-          <tr class="table-total">
-            <td><strong>Total</strong></td>
-            <td class="text-right"><strong>{{ fmt(totalActes) }}</strong></td>
-            <td class="text-right"><strong>{{ fmt(totalHommes) }}</strong></td>
-            <td class="text-right"><strong>{{ tauxHommes }}%</strong></td>
-            <td class="text-right"><strong>{{ fmt(totalFemmes) }}</strong></td>
-            <td class="text-right"><strong>{{ tauxFemmes }}%</strong></td>
+          <tr class="dt-foot">
+            <td class="dt-td dt-foot-lbl">Total général</td>
+            <td class="dt-td dt-r dt-bold">{{ fmt(totalActes) }}</td>
+            <td class="dt-td dt-r dt-bold">{{ fmt(totalHommes) }}</td>
+            <td class="dt-td dt-r"><span style="color:#1a6db5;font-weight:600">{{ tauxHommes }}%</span></td>
+            <td class="dt-td dt-r dt-bold">{{ fmt(totalFemmes) }}</td>
+            <td class="dt-td dt-r"><span style="color:#a32d2d;font-weight:600">{{ tauxFemmes }}%</span></td>
           </tr>
         </tfoot>
       </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination" *ngIf="!loadingData && totalPages > 1">
+      <button class="pg-btn" (click)="prevPage()" [disabled]="currentPage === 0">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+      <ng-container *ngFor="let p of pages">
+        <button class="pg-btn pg-num"
+          [class.pg-active]="p === currentPage"
+          *ngIf="p === 0 || p === totalPages - 1 || (p >= currentPage - 2 && p <= currentPage + 2)"
+          (click)="goToPage(p)">
+          {{ p + 1 }}
+        </button>
+        <span class="pg-ellipsis"
+          *ngIf="(p === currentPage - 3 && p > 0) || (p === currentPage + 3 && p < totalPages - 1)">
+          …
+        </span>
+      </ng-container>
+      <button class="pg-btn" (click)="nextPage()" [disabled]="currentPage === totalPages - 1">
+        <mat-icon>chevron_right</mat-icon>
+      </button>
     </div>
   </div>
 
