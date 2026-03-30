@@ -1,0 +1,37 @@
+<div class="dialog-wrapper" [ngClass]="'type-' + data.type">
+
+  <!-- Icône centrale -->
+  <div class="icon-ring">
+    <mat-icon class="main-icon">{{ icon }}</mat-icon>
+  </div>
+
+  <mat-dialog-content class="dialog-body">
+    <h2 class="dialog-title">{{ title }}</h2>
+
+    <!-- Badge utilisateur -->
+    <div class="user-badge">
+      <mat-icon>account_circle</mat-icon>
+      <span>{{ data.userName }}</span>
+    </div>
+
+    <!-- Message contextuel -->
+    <p class="dialog-message" [innerHTML]="message"></p>
+
+    <!-- Avertissement supplémentaire pour la suppression -->
+    <div class="danger-box" *ngIf="data.type === 'delete'">
+      <mat-icon>warning</mat-icon>
+      <span>Cette action ne peut pas être annulée.</span>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions class="dialog-actions">
+    <button mat-stroked-button class="btn-cancel" (click)="cancel()">
+      Annuler
+    </button>
+    <button mat-flat-button class="btn-confirm" (click)="confirm()">
+      <mat-icon>{{ icon }}</mat-icon>
+      {{ confirmLabel }}
+    </button>
+  </mat-dialog-actions>
+
+</div>

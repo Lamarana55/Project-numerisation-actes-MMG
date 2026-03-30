@@ -76,6 +76,8 @@ import { PrivacyPolicyComponent } from './config/about/privacy-policy/privacy-po
 import { PermissionDialogComponent } from './config/permissions-list/permission-dialog/permission-dialog.component';
 import { RoleFormDialogComponent } from './config/roles-list/role-form-dialog/role-form-dialog.component';
 import { UserFormDialogComponent } from './config/user-form-dialog/user-form-dialog.component';
+import { ResetPasswordDialogComponent } from './config/reset-password-dialog/reset-password-dialog.component';
+import { ConfirmActionDialogComponent } from './config/confirm-action-dialog/confirm-action-dialog.component';
 import { ToastComponent } from './shared/toast/toast.component';
 import { NumerisationIndexationComponent } from './numerisation-indexation/numerisation-indexation.component';
 
@@ -100,6 +102,8 @@ registerLocaleData(localeFr);
     PermissionsListComponent,
     RoleFormDialogComponent,
     UserFormDialogComponent,
+    ResetPasswordDialogComponent,
+    ConfirmActionDialogComponent,
     UserCreateComponent,
     LocalitesListComponent,
     AboutComponent,

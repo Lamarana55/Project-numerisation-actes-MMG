@@ -303,8 +303,8 @@ export class UserProfileComponent implements OnInit {
   /**
    * Obtenir les rôles de manière sécurisée
    */
-  getUserRoles(): Role {
-    return this.currentUser!.role;
+  getUserRoles(): Role | undefined {
+    return this.currentUser?.role;
   }
 
   /**

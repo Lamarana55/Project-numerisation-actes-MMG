@@ -1,0 +1,150 @@
+/* ── Variables par type ─────────────────────────────────────── */
+.type-delete     { --accent: #dc2626; --accent-light: #fef2f2; --accent-border: #fecaca; --accent-glow: rgba(220,38,38,.20); }
+.type-activate   { --accent: #16a34a; --accent-light: #f0fdf4; --accent-border: #bbf7d0; --accent-glow: rgba(22,163,74,.20); }
+.type-deactivate { --accent: #d97706; --accent-light: #fffbeb; --accent-border: #fde68a; --accent-glow: rgba(217,119,6,.20); }
+
+/* ── Wrapper ────────────────────────────────────────────────── */
+.dialog-wrapper {
+  text-align: center;
+  padding: 0;
+  min-width: 380px;
+}
+
+/* ── Icône animée ───────────────────────────────────────────── */
+.icon-ring {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: var(--accent-light);
+  border: 2px solid var(--accent-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 32px auto 0;
+  box-shadow: 0 0 0 8px var(--accent-glow);
+  animation: ring-pulse 2s ease-in-out infinite;
+}
+
+@keyframes ring-pulse {
+  0%, 100% { box-shadow: 0 0 0 8px var(--accent-glow); }
+  50%       { box-shadow: 0 0 0 14px transparent; }
+}
+
+.main-icon {
+  font-size: 38px;
+  width: 38px;
+  height: 38px;
+  color: var(--accent);
+}
+
+/* ── Corps ──────────────────────────────────────────────────── */
+.dialog-body {
+  padding: 20px 28px 4px !important;
+}
+
+.dialog-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 14px 0 16px;
+}
+
+/* ── Badge utilisateur ──────────────────────────────────────── */
+.user-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  padding: 7px 18px;
+  font-weight: 600;
+  font-size: 14px;
+  color: #1e293b;
+  margin-bottom: 16px;
+}
+
+.user-badge mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  color: #64748b;
+}
+
+/* ── Message ────────────────────────────────────────────────── */
+.dialog-message {
+  font-size: 14px;
+  color: #475569;
+  line-height: 1.6;
+  margin: 0 0 16px;
+  text-align: center;
+}
+
+.dialog-message strong {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* ── Boîte danger (suppression) ─────────────────────────────── */
+.danger-box {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--accent-light);
+  border: 1px solid var(--accent-border);
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+
+.danger-box mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+/* ── Actions ────────────────────────────────────────────────── */
+.dialog-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  padding: 8px 28px 28px !important;
+}
+
+.btn-cancel {
+  border-radius: 8px;
+  color: #64748b;
+  border-color: #e2e8f0;
+  font-weight: 500;
+  min-width: 110px;
+}
+
+.btn-cancel:hover {
+  background: #f8fafc;
+}
+
+.btn-confirm {
+  border-radius: 8px;
+  background: var(--accent) !important;
+  color: #fff !important;
+  font-weight: 600;
+  min-width: 130px;
+  box-shadow: 0 3px 12px var(--accent-glow);
+  transition: box-shadow .2s, transform .15s;
+}
+
+.btn-confirm:hover {
+  box-shadow: 0 5px 20px var(--accent-glow);
+  transform: translateY(-1px);
+}
+
+.btn-confirm mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  margin-right: 4px;
+}

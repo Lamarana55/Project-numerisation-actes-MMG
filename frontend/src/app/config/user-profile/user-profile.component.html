@@ -39,7 +39,7 @@
           <mat-chip-set *ngIf="hasRoles()">
             <mat-chip  class="role-chip">
               <mat-icon>security</mat-icon>
-              {{currentUser?.role!.nom}}
+              {{ currentUser?.roleName ?? currentUser?.role?.nom }}
             </mat-chip>
           </mat-chip-set>
         </div>

@@ -30,7 +30,6 @@ export class UserService {
    * Créer un nouvel utilisateur
    */
   createUser(user: User): Observable<User> {
-    console.log(user)
     return this.http.post<User>(this.apiUrl, user);
   }
 
@@ -45,7 +44,7 @@ export class UserService {
    * Supprimer un utilisateur
    */
   deleteUser(id: string): Observable<string> {
-    return this.http.delete<string>(`${this.apiUrl}/${id}`);
+    return this.http.delete(`${this.apiUrl}/${id}`, { responseType: 'text' });
   }
 
   /**
@@ -95,7 +94,9 @@ export class UserService {
   /**
    * Réinitialiser le mot de passe d'un utilisateur
    */
-  resetUserPassword(userId: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/${userId}/reset-password`, {});
+  resetUserPassword(userId: string): Observable<{ message: string; defaultPassword: string }> {
+    return this.http.post<{ message: string; defaultPassword: string }>(
+      `${this.apiUrl}/${userId}/reset-password`, {}
+    );
   }
 }
