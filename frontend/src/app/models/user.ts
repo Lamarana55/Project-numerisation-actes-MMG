@@ -11,7 +11,10 @@ export interface User {
   code?: string;
   statut?: 'Activated' | 'Desactivated';
   isDelete?: 'Yes' | 'No';
-  role: Role;
+  // Backend (UserDTO) retourne roleName (String)
+  roleName?: string;
+  // Utilisé uniquement pour l'envoi (création / mise à jour)
+  role?: Role;
   createdAt?: Date;
   updatedAt?: Date;
 }

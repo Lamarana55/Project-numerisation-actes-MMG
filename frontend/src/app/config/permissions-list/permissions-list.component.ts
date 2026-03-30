@@ -1,13 +1,17 @@
-// permissions-list.component.ts
-import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef, inject } from '@angular/core';
+import {
+  Component, OnInit, OnDestroy,
+  ChangeDetectionStrategy, ChangeDetectorRef, inject
+} from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { PageEvent } from '@angular/material/paginator';
 import { Subject, takeUntil } from 'rxjs';
+import { FormControl } from '@angular/forms';
 
 import { Permission } from '../../models/permission';
 import { PermissionService } from '../../services/permission.service';
 import { PermissionDialogComponent } from './permission-dialog/permission-dialog.component';
+import { ConfirmActionDialogComponent } from '../confirm-action-dialog/confirm-action-dialog.component';
 
 @Component({
   selector: 'app-permissions-list',
@@ -16,265 +20,174 @@ import { PermissionDialogComponent } from './permission-dialog/permission-dialog
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PermissionsListComponent implements OnInit, OnDestroy {
-  private readonly permissionService = inject(PermissionService);
-  private readonly snackBar = inject(MatSnackBar);
-  private readonly dialog = inject(MatDialog);
-  private readonly cdr = inject(ChangeDetectorRef);
-  private readonly destroy$ = new Subject<void>();
 
-  permissions: Permission[] = [];
-  filteredPermissions: Permission[] = [];
+  private readonly permService = inject(PermissionService);
+  private readonly snackBar    = inject(MatSnackBar);
+  private readonly dialog      = inject(MatDialog);
+  private readonly cdr         = inject(ChangeDetectorRef);
+  private readonly destroy$    = new Subject<void>();
+
+  permissions:          Permission[] = [];
+  filteredPermissions:  Permission[] = [];
   paginatedPermissions: Permission[] = [];
   loading = false;
   error: string | null = null;
-  searchTerm = '';
 
-  // Pagination
-  pageSize = 5;
+  searchControl = new FormControl('');
+
+  pageSize        = 10;
   pageSizeOptions = [5, 10, 25, 50];
-  currentPage = 0;
-  totalItems = 0;
+  currentPage     = 0;
+  totalItems      = 0;
 
-  // Configuration du tableau
-  displayedColumns: string[] = ['nom', 'description', 'actions'];
+  displayedColumns = ['nom', 'description', 'actions'];
 
-  ngOnInit(): void {
-    this.loadPermissions();
-  }
+  ngOnInit(): void { this.loadPermissions(); }
+  ngOnDestroy(): void { this.destroy$.next(); this.destroy$.complete(); }
 
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
-  /**
-   * Charge toutes les permissions
-   */
   loadPermissions(): void {
     this.loading = true;
     this.error = null;
     this.cdr.markForCheck();
-
-    this.permissionService.getAllPermissions()
+    this.permService.getAllPermissions()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (permissions) => {
-          this.permissions = permissions;
+        next: (perms) => {
+          this.permissions = perms;
           this.applyFilter();
           this.loading = false;
           this.cdr.markForCheck();
         },
-        error: (error) => {
-          console.error('Erreur lors du chargement des permissions:', error);
+        error: () => {
           this.error = 'Impossible de charger les permissions';
           this.loading = false;
           this.cdr.markForCheck();
-          this.showNotification('Erreur lors du chargement des permissions');
+          this.notify('Erreur lors du chargement', 'error');
         }
       });
   }
 
-  /**
-   * Applique le filtre de recherche
-   */
   applyFilter(): void {
-    let filtered = [...this.permissions];
-
-    if (this.searchTerm.trim()) {
-      const term = this.searchTerm.toLowerCase();
-      filtered = filtered.filter(permission =>
-        permission.nom.toLowerCase().includes(term) ||
-        (permission.description && permission.description.toLowerCase().includes(term))
-      );
-    }
-
-    this.filteredPermissions = filtered;
-    this.totalItems = filtered.length;
+    const term = (this.searchControl.value || '').toLowerCase().trim();
+    this.filteredPermissions = term
+      ? this.permissions.filter(p =>
+          p.nom.toLowerCase().includes(term) ||
+          (p.description || '').toLowerCase().includes(term))
+      : [...this.permissions];
+    this.totalItems  = this.filteredPermissions.length;
     this.currentPage = 0;
-    this.updatePaginatedData();
+    this.updatePaginated();
+  }
+
+  private updatePaginated(): void {
+    const start = this.currentPage * this.pageSize;
+    this.paginatedPermissions = this.filteredPermissions.slice(start, start + this.pageSize);
     this.cdr.markForCheck();
   }
 
-  /**
-   * Met à jour les données paginées
-   */
-  updatePaginatedData(): void {
-    const startIndex = this.currentPage * this.pageSize;
-    const endIndex = startIndex + this.pageSize;
-    this.paginatedPermissions = this.filteredPermissions.slice(startIndex, endIndex);
-    this.cdr.markForCheck();
+  onPageChange(e: PageEvent): void {
+    this.currentPage = e.pageIndex;
+    this.pageSize    = e.pageSize;
+    this.updatePaginated();
   }
 
-  /**
-   * Gère le changement de page
-   */
-  onPageChange(event: PageEvent): void {
-    this.currentPage = event.pageIndex;
-    this.pageSize = event.pageSize;
-    this.updatePaginatedData();
-  }
+  clearSearch(): void { this.searchControl.setValue(''); this.applyFilter(); }
+  refreshData(): void { this.loadPermissions(); }
 
-  /**
-   * Ouvre le dialog d'ajout
-   */
+  // ── CRUD ──────────────────────────────────────────────────────
   openAddDialog(): void {
-    const dialogRef = this.dialog.open(PermissionDialogComponent, {
-      width: '500px',
-      data: {
-        permission: null,
-        title: 'Nouvelle Permission'
-      }
+    const ref = this.dialog.open(PermissionDialogComponent, {
+      width: '500px', maxWidth: '95vw',
+      data: { mode: 'create', permission: null }
     });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.createPermission(result);
-      }
-    });
+    ref.afterClosed().subscribe(result => { if (result) this.createPermission(result); });
   }
 
-  /**
-   * Ouvre le dialog de modification
-   */
-  openEditDialog(permission: Permission): void {
-    const dialogRef = this.dialog.open(PermissionDialogComponent, {
-      width: '500px',
-      data: {
-        permission: { ...permission },
-        title: 'Modifier Permission'
-      }
+  openEditDialog(perm: Permission): void {
+    const ref = this.dialog.open(PermissionDialogComponent, {
+      width: '500px', maxWidth: '95vw',
+      data: { mode: 'edit', permission: { ...perm } }
     });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.updatePermission(permission.id!, result);
-      }
-    });
+    ref.afterClosed().subscribe(result => { if (result) this.updatePermission(perm.id!, result); });
   }
 
-  /**
-   * Crée une nouvelle permission
-   */
-  createPermission(permissionData: Permission): void {
+  private createPermission(data: any): void {
     this.loading = true;
     this.cdr.markForCheck();
-
-    this.permissionService.createPermission(permissionData)
+    this.permService.createPermission(data)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (permission) => {
-          this.permissions.push(permission);
+        next: (perm) => {
+          this.permissions = [perm, ...this.permissions];
+          this.loading = false;
           this.applyFilter();
-          this.loading = false;
-          this.cdr.markForCheck();
-          this.showNotification('Permission créée avec succès');
+          this.notify('Permission créée avec succès', 'success');
         },
-        error: (error) => {
-          console.error('Erreur lors de la création:', error);
+        error: (err) => {
           this.loading = false;
           this.cdr.markForCheck();
-          this.showNotification('Erreur lors de la création de la permission');
+          const msg = err.status === 409 ? 'Cette permission existe déjà' : 'Erreur lors de la création';
+          this.notify(msg, 'error');
         }
       });
   }
 
-  /**
-   * Met à jour une permission existante
-   */
-  updatePermission(id: string, permissionData: Permission): void {
+  private updatePermission(id: string, data: any): void {
     this.loading = true;
     this.cdr.markForCheck();
-
-    this.permissionService.updatePermission(id, permissionData)
+    this.permService.updatePermission(id, data)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (updatedPermission) => {
-          const index = this.permissions.findIndex(p => p.id === id);
-          if (index !== -1) {
-            this.permissions[index] = updatedPermission;
+        next: (updated) => {
+          const idx = this.permissions.findIndex(p => p.id === id);
+          if (idx !== -1) this.permissions[idx] = updated;
+          this.loading = false;
+          this.applyFilter();
+          this.notify('Permission modifiée avec succès', 'success');
+        },
+        error: () => {
+          this.loading = false;
+          this.cdr.markForCheck();
+          this.notify('Erreur lors de la modification', 'error');
+        }
+      });
+  }
+
+  deletePermission(perm: Permission): void {
+    const ref = this.dialog.open(ConfirmActionDialogComponent, {
+      width: '440px', maxWidth: '95vw',
+      data: { type: 'delete', userName: perm.nom }
+    });
+    ref.afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.loading = true;
+      this.cdr.markForCheck();
+      this.permService.deletePermission(perm.id!)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: () => {
+            this.permissions = this.permissions.filter(p => p.id !== perm.id);
+            this.loading = false;
             this.applyFilter();
+            this.notify('Permission supprimée avec succès', 'success');
+          },
+          error: () => {
+            this.loading = false;
+            this.cdr.markForCheck();
+            this.notify('Erreur lors de la suppression', 'error');
           }
-          this.loading = false;
-          this.cdr.markForCheck();
-          this.showNotification('Permission modifiée avec succès');
-        },
-        error: (error) => {
-          console.error('Erreur lors de la modification:', error);
-          this.loading = false;
-          this.cdr.markForCheck();
-          this.showNotification('Erreur lors de la modification de la permission');
-        }
-      });
-  }
-
-  /**
-   * Supprime une permission avec confirmation native
-   */
-  deletePermission(permission: Permission): void {
-    // Utilisation de la confirmation native du navigateur - SIMPLE ET SANS ERREUR
-    const confirmed = window.confirm(`Êtes-vous sûr de vouloir supprimer la permission "${permission.nom}" ?`);
-
-    if (confirmed) {
-      this.performDelete(permission);
-    }
-  }
-
-  /**
-   * Effectue la suppression
-   */
-  private performDelete(permission: Permission): void {
-    this.loading = true;
-    this.cdr.markForCheck();
-
-    this.permissionService.deletePermission(permission.id!)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: () => {
-          this.permissions = this.permissions.filter(p => p.id !== permission.id);
-          this.applyFilter();
-          this.loading = false;
-          this.cdr.markForCheck();
-          this.showNotification('Permission supprimée avec succès');
-        },
-        error: (error) => {
-          console.error('Erreur lors de la suppression:', error);
-          this.loading = false;
-          this.cdr.markForCheck();
-          this.showNotification('Erreur lors de la suppression de la permission');
-        }
-      });
-  }
-
-  /**
-   * Recharge les données
-   */
-  refreshData(): void {
-    this.loadPermissions();
-  }
-
-  /**
-   * Efface le filtre de recherche
-   */
-  clearSearch(): void {
-    this.searchTerm = '';
-    this.applyFilter();
-  }
-
-  /**
-   * Affiche une notification simple
-   */
-  private showNotification(message: string): void {
-    this.snackBar.open(message, 'Fermer', {
-      duration: 3000,
-      horizontalPosition: 'end',
-      verticalPosition: 'top'
+        });
     });
   }
 
-  /**
-   * Track by function pour les performances
-   */
-  trackByPermissionId(index: number, permission: Permission): string {
-    return permission.id || index.toString();
+  private notify(msg: string, type: 'success' | 'error'): void {
+    this.snackBar.open(msg, 'Fermer', {
+      duration: 4000,
+      horizontalPosition: 'end',
+      verticalPosition: 'top',
+      panelClass: type === 'success' ? 'snackbar-success' : 'snackbar-error'
+    });
   }
+
+  trackById(_: number, p: Permission): string { return p.id ?? ''; }
 }

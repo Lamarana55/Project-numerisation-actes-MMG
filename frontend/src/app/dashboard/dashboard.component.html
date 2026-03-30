@@ -75,7 +75,7 @@
           <span class="filter-step">2</span> Préfecture
         </label>
         <div class="filter-select-wrap" [class.active]="selectedPrefCode" [class.disabled]="!selectedRegionCode">
-          <mat-icon class="filter-ico">location_city</mat-icon>
+          <mat-icon class="filter-ico">place</mat-icon>
           <select [(ngModel)]="selectedPrefCode" (ngModelChange)="onPrefChange()"
             class="filter-sel" [disabled]="!selectedRegionCode">
             <option value="">{{ selectedRegionCode ? 'Toutes' : '—' }}</option>
@@ -93,7 +93,7 @@
           <span class="filter-step">3</span> Commune
         </label>
         <div class="filter-select-wrap" [class.active]="selectedComCode" [class.disabled]="!selectedPrefCode">
-          <mat-icon class="filter-ico">home_work</mat-icon>
+          <mat-icon class="filter-ico">place</mat-icon>
           <select [(ngModel)]="selectedComCode" (ngModelChange)="onComChange()"
             class="filter-sel" [disabled]="!selectedPrefCode">
             <option value="">{{ selectedPrefCode ? 'Toutes' : '—' }}</option>

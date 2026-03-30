@@ -1,95 +1,137 @@
 package gov.ravec.backend.services;
 
+import gov.ravec.backend.dto.ResetPasswordResponse;
+import gov.ravec.backend.dto.UserCreateRequest;
 import gov.ravec.backend.dto.UserDTO;
+import gov.ravec.backend.dto.UserUpdateRequest;
+import gov.ravec.backend.entities.Role;
 import gov.ravec.backend.entities.User;
+import gov.ravec.backend.repositories.RoleRepository;
 import gov.ravec.backend.repositories.UserRepository;
 import gov.ravec.backend.utils.Delete;
 import gov.ravec.backend.utils.Statut;
 import jakarta.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
 public class UserService {
-    private final UserRepository userRepository;
 
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
     private final PasswordEncoder encoder;
 
     @Value("${ravec.app.default-password}")
     private String defaultPassword;
 
-    public UserService(UserRepository userRepository, PasswordEncoder encoder) {
+    public UserService(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder encoder) {
         this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
         this.encoder = encoder;
     }
 
-    private static boolean isDelete(User user) {
+    private static boolean isNotDeleted(User user) {
         return user.getIsDelete() == Delete.No;
     }
 
     public List<UserDTO> index() {
-        List<User> users = userRepository.findByIsDeleteOrderByCreatedAtDesc(Delete.No);
-        return User.toDTOList(users);
+        return User.toDTOList(userRepository.findByIsDeleteOrderByCreatedAtDesc(Delete.No));
     }
 
     public ResponseEntity<UserDTO> show(String id) {
-        Optional<User> user = userRepository.findById(id)
-                .filter(UserService::isDelete);
-
-        return user
-                .map(value -> ResponseEntity.ok(User.toDTO(value)))
+        return userRepository.findById(id)
+                .filter(UserService::isNotDeleted)
+                .map(u -> ResponseEntity.ok(User.toDTO(u)))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    public User save(User user) {
+    public UserDTO save(UserCreateRequest req) {
+        Role role = req.getRoleId() != null
+                ? roleRepository.findById(req.getRoleId()).orElse(null)
+                : null;
+
+        User user = new User();
         user.setId(UUID.randomUUID().toString());
         user.setCode(UUID.randomUUID().toString());
+        user.setNom(req.getNom());
+        user.setPrenom(req.getPrenom());
+        user.setEmail(req.getEmail());
+        user.setUsername(req.getUsername());
+        user.setTelephone(req.getTelephone());
+        user.setFonction(req.getFonction());
+        user.setRole(role);
         user.setStatut(Statut.Activated);
         user.setPassword(encoder.encode(defaultPassword));
-        return userRepository.save(user);
+        return User.toDTO(userRepository.save(user));
     }
 
-    public User update(String id, User user) {
-        return userRepository.findById(id).map(exist -> {
-            exist.setCode(user.getCode());
-            exist.setNom(user.getNom());
-            exist.setPrenom(user.getPrenom());
-            exist.setEmail(user.getEmail());
-            exist.setTelephone(user.getTelephone());
-            exist.setFonction(user.getFonction());
-            exist.setRole(user.getRole());
-            exist.setUsername(user.getUsername());
+    public UserDTO update(String id, UserUpdateRequest req) {
+        return userRepository.findById(id)
+                .filter(UserService::isNotDeleted)
+                .map(exist -> {
+                    exist.setNom(req.getNom());
+                    exist.setPrenom(req.getPrenom());
+                    exist.setEmail(req.getEmail());
+                    exist.setTelephone(req.getTelephone());
+                    exist.setFonction(req.getFonction());
+                    exist.setUsername(req.getUsername());
+                    // Résoudre le Role depuis la BDD pour éviter l'entité détachée
+                    if (req.getRoleId() != null) {
+                        roleRepository.findById(req.getRoleId()).ifPresent(exist::setRole);
+                    }
+                    if (req.getStatut() != null) {
+                        exist.setStatut(req.getStatut());
+                    }
+                    exist.setUpdatedAt(Instant.now());
+                    return User.toDTO(userRepository.save(exist));
+                }).orElse(null);
+    }
 
-            exist.setUpdatedAt(Instant.now());
-            return userRepository.save(exist);
-        }).orElse(null);
+    public UserDTO toggleStatus(String id) {
+        return userRepository.findById(id)
+                .filter(UserService::isNotDeleted)
+                .map(user -> {
+                    user.setStatut(user.getStatut() == Statut.Activated ? Statut.Desactivated : Statut.Activated);
+                    user.setUpdatedAt(Instant.now());
+                    return User.toDTO(userRepository.save(user));
+                }).orElse(null);
+    }
+
+    public ResetPasswordResponse resetPassword(String id) {
+        return userRepository.findById(id)
+                .filter(UserService::isNotDeleted)
+                .map(user -> {
+                    user.setPassword(encoder.encode(defaultPassword));
+                    user.setUpdatedAt(Instant.now());
+                    userRepository.save(user);
+                    return new ResetPasswordResponse("Mot de passe réinitialisé avec succès", defaultPassword);
+                }).orElse(null);
     }
 
     public String delete(String id) {
-        return userRepository.findById(id).filter(UserService::isDelete).map(exist -> {
-            exist.setIsDelete(Delete.Yes);
-            userRepository.save(exist);
-            return "User deleted !";
-        }).orElse(null);
+        return userRepository.findById(id)
+                .filter(UserService::isNotDeleted)
+                .map(exist -> {
+                    exist.setIsDelete(Delete.Yes);
+                    userRepository.save(exist);
+                    return "Utilisateur supprimé avec succès";
+                }).orElse(null);
     }
 
     public boolean saveAll(List<User> users) {
-        List<User> userList = users.stream()
+        List<User> toSave = users.stream()
                 .filter(user -> !userRepository.existsById(user.getId()))
                 .toList();
-        if (!userList.isEmpty()) {
-            userRepository.saveAll(userList);
+        if (!toSave.isEmpty()) {
+            userRepository.saveAll(toSave);
             return true;
         }
         return false;

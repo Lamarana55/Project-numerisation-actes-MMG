@@ -1,222 +1,148 @@
-<h2 mat-dialog-title>
-  {{ isEditMode ? 'Modifier l\'utilisateur' : 'Nouvel utilisateur' }}
-</h2>
+<div class="dialog-header">
+  <div class="dialog-header-icon">
+    <mat-icon>{{ isEditMode ? 'edit' : 'person_add' }}</mat-icon>
+  </div>
+  <div class="dialog-header-text">
+    <h2 mat-dialog-title>{{ isEditMode ? 'Modifier l\'utilisateur' : 'Nouvel utilisateur' }}</h2>
+    <p class="dialog-subtitle">{{ isEditMode ? 'Mettez à jour les informations' : 'Remplissez les informations du nouveau compte' }}</p>
+  </div>
+</div>
 
 <form [formGroup]="userForm" (ngSubmit)="onSubmit()">
   <mat-dialog-content class="dialog-content">
     <div class="form-container">
 
       <!-- Informations personnelles -->
-      <div class="personal-info-section">
-        <h3><mat-icon>person</mat-icon> Informations personnelles</h3>
+      <div class="form-section">
+        <div class="section-header">
+          <mat-icon class="section-icon">person</mat-icon>
+          <span class="section-title">Informations personnelles</span>
+        </div>
 
         <div class="form-row">
-          <!-- Prénom -->
           <mat-form-field appearance="outline" class="half-width">
             <mat-label>Prénom</mat-label>
-            <input matInput
-                   formControlName="prenom"
-                   (blur)="generateUsername()"
-                   placeholder="Prénom">
-            <mat-error *ngIf="getFieldError('prenom')">
-              {{ getFieldError('prenom') }}
-            </mat-error>
+            <input matInput formControlName="prenom" (blur)="generateUsername()" placeholder="Prénom">
+            <mat-icon matSuffix>badge</mat-icon>
+            <mat-error *ngIf="getFieldError('prenom')">{{ getFieldError('prenom') }}</mat-error>
           </mat-form-field>
 
-          <!-- Nom -->
           <mat-form-field appearance="outline" class="half-width">
             <mat-label>Nom</mat-label>
-            <input matInput
-                   formControlName="nom"
-                   (blur)="generateUsername()"
-                   placeholder="Nom de famille">
-            <mat-error *ngIf="getFieldError('nom')">
-              {{ getFieldError('nom') }}
-            </mat-error>
+            <input matInput formControlName="nom" (blur)="generateUsername()" placeholder="Nom de famille">
+            <mat-icon matSuffix>badge</mat-icon>
+            <mat-error *ngIf="getFieldError('nom')">{{ getFieldError('nom') }}</mat-error>
           </mat-form-field>
         </div>
 
         <div class="form-row">
-          <!-- Téléphone -->
           <mat-form-field appearance="outline" class="half-width">
             <mat-label>Téléphone</mat-label>
-            <input matInput
-                   formControlName="telephone"
-                   type="tel"
-                   placeholder="624000000">
+            <input matInput formControlName="telephone" type="tel" placeholder="624 000 000">
             <mat-icon matSuffix>phone</mat-icon>
-            <mat-error *ngIf="getFieldError('telephone')">
-              {{ getFieldError('telephone') }}
-            </mat-error>
+            <mat-error *ngIf="getFieldError('telephone')">{{ getFieldError('telephone') }}</mat-error>
           </mat-form-field>
 
-          <!-- Fonction -->
           <mat-form-field appearance="outline" class="half-width">
             <mat-label>Fonction (optionnel)</mat-label>
-            <input matInput
-                   formControlName="fonction"
-                   placeholder="Directeur, Manager, etc.">
+            <input matInput formControlName="fonction" placeholder="Directeur, Agent, etc.">
             <mat-icon matSuffix>work</mat-icon>
           </mat-form-field>
         </div>
       </div>
 
-      <!-- Informations de connexion -->
-      <div class="account-info-section">
-        <h3><mat-icon>account_box</mat-icon> Informations de compte</h3>
+      <!-- Informations de compte -->
+      <div class="form-section">
+        <div class="section-header">
+          <mat-icon class="section-icon">manage_accounts</mat-icon>
+          <span class="section-title">Informations de compte</span>
+        </div>
 
         <div class="form-row">
-          <!-- Email/Username (même champ) -->
           <mat-form-field appearance="outline" class="half-width">
-            <mat-label>Email/Username</mat-label>
-            <input matInput
-                   formControlName="email"
-                   type="email"
-                   placeholder="prenom.nom@ravec.gov.gn">
+            <mat-label>Adresse email</mat-label>
+            <input matInput formControlName="email" type="email" placeholder="prenom.nom@ravec.gov.gn">
             <mat-icon matSuffix>email</mat-icon>
-            <mat-error *ngIf="getFieldError('email')">
-              {{ getFieldError('email') }}
-            </mat-error>
+            <mat-error *ngIf="getFieldError('email')">{{ getFieldError('email') }}</mat-error>
           </mat-form-field>
 
-          <!-- Username (copie de l'email) -->
           <mat-form-field appearance="outline" class="half-width">
             <mat-label>Nom d'utilisateur</mat-label>
-            <input matInput
-                   formControlName="username"
-                   placeholder="prenom.nom@ravec.gov.gn">
-            <mat-icon matSuffix>person</mat-icon>
-            <mat-error *ngIf="getFieldError('username')">
-              {{ getFieldError('username') }}
-            </mat-error>
+            <input matInput formControlName="username" placeholder="prenom.nom@ravec.gov.gn"
+                   [readonly]="isEditMode">
+            <mat-icon matSuffix>{{ isEditMode ? 'lock' : 'alternate_email' }}</mat-icon>
+            <mat-hint *ngIf="isEditMode">Le nom d'utilisateur ne peut pas être modifié</mat-hint>
+            <mat-error *ngIf="getFieldError('username')">{{ getFieldError('username') }}</mat-error>
           </mat-form-field>
         </div>
 
-        <!-- Mots de passe (seulement en mode création) -->
-        <div *ngIf="!isEditMode" class="password-section">
-          <div class="form-row">
-            <!-- Mot de passe -->
-            <mat-form-field appearance="outline" class="half-width">
-              <mat-label>Mot de passe</mat-label>
-              <input matInput
-                     formControlName="password"
-                     type="password"
-                     placeholder="Mot de passe">
-              <mat-icon matSuffix>lock</mat-icon>
-              <mat-error *ngIf="getFieldError('password')">
-                {{ getFieldError('password') }}
-              </mat-error>
-              <mat-hint *ngIf="userForm.get('password')?.value">
-                Force: <span [style.color]="getPasswordStrengthColor() === 'warn' ? '#f44336' :
-                                         getPasswordStrengthColor() === 'accent' ? '#ff9800' : '#4caf50'">
-                  {{ getPasswordStrength() }}
-                </span>
-              </mat-hint>
-            </mat-form-field>
+        <!-- Bouton de génération automatique -->
+        <div class="auto-generate">
+          <button mat-stroked-button type="button" (click)="generateUsername()"
+            [disabled]="!userForm.get('nom')?.value || !userForm.get('prenom')?.value"
+            class="generate-btn">
+            <mat-icon>auto_fix_high</mat-icon>
+            {{ isEditMode ? 'Générer email' : 'Générer email / username' }}
+          </button>
+          <span class="generate-hint">Format : prenom.nom&#64;ravec.gov.gn</span>
+        </div>
 
-            <!-- Confirmation mot de passe -->
-            <mat-form-field appearance="outline" class="half-width">
-              <mat-label>Confirmer le mot de passe</mat-label>
-              <input matInput
-                     formControlName="confirmPassword"
-                     type="password"
-                     placeholder="Confirmer le mot de passe">
-              <mat-icon matSuffix>lock_outline</mat-icon>
-              <mat-error *ngIf="!passwordsMatch() && userForm.get('confirmPassword')?.touched">
-                Les mots de passe ne correspondent pas
-              </mat-error>
-            </mat-form-field>
-          </div>
+        <!-- Note mot de passe par défaut (création uniquement) -->
+        <div class="default-password-note" *ngIf="!isEditMode">
+          <mat-icon>info</mat-icon>
+          <span>Un mot de passe par défaut sera attribué automatiquement. L'utilisateur pourra le modifier à la première connexion.</span>
         </div>
       </div>
 
-      <!-- Rôle -->
-      <div class="role-section">
-        <h3><mat-icon>security</mat-icon> Rôle et permissions</h3>
-        <p class="role-subtitle">
-          Sélectionnez le rôle accordé à cet utilisateur
-        </p>
+      <!-- Rôle et permissions -->
+      <div class="form-section">
+        <div class="section-header">
+          <mat-icon class="section-icon">security</mat-icon>
+          <span class="section-title">Rôle et permissions</span>
+        </div>
 
-        <!-- Sélection du rôle -->
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Rôle</mat-label>
           <mat-select formControlName="roleId" placeholder="Choisir un rôle">
             <mat-option *ngFor="let role of availableRoles" [value]="role.id">
               <div class="role-option">
-                <div class="role-name">{{ role.nom }}</div>
-                <div class="role-description">{{ role.description }}</div>
+                <span class="role-option-name">{{ role.nom }}</span>
+                <span class="role-option-desc" *ngIf="role.description">{{ role.description }}</span>
               </div>
             </mat-option>
           </mat-select>
-          <mat-icon matSuffix>security</mat-icon>
-          <mat-error *ngIf="getFieldError('roleId')">
-            {{ getFieldError('roleId') }}
-          </mat-error>
+          <mat-icon matSuffix>shield</mat-icon>
+          <mat-error *ngIf="getFieldError('roleId')">{{ getFieldError('roleId') }}</mat-error>
         </mat-form-field>
 
         <!-- Aperçu du rôle sélectionné -->
         <div class="role-preview" *ngIf="selectedRole">
-          <mat-card class="role-card">
-            <mat-card-header>
-              <mat-card-title>
-                <mat-icon>verified_user</mat-icon>
-                {{ selectedRole.nom }}
-              </mat-card-title>
-            </mat-card-header>
-            <mat-card-content>
-              <p>{{ selectedRole.description }}</p>
-              <div class="role-permissions" *ngIf="selectedRole.permissions && selectedRole.permissions.length > 0">
-                <h4>Permissions accordées ({{ selectedRole.permissions.length }}) :</h4>
-                <div class="permissions-chips">
-                  <mat-chip-set>
-                    <mat-chip *ngFor="let permission of selectedRole.permissions">
-                      {{ permission.nom }}
-                    </mat-chip>
-                  </mat-chip-set>
-                </div>
-              </div>
-            </mat-card-content>
-          </mat-card>
+          <div class="role-preview-header">
+            <mat-icon>verified_user</mat-icon>
+            <strong>{{ selectedRole.nom }}</strong>
+            <span class="role-perm-count" *ngIf="selectedRole.permissions?.length">
+              {{ selectedRole.permissions!.length }} permission(s)
+            </span>
+          </div>
+          <p class="role-preview-desc" *ngIf="selectedRole.description">{{ selectedRole.description }}</p>
+          <div class="permissions-chips" *ngIf="selectedRole.permissions && selectedRole.permissions.length > 0">
+            <span class="perm-chip" *ngFor="let p of selectedRole.permissions">{{ p.nom }}</span>
+          </div>
         </div>
       </div>
 
-      <!-- Génération automatique -->
-      <div class="generation-actions" *ngIf="!isEditMode">
-        <mat-card class="helper-card">
-          <mat-card-header>
-            <mat-icon mat-card-avatar>auto_fix_high</mat-icon>
-            <mat-card-title>Génération automatique</mat-card-title>
-            <mat-card-subtitle>Basé sur le format RAVEC</mat-card-subtitle>
-          </mat-card-header>
-          <mat-card-actions>
-            <button mat-stroked-button
-                    type="button"
-                    (click)="generateUsername()"
-                    [disabled]="!userForm.get('nom')?.value || !userForm.get('prenom')?.value">
-              <mat-icon>email</mat-icon>
-              Générer email/username
-            </button>
-          </mat-card-actions>
-        </mat-card>
-      </div>
     </div>
   </mat-dialog-content>
 
-  <mat-dialog-actions align="end">
-    <button mat-button
-            type="button"
-            (click)="onCancel()"
-            [disabled]="loading">
-      <mat-icon>cancel</mat-icon>
+  <mat-dialog-actions class="dialog-actions">
+    <button mat-stroked-button type="button" (click)="onCancel()">
+      <mat-icon>close</mat-icon>
       Annuler
     </button>
-    <button mat-raised-button
-            color="primary"
-            type="submit"
-            [disabled]="!userForm.valid || !passwordsMatch() || loading">
-      <mat-spinner *ngIf="loading" diameter="20" class="spinner-inline"></mat-spinner>
+    <button mat-raised-button color="primary" type="submit" [disabled]="!userForm.valid || loading" class="submit-btn">
+      <mat-spinner *ngIf="loading" diameter="18" class="spinner-inline"></mat-spinner>
       <mat-icon *ngIf="!loading">{{ isEditMode ? 'save' : 'person_add' }}</mat-icon>
-      {{ isEditMode ? 'Modifier' : 'Créer' }}
+      {{ isEditMode ? 'Enregistrer' : 'Créer l\'utilisateur' }}
     </button>
   </mat-dialog-actions>
 </form>

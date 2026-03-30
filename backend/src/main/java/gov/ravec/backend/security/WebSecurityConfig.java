@@ -3,6 +3,7 @@ package gov.ravec.backend.security;
 import gov.ravec.backend.services.UserDetailsServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -44,6 +45,10 @@ public class WebSecurityConfig {
             .exceptionHandling(ex -> ex.authenticationEntryPoint(unauthorizedHandler))
             .sessionManagement(m -> m.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(request -> request
+                // CORS preflight — les navigateurs envoient OPTIONS sans token
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                // Endpoint d'erreur Spring — doit être accessible sans auth
+                .requestMatchers("/error", "/error/**").permitAll()
                 .requestMatchers("/auth/**").permitAll()
                 .requestMatchers(
                     "/v3/api-docs/**",
