@@ -61,6 +61,25 @@
         </button>
       </div>
 
+      <!-- Barre de recherche -->
+      <div class="search-bar">
+        <mat-icon class="search-icon">search</mat-icon>
+        <input
+          [formControl]="searchControl"
+          placeholder="Rechercher par nom ou code…"
+          autocomplete="off"
+          class="search-input">
+        <button *ngIf="hasSearch" (click)="clearSearch()" type="button" class="search-clear-btn" matTooltip="Effacer">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <!-- Compteur résultats filtrés -->
+      <div *ngIf="hasSearch" class="search-results-info">
+        <mat-icon>filter_alt</mat-icon>
+        <span>{{ displayedHierarchy.length }} résultat(s) pour "{{ searchTerm }}"</span>
+      </div>
+
       <!-- Arborescence Hiérarchique -->
       <div class="hierarchy-tree">
         <ng-container *ngFor="let node of getHierarchyForTab()">

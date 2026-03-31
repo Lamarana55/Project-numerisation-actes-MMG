@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormControl, Validators } from '@angular/forms';
 import { Subject, Observable } from 'rxjs';
-import { takeUntil, finalize } from 'rxjs/operators';
+import { takeUntil, finalize, debounceTime } from 'rxjs/operators';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { LocalitesService } from './localites.service';
 import { HierarchyLevel } from './localites.models';
@@ -22,6 +22,11 @@ export class LocalitesComponent implements OnInit, OnDestroy {
   // Hierarquias
   adminHierarchy: HierarchyLevel[] = [];
   worldHierarchy: HierarchyLevel[] = [];
+
+  // Recherche / filtre
+  searchControl = new FormControl('');
+  searchTerm = '';
+  displayedHierarchy: HierarchyLevel[] = [];
 
   // Edición y selección
   selectedNode: HierarchyLevel | null = null;
@@ -50,11 +55,55 @@ export class LocalitesComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadData();
+    this.setupSearch();
   }
 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  private setupSearch(): void {
+    this.searchControl.valueChanges
+      .pipe(debounceTime(250), takeUntil(this.destroy$))
+      .subscribe(val => {
+        this.searchTerm = val || '';
+        this.applySearch();
+      });
+  }
+
+  applySearch(): void {
+    const term = this.searchTerm.toLowerCase().trim();
+    const hierarchy = this.activeTab === 'admin' ? this.adminHierarchy : this.worldHierarchy;
+    this.displayedHierarchy = term ? this.filterHierarchy(hierarchy, term) : hierarchy;
+  }
+
+  private filterHierarchy(nodes: HierarchyLevel[], term: string): HierarchyLevel[] {
+    const result: HierarchyLevel[] = [];
+    for (const node of nodes) {
+      const nodeMatches =
+        node.data.nom?.toLowerCase().includes(term) ||
+        node.data.code?.toLowerCase().includes(term);
+      const filteredChildren = node.children
+        ? this.filterHierarchy(node.children, term)
+        : [];
+      if (nodeMatches) {
+        result.push({ ...node, expanded: true });
+      } else if (filteredChildren.length > 0) {
+        result.push({ ...node, children: filteredChildren, expanded: true });
+      }
+    }
+    return result;
+  }
+
+  clearSearch(): void {
+    this.searchControl.setValue('');
+    this.searchTerm = '';
+    this.applySearch();
+  }
+
+  get hasSearch(): boolean {
+    return !!this.searchTerm;
   }
 
   loadData(): void {
@@ -67,6 +116,7 @@ export class LocalitesComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (hierarchy) => {
           this.adminHierarchy = hierarchy;
+          this.applySearch();
         },
         error: (err: any) => {
           this.error = 'Error cargando localidades';
@@ -79,6 +129,7 @@ export class LocalitesComponent implements OnInit, OnDestroy {
     this.activeTab = tab;
     this.selectedNode = null;
     this.closeEdit();
+    this.applySearch();
 
     if (tab === 'monde' && this.worldHierarchy.length === 0) {
       this.loadWorldData();
@@ -95,6 +146,7 @@ export class LocalitesComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (hierarchy) => {
           this.worldHierarchy = hierarchy;
+          this.applySearch();
         },
         error: (err: any) => {
           this.error = 'Error cargando países';
@@ -253,7 +305,7 @@ export class LocalitesComponent implements OnInit, OnDestroy {
   }
 
   getHierarchyForTab(): HierarchyLevel[] {
-    return this.activeTab === 'admin' ? this.adminHierarchy : this.worldHierarchy;
+    return this.displayedHierarchy;
   }
 
   getTypeLabel(type: string): string {
