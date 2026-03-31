@@ -19,25 +19,30 @@
 
   <!-- ══ BARRE FILTRE ══════════════════════════════════════════ -->
   <div class="filter-panel">
-    <div class="filter-topbar">
-      <span class="filter-label"><mat-icon>tune</mat-icon>Filtres & Recherche</span>
+    <div class="filter-panel-topbar">
+      <span class="filter-label"><mat-icon>tune</mat-icon>Filtres</span>
+      <span class="fp-sep"></span>
+      <span class="results-count"><mat-icon>check_circle</mat-icon>{{ filteredPermissions.length | number }}</span>
       <div class="fp-spacer"></div>
       <button mat-icon-button class="fp-refresh" (click)="refreshData()" [disabled]="loading" matTooltip="Actualiser">
         <mat-icon>refresh</mat-icon>
       </button>
       <button mat-flat-button class="fp-add-btn" (click)="openAddDialog()" [disabled]="loading">
         <mat-icon>add</mat-icon>
-        Nouvelle Permission
+        Nouvelle
       </button>
     </div>
     <div class="filter-body">
-      <div class="filter-search-wrap">
-        <mat-icon>search</mat-icon>
-        <input [formControl]="searchControl" (input)="applyFilter()"
-               placeholder="Rechercher par nom ou description…" autocomplete="off">
-        <button class="search-clear-btn" *ngIf="searchControl.value" (click)="clearSearch()" type="button">
-          <mat-icon>close</mat-icon>
-        </button>
+      <div class="filter-seg filter-seg--search">
+        <label class="filter-seg-label"><mat-icon>search</mat-icon>Recherche</label>
+        <div class="search-input-wrap">
+          <mat-icon>search</mat-icon>
+          <input [formControl]="searchControl" (input)="applyFilter()"
+                 placeholder="Nom, description…" autocomplete="off">
+          <button class="search-clear-btn" *ngIf="searchControl.value" (click)="clearSearch()" type="button">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
       </div>
     </div>
   </div>

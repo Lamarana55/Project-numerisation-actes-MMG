@@ -80,6 +80,10 @@ import { ResetPasswordDialogComponent } from './config/reset-password-dialog/res
 import { ConfirmActionDialogComponent } from './config/confirm-action-dialog/confirm-action-dialog.component';
 import { ToastComponent } from './shared/toast/toast.component';
 import { NumerisationIndexationComponent } from './numerisation-indexation/numerisation-indexation.component';
+import { SumPermissionsPipe } from './pipes/sum-permissions.pipe';
+import { LocalitesComponent } from './config/localites/localites.component';
+import { HierarchyNodeComponent } from './config/localites/hierarchy-node.component';
+
 
 registerLocaleData(localeFr);
 
@@ -106,12 +110,15 @@ registerLocaleData(localeFr);
     ConfirmActionDialogComponent,
     UserCreateComponent,
     LocalitesListComponent,
+    LocalitesComponent,
+    HierarchyNodeComponent,
     AboutComponent,
     NotificationsComponent,
     PrivacyPolicyComponent,
     PermissionDialogComponent,
     ToastComponent,
     NumerisationIndexationComponent,
+    SumPermissionsPipe,
   ],
   imports: [
     BrowserModule,
