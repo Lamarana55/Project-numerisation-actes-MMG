@@ -1,0 +1,207 @@
+<div class="localites-root">
+
+  <!-- ══ EN-TÊTE AVEC ONGLETS ══════════════════════════════════ -->
+  <div class="page-header">
+    <div class="header-top">
+      <div class="page-header-left">
+        <div class="page-header-icon"><mat-icon>public</mat-icon></div>
+        <div>
+          <h1 class="page-title">Gestion des Localités</h1>
+          <p class="page-subtitle">Gérez les régions, préfectures, communes, quartiers, pays et villes</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Onglets principal / Monde -->
+    <div class="tabs-container">
+      <button 
+        class="tab-btn" 
+        [class.active]="activeTab === 'admin'"
+        (click)="switchTab('admin')">
+        <mat-icon>public</mat-icon>
+        <span>Hiérarchie Administrative</span>
+        <span class="tab-badge" *ngIf="activeTab === 'admin'">→</span>
+      </button>
+      <button 
+        class="tab-btn" 
+        [class.active]="activeTab === 'monde'"
+        (click)="switchTab('monde')">
+        <mat-icon>language</mat-icon>
+        <span>Pays & Villes</span>
+        <span class="tab-badge" *ngIf="activeTab === 'monde'">→</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ══ CHARGEMENT ════════════════════════════════════════════ -->
+  <div *ngIf="loading" class="state-box">
+    <mat-spinner diameter="48"></mat-spinner>
+    <p>Chargement des données...</p>
+  </div>
+
+  <!-- ══ ERREUR ════════════════════════════════════════════════ -->
+  <div *ngIf="error && !loading" class="state-box state-box--error">
+    <mat-icon>error_outline</mat-icon>
+    <h3>Erreur</h3>
+    <p>{{ error }}</p>
+    <button mat-flat-button color="primary" (click)="loadData()">
+      <mat-icon>refresh</mat-icon> Réessayer
+    </button>
+  </div>
+
+  <!-- ══ CONTENU PRINCIPAL ════════════════════════════════════ -->
+  <div *ngIf="!loading && !error" class="main-layout">
+
+    <!-- Panneau Hiérarchique Gauche -->
+    <div class="hierarchy-panel">
+      <div class="hierarchy-header">
+        <h2>{{ activeTab === 'admin' ? 'Hiérarchie Administrative' : 'Pays & Villes' }}</h2>
+        <button mat-icon-button (click)="loadData()" matTooltip="Rafraîchir">
+          <mat-icon>refresh</mat-icon>
+        </button>
+      </div>
+
+      <!-- Arborescence Hiérarchique -->
+      <div class="hierarchy-tree">
+        <ng-container *ngFor="let node of getHierarchyForTab()">
+          <app-hierarchy-node
+            [node]="node"
+            [isSelected]="selectedNode?.data.id === node.data.id"
+            [expandedNodes]="expandedNodes"
+            (select)="selectNode($event)"
+            (toggleNode)="toggleNode($event)"
+            (createChild)="openCreate($event)"
+            (editNode)="openEdit($event)"
+            (deleteNode)="deleteNode($event)">
+          </app-hierarchy-node>
+        </ng-container>
+
+        <!-- État Vide -->
+        <div *ngIf="getHierarchyForTab().length === 0" class="empty-state">
+          <mat-icon>folder_open</mat-icon>
+          <p>Aucune données. Créez une nouvelle entrée.</p>
+        </div>
+      </div>
+
+      <!-- Bouton Créer Racine -->
+      <button 
+        mat-flat-button 
+        color="primary" 
+        class="btn-create-root"
+        (click)="openCreate()">
+        <mat-icon>add</mat-icon>
+        Créer {{ activeTab === 'admin' ? 'Région' : 'Pays' }}
+      </button>
+    </div>
+
+    <!-- Panneau Détails & Édition Droite -->
+    <div class="details-panel">
+
+      <!-- Pas de sélection -->
+      <div *ngIf="!selectedNode && !editMode" class="empty-details">
+        <mat-icon>info</mat-icon>
+        <p>Sélectionnez une localité pour voir les détails</p>
+      </div>
+
+      <!-- Mode Lecture -->
+      <div *ngIf="selectedNode && !editMode" class="node-details">
+        <div class="details-header">
+          <div class="header-badge" [style.background]="getColor(selectedNode.type)">
+            <mat-icon>{{ getIcon(selectedNode.type) }}</mat-icon>
+          </div>
+          <div>
+            <h3 class="node-label">
+              {{ formatLabel(selectedNode.type) }}
+            </h3>
+            <p class="node-code">{{ selectedNode.data.code }}</p>
+          </div>
+        </div>
+
+        <div class="details-info">
+          <div class="info-item">
+            <label>Nom</label>
+            <span>{{ selectedNode.data.nom }}</span>
+          </div>
+          <div class="info-item" *ngIf="selectedNode.data.createdAt">
+            <label>Créé le</label>
+            <span>{{ selectedNode.data.createdAt | date: 'short' }}</span>
+          </div>
+          <div class="info-item" *ngIf="selectedNode.data.updatedAt">
+            <label>Modifié le</label>
+            <span>{{ selectedNode.data.updatedAt | date: 'short' }}</span>
+          </div>
+        </div>
+
+        <div class="details-actions">
+          <button mat-stroked-button color="primary" (click)="openEdit(selectedNode)">
+            <mat-icon>edit</mat-icon> Modifier
+          </button>
+          <button mat-stroked-button color="warn" (click)="deleteNode(selectedNode)">
+            <mat-icon>delete_outline</mat-icon> Supprimer
+          </button>
+        </div>
+      </div>
+
+      <!-- Mode Édition / Création -->
+      <div *ngIf="editMode" class="edit-form-container">
+        <div class="form-header">
+          <h3>
+            {{ editMode ? 'Modifier' : 'Créer' }} 
+            {{ selectedNode ? formatLabel(selectedNode.type) : 'Nouvel élément' }}
+          </h3>
+        </div>
+
+        <form [formGroup]="editForm" (ngSubmit)="saveNode()" class="edit-form">
+
+          <!-- Champ Code -->
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Code</mat-label>
+            <input matInput formControlName="code" placeholder="Ex: GN, CA, etc." autocomplete="off">
+            <mat-icon matSuffix>code</mat-icon>
+            <mat-error *ngIf="editForm.get('code')?.hasError('required')">
+              Le code est requis
+            </mat-error>
+            <mat-error *ngIf="editForm.get('code')?.hasError('minlength')">
+              Minimum 2 caractères
+            </mat-error>
+          </mat-form-field>
+
+          <!-- Champ Nom -->
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Nom</mat-label>
+            <input matInput formControlName="nom" placeholder="Ex: Guinée, Conakry, etc." autocomplete="off">
+            <mat-icon matSuffix>label</mat-icon>
+            <mat-error *ngIf="editForm.get('nom')?.hasError('required')">
+              Le nom est requis
+            </mat-error>
+            <mat-error *ngIf="editForm.get('nom')?.hasError('minlength')">
+              Minimum 2 caractères
+            </mat-error>
+          </mat-form-field>
+
+          <!-- Erreurs personnalisées -->
+          <div *ngIf="formErrors.length > 0" class="form-errors">
+            <div *ngFor="let err of formErrors" class="error-msg">
+              <mat-icon>warning</mat-icon>
+              <span>{{ err.message }}</span>
+            </div>
+          </div>
+
+          <!-- Boutons Action -->
+          <div class="form-actions">
+            <button type="submit" mat-flat-button color="primary" [disabled]="!formValid || loading">
+              <mat-icon>{{ editMode ? 'save' : 'add' }}</mat-icon>
+              {{ editMode ? 'Enregistrer' : 'Créer' }}
+            </button>
+            <button type="button" mat-stroked-button (click)="closeEdit()">
+              <mat-icon>close</mat-icon> Annuler
+            </button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

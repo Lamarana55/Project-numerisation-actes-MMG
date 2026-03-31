@@ -13,6 +13,9 @@ import { UpdatePasswordComponent } from './pages/update-password/update-password
 import { UserListComponent } from './config/user-list/user-list.component';
 import { UserProfileComponent } from './config/user-profile/user-profile.component';
 
+// Composant de gestion des localités
+import { LocalitesComponent } from './config/localites/localites.component';
+
 // Guards // ← Nouveau chemin corrigé
 import { AuthorizationGuard } from './gards/authorization.guard'; // ← Votre guard existant
 import { AuthGuard } from './gards/auth.guard';
@@ -95,7 +98,7 @@ const routes: Routes = [
       // === GESTION DES LOCALITÉS ===
       {
         path: 'localites/list',
-        component: UserListComponent,
+        component: LocalitesComponent,
         canActivate: [AuthorizationGuard],
         data: { roles: ['CAN_MANAGE_LOCALITES'] },
       },
