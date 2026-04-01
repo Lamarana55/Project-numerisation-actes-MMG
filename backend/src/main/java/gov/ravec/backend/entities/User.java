@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import gov.ravec.backend.dto.UserDTO;
 import gov.ravec.backend.utils.BaseEntity;
+import gov.ravec.backend.utils.NiveauAdministratif;
 import gov.ravec.backend.utils.Statut;
 
 @Entity
@@ -56,12 +57,30 @@ public class User extends BaseEntity {
 
     private String fonction = null;
 
-    // Relation avec Role (un utilisateur a un rôle principal)
+    /** Profil métier (ex: SUPER_ADMINISTRATEUR, COORDINATEUR_REGIONAL…) */
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
 
-    // Méthodes utilitaires
+    // ── Affectations territoriales (nullable selon le niveau du profil) ───────
+
+    /** Région d'affectation — obligatoire pour REGIONAL, PREFECTORAL, COMMUNAL */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "region_id")
+    private Region region;
+
+    /** Préfecture d'affectation — obligatoire pour PREFECTORAL et COMMUNAL */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "prefecture_id")
+    private Prefecture prefecture;
+
+    /** Commune d'affectation — obligatoire pour COMMUNAL */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "commune_id")
+    private Commune commune;
+
+    // ── Méthodes utilitaires ─────────────────────────────────────────────────
+
     public String getNomComplet() {
         return this.prenom + " " + this.nom;
     }
@@ -80,7 +99,12 @@ public class User extends BaseEntity {
                         .anyMatch(permission -> permission.getNom().equals(permissionName));
     }
 
-    // Entity -> DTO
+    public NiveauAdministratif getNiveauAdministratif() {
+        return this.role != null ? this.role.getNiveauAdministratif() : null;
+    }
+
+    // ── Entity → DTO ─────────────────────────────────────────────────────────
+
     public static UserDTO toDTO(User user) {
         if (user == null) {
             return null;
@@ -95,11 +119,20 @@ public class User extends BaseEntity {
                 .telephone(user.getTelephone())
                 .fonction(user.getFonction())
                 .roleName(user.getRole() != null ? user.getRole().getNom() : null)
+                .roleLibelle(user.getRole() != null ? user.getRole().getLibelle() : null)
+                .niveauAdministratif(user.getNiveauAdministratif())
                 .statut(user.getStatut())
+                .regionId(user.getRegion() != null ? user.getRegion().getId().toString() : null)
+                .regionNom(user.getRegion() != null ? user.getRegion().getNom() : null)
+                .prefectureId(user.getPrefecture() != null ? user.getPrefecture().getId().toString() : null)
+                .prefectureNom(user.getPrefecture() != null ? user.getPrefecture().getNom() : null)
+                .communeId(user.getCommune() != null ? user.getCommune().getId().toString() : null)
+                .communeNom(user.getCommune() != null ? user.getCommune().getNom() : null)
                 .build();
     }
 
-    // DTO -> Entity
+    // ── DTO → Entity ─────────────────────────────────────────────────────────
+
     public static User toEntity(UserDTO dto, Role role) {
         if (dto == null) {
             return null;
@@ -126,5 +159,4 @@ public class User extends BaseEntity {
                 .map(User::toDTO)
                 .toList();
     }
-
 }

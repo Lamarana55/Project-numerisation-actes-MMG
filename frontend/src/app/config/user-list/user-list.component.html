@@ -27,60 +27,43 @@
   <!-- ══ PANNEAU FILTRES ════════════════════════════════════ -->
   <div class="filter-panel">
 
-    <!-- Bandeau supérieur sombre -->
     <div class="filter-panel-topbar">
       <span class="filter-label">
         <mat-icon>tune</mat-icon>
         Filtres & Recherche
       </span>
-
       <div class="fp-sep"></div>
-
-      <!-- Résultat filtré -->
       <span class="results-count" *ngIf="hasActiveFilters">
         <mat-icon>search</mat-icon>
         {{ filteredUsers.length }} / {{ users.length }} résultats
       </span>
-
       <div class="fp-spacer"></div>
-
-      <!-- Refresh -->
       <button mat-icon-button class="fp-refresh" (click)="refreshData()" [disabled]="loading" matTooltip="Actualiser">
         <mat-icon>refresh</mat-icon>
       </button>
-
-      <!-- Bouton principal -->
       <button mat-flat-button class="fp-add-btn" (click)="openAddDialog()" [disabled]="loading">
         <mat-icon>add</mat-icon>
         Nouvel utilisateur
       </button>
     </div>
 
-    <!-- Corps du filtre -->
     <div class="filter-body">
 
       <!-- ① Recherche -->
       <div class="filter-seg filter-seg--search">
-        <span class="filter-seg-label">
-          <mat-icon>search</mat-icon>Recherche
-        </span>
+        <span class="filter-seg-label"><mat-icon>search</mat-icon>Recherche</span>
         <div class="search-input-wrap">
           <mat-icon>search</mat-icon>
-          <input
-            [formControl]="searchControl"
-            placeholder="Nom, email, username, téléphone…"
-            autocomplete="off">
+          <input [formControl]="searchControl" placeholder="Nom, email, username, téléphone…" autocomplete="off">
           <button class="search-clear-btn" *ngIf="searchTerm" (click)="searchControl.setValue('')" type="button">
             <mat-icon>close</mat-icon>
           </button>
         </div>
       </div>
 
-      <!-- ② Statut — select -->
+      <!-- ② Statut -->
       <div class="filter-seg filter-seg--sm">
-        <span class="filter-seg-label">
-          <mat-icon>verified_user</mat-icon>Statut
-        </span>
+        <span class="filter-seg-label"><mat-icon>verified_user</mat-icon>Statut</span>
         <div class="filter-select-wrap">
           <mat-icon class="fsel-ico">verified_user</mat-icon>
           <select class="filter-sel" [(ngModel)]="selectedStatus" (ngModelChange)="applyFilters()">
@@ -92,22 +75,35 @@
         </div>
       </div>
 
-      <!-- ③ Rôle — select -->
-      <div class="filter-seg filter-seg--sm" style="flex:1">
-        <span class="filter-seg-label">
-          <mat-icon>admin_panel_settings</mat-icon>Rôle
-        </span>
+      <!-- ③ Niveau administratif -->
+      <div class="filter-seg filter-seg--sm">
+        <span class="filter-seg-label"><mat-icon>public</mat-icon>Niveau</span>
         <div class="filter-select-wrap">
-          <mat-icon class="fsel-ico">shield</mat-icon>
-          <select class="filter-sel" [(ngModel)]="selectedRole" (ngModelChange)="applyFilters()">
-            <option value="">Tous les rôles</option>
-            <option *ngFor="let r of availableRoles" [value]="r.nom">{{ r.nom }}</option>
+          <mat-icon class="fsel-ico">public</mat-icon>
+          <select class="filter-sel" [(ngModel)]="selectedNiveau" (ngModelChange)="applyFilters()">
+            <option value="">Tous les niveaux</option>
+            <option *ngFor="let n of niveaux" [value]="n.value">{{ n.label }}</option>
           </select>
           <mat-icon class="fsel-chevron">expand_more</mat-icon>
         </div>
       </div>
 
-      <!-- ④ Effacer -->
+      <!-- ④ Profil -->
+      <div class="filter-seg filter-seg--sm" style="flex:1">
+        <span class="filter-seg-label"><mat-icon>admin_panel_settings</mat-icon>Profil</span>
+        <div class="filter-select-wrap">
+          <mat-icon class="fsel-ico">shield</mat-icon>
+          <select class="filter-sel" [(ngModel)]="selectedRole" (ngModelChange)="applyFilters()">
+            <option value="">Tous les profils</option>
+            <option *ngFor="let r of availableRoles" [value]="r.nom">
+              {{ r.libelle || r.nom }}
+            </option>
+          </select>
+          <mat-icon class="fsel-chevron">expand_more</mat-icon>
+        </div>
+      </div>
+
+      <!-- ⑤ Effacer -->
       <div class="filter-seg filter-seg--clear">
         <button class="btn-clear-filters"
           [class.disabled]="!hasActiveFilters"
@@ -135,13 +131,11 @@
   <!-- ══ TABLEAU ════════════════════════════════════════════ -->
   <div class="content-card">
 
-    <!-- Chargement -->
     <div *ngIf="loading" class="state-box">
       <mat-spinner diameter="48"></mat-spinner>
       <p>Chargement des utilisateurs…</p>
     </div>
 
-    <!-- Erreur -->
     <div *ngIf="error && !loading" class="state-box state-box--error">
       <mat-icon>error_outline</mat-icon>
       <h3>Erreur de chargement</h3>
@@ -151,7 +145,6 @@
       </button>
     </div>
 
-    <!-- Vide -->
     <div *ngIf="!loading && !error && filteredUsers.length === 0" class="state-box">
       <mat-icon>people_outline</mat-icon>
       <h3>{{ hasActiveFilters ? 'Aucun résultat' : 'Aucun utilisateur' }}</h3>
@@ -165,7 +158,6 @@
       </button>
     </div>
 
-    <!-- Table -->
     <div *ngIf="!loading && !error && filteredUsers.length > 0" class="table-wrap">
       <table mat-table [dataSource]="paginatedUsers" class="users-table">
 
@@ -220,14 +212,44 @@
           </td>
         </ng-container>
 
-        <!-- Rôle -->
+        <!-- Profil métier -->
         <ng-container matColumnDef="role">
-          <th mat-header-cell *matHeaderCellDef>Rôle</th>
+          <th mat-header-cell *matHeaderCellDef>Profil</th>
           <td mat-cell *matCellDef="let user">
-            <span class="role-badge" *ngIf="getRoleDisplay(user) !== 'Aucun rôle'">
-              <mat-icon>shield</mat-icon>{{ getRoleDisplay(user) }}
-            </span>
-            <span class="no-role" *ngIf="getRoleDisplay(user) === 'Aucun rôle'">—</span>
+            <div class="profil-cell" *ngIf="getProfilMeta(user); else noRole">
+              <div class="profil-badge-row">
+                <mat-icon class="profil-icon"
+                  [style.color]="getProfilMeta(user)?.couleur">
+                  {{ getProfilMeta(user)?.icone || 'person' }}
+                </mat-icon>
+                <span class="profil-libelle">{{ getRoleDisplay(user) }}</span>
+              </div>
+              <span class="niveau-badge" [attr.data-niveau]="user.niveauAdministratif">
+                {{ getNiveauLabel(user) }}
+              </span>
+            </div>
+            <ng-template #noRole>
+              <span class="no-role">—</span>
+            </ng-template>
+          </td>
+        </ng-container>
+
+        <!-- Territoire -->
+        <ng-container matColumnDef="territoire">
+          <th mat-header-cell *matHeaderCellDef>Territoire</th>
+          <td mat-cell *matCellDef="let user">
+            <div class="territoire-cell" *ngIf="getTerritoireLabel(user); else noTerr">
+              <mat-icon class="terr-icon">location_on</mat-icon>
+              <div class="terr-info">
+                <span class="terr-principal">{{ getTerritoireLabel(user) }}</span>
+                <span class="terr-parent" *ngIf="user.communeNom && user.prefectureNom">
+                  {{ user.prefectureNom }}
+                </span>
+              </div>
+            </div>
+            <ng-template #noTerr>
+              <span class="no-role" matTooltip="Accès national">National</span>
+            </ng-template>
           </td>
         </ng-container>
 
@@ -255,14 +277,14 @@
               <button mat-icon-button
                 *ngIf="!isAdminUser(user)"
                 [ngClass]="user.statut === 'Activated' ? 'action-btn ab-warn' : 'action-btn ab-ok'"
-                (click)="toggleUserStatus(user);"
+                (click)="toggleUserStatus(user)"
                 [disabled]="loading"
                 [matTooltip]="user.statut === 'Activated' ? 'Désactiver' : 'Activer'">
                 <mat-icon>{{ user.statut === 'Activated' ? 'person_off' : 'person' }}</mat-icon>
               </button>
               <button mat-icon-button class="action-btn ab-info"
                 *ngIf="!isAdminUser(user)"
-                (click)="resetPassword(user);"
+                (click)="resetPassword(user)"
                 [disabled]="loading" matTooltip="Réinitialiser mot de passe">
                 <mat-icon>lock_reset</mat-icon>
               </button>

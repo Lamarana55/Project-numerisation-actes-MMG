@@ -7,6 +7,7 @@ import lombok.*;
 
 import gov.ravec.backend.utils.Delete;
 import gov.ravec.backend.utils.BaseEntity;
+import gov.ravec.backend.utils.NiveauAdministratif;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -22,10 +23,21 @@ import java.util.Set;
 public class Role extends BaseEntity {
     @Id
     private String id;
+
+    /** Nom technique du profil (ex: SUPER_ADMINISTRATEUR, COORDINATEUR_REGIONAL) */
     @Column(unique = true, nullable = false)
     private String nom;
+
+    /** Libellé lisible affiché dans l'interface */
+    private String libelle = null;
+
     private String description = null;
-    
+
+    /** Niveau administratif déterminant la portée territoriale du profil */
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private NiveauAdministratif niveauAdministratif = NiveauAdministratif.COMMUNAL;
+
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     @JoinTable(name = "role_permission",
             joinColumns = @JoinColumn(name = "role_id"),

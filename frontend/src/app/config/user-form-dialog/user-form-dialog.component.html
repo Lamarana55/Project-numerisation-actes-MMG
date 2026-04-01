@@ -3,7 +3,7 @@
     <mat-icon>{{ isEditMode ? 'edit' : 'person_add' }}</mat-icon>
   </div>
   <div class="dialog-header-text">
-    <h2 mat-dialog-title>{{ isEditMode ? 'Modifier l\'utilisateur' : 'Nouvel utilisateur' }}</h2>
+    <h2 mat-dialog-title>{{ isEditMode ? "Modifier l'utilisateur" : 'Nouvel utilisateur' }}</h2>
     <p class="dialog-subtitle">{{ isEditMode ? 'Mettez à jour les informations' : 'Remplissez les informations du nouveau compte' }}</p>
   </div>
 </div>
@@ -12,7 +12,7 @@
   <mat-dialog-content class="dialog-content">
     <div class="form-container">
 
-      <!-- Informations personnelles -->
+      <!-- ── 1. Informations personnelles ──────────────────────────────── -->
       <div class="form-section">
         <div class="section-header">
           <mat-icon class="section-icon">person</mat-icon>
@@ -24,14 +24,14 @@
             <mat-label>Prénom</mat-label>
             <input matInput formControlName="prenom" (blur)="generateUsername()" placeholder="Prénom">
             <mat-icon matSuffix>badge</mat-icon>
-            <mat-error *ngIf="getFieldError('prenom')">{{ getFieldError('prenom') }}</mat-error>
+            <mat-error>{{ getFieldError('prenom') }}</mat-error>
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="half-width">
             <mat-label>Nom</mat-label>
             <input matInput formControlName="nom" (blur)="generateUsername()" placeholder="Nom de famille">
             <mat-icon matSuffix>badge</mat-icon>
-            <mat-error *ngIf="getFieldError('nom')">{{ getFieldError('nom') }}</mat-error>
+            <mat-error>{{ getFieldError('nom') }}</mat-error>
           </mat-form-field>
         </div>
 
@@ -40,18 +40,18 @@
             <mat-label>Téléphone</mat-label>
             <input matInput formControlName="telephone" type="tel" placeholder="624 000 000">
             <mat-icon matSuffix>phone</mat-icon>
-            <mat-error *ngIf="getFieldError('telephone')">{{ getFieldError('telephone') }}</mat-error>
+            <mat-error>{{ getFieldError('telephone') }}</mat-error>
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="half-width">
             <mat-label>Fonction (optionnel)</mat-label>
-            <input matInput formControlName="fonction" placeholder="Directeur, Agent, etc.">
+            <input matInput formControlName="fonction" placeholder="Directeur, Technicien, etc.">
             <mat-icon matSuffix>work</mat-icon>
           </mat-form-field>
         </div>
       </div>
 
-      <!-- Informations de compte -->
+      <!-- ── 2. Informations de compte ─────────────────────────────────── -->
       <div class="form-section">
         <div class="section-header">
           <mat-icon class="section-icon">manage_accounts</mat-icon>
@@ -63,7 +63,7 @@
             <mat-label>Adresse email</mat-label>
             <input matInput formControlName="email" type="email" placeholder="prenom.nom@ravec.gov.gn">
             <mat-icon matSuffix>email</mat-icon>
-            <mat-error *ngIf="getFieldError('email')">{{ getFieldError('email') }}</mat-error>
+            <mat-error>{{ getFieldError('email') }}</mat-error>
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="half-width">
@@ -72,11 +72,10 @@
                    [readonly]="isEditMode">
             <mat-icon matSuffix>{{ isEditMode ? 'lock' : 'alternate_email' }}</mat-icon>
             <mat-hint *ngIf="isEditMode">Le nom d'utilisateur ne peut pas être modifié</mat-hint>
-            <mat-error *ngIf="getFieldError('username')">{{ getFieldError('username') }}</mat-error>
+            <mat-error>{{ getFieldError('username') }}</mat-error>
           </mat-form-field>
         </div>
 
-        <!-- Bouton de génération automatique -->
         <div class="auto-generate">
           <button mat-stroked-button type="button" (click)="generateUsername()"
             [disabled]="!userForm.get('nom')?.value || !userForm.get('prenom')?.value"
@@ -87,39 +86,94 @@
           <span class="generate-hint">Format : prenom.nom&#64;ravec.gov.gn</span>
         </div>
 
-        <!-- Note mot de passe par défaut (création uniquement) -->
         <div class="default-password-note" *ngIf="!isEditMode">
           <mat-icon>info</mat-icon>
           <span>Un mot de passe par défaut sera attribué automatiquement. L'utilisateur pourra le modifier à la première connexion.</span>
         </div>
       </div>
 
-      <!-- Rôle et permissions -->
+      <!-- ── 3. Profil métier ───────────────────────────────────────────── -->
       <div class="form-section">
         <div class="section-header">
-          <mat-icon class="section-icon">security</mat-icon>
-          <span class="section-title">Rôle et permissions</span>
+          <mat-icon class="section-icon">admin_panel_settings</mat-icon>
+          <span class="section-title">Profil métier</span>
         </div>
 
         <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Rôle</mat-label>
-          <mat-select formControlName="roleId" placeholder="Choisir un rôle">
-            <mat-option *ngFor="let role of availableRoles" [value]="role.id">
-              <div class="role-option">
-                <span class="role-option-name">{{ role.nom }}</span>
-                <span class="role-option-desc" *ngIf="role.description">{{ role.description }}</span>
-              </div>
-            </mat-option>
+          <mat-label>Profil</mat-label>
+          <mat-select formControlName="roleId" placeholder="Choisir un profil">
+
+            <!-- Groupe CENTRAL -->
+            <mat-optgroup label="PN-RAVEC — Niveau National">
+              <ng-container *ngFor="let role of availableRoles">
+                <mat-option *ngIf="role.niveauAdministratif === 'CENTRAL'" [value]="role.id">
+                  <div class="profil-option">
+                    <mat-icon class="profil-icon" [style.color]="getProfilMeta(role.nom)?.couleur">
+                      {{ getProfilMeta(role.nom)?.icone || 'person' }}
+                    </mat-icon>
+                    <span class="profil-nom">{{ role.libelle || role.nom }}</span>
+                  </div>
+                </mat-option>
+              </ng-container>
+            </mat-optgroup>
+
+            <!-- Groupe REGIONAL -->
+            <mat-optgroup label="Niveau Régional">
+              <ng-container *ngFor="let role of availableRoles">
+                <mat-option *ngIf="role.niveauAdministratif === 'REGIONAL'" [value]="role.id">
+                  <div class="profil-option">
+                    <mat-icon class="profil-icon" [style.color]="getProfilMeta(role.nom)?.couleur">
+                      {{ getProfilMeta(role.nom)?.icone || 'person' }}
+                    </mat-icon>
+                    <span class="profil-nom">{{ role.libelle || role.nom }}</span>
+                  </div>
+                </mat-option>
+              </ng-container>
+            </mat-optgroup>
+
+            <!-- Groupe PREFECTORAL -->
+            <mat-optgroup label="Niveau Préfectoral">
+              <ng-container *ngFor="let role of availableRoles">
+                <mat-option *ngIf="role.niveauAdministratif === 'PREFECTORAL'" [value]="role.id">
+                  <div class="profil-option">
+                    <mat-icon class="profil-icon" [style.color]="getProfilMeta(role.nom)?.couleur">
+                      {{ getProfilMeta(role.nom)?.icone || 'person' }}
+                    </mat-icon>
+                    <span class="profil-nom">{{ role.libelle || role.nom }}</span>
+                  </div>
+                </mat-option>
+              </ng-container>
+            </mat-optgroup>
+
+            <!-- Groupe COMMUNAL -->
+            <mat-optgroup label="Niveau Communal">
+              <ng-container *ngFor="let role of availableRoles">
+                <mat-option *ngIf="role.niveauAdministratif === 'COMMUNAL'" [value]="role.id">
+                  <div class="profil-option">
+                    <mat-icon class="profil-icon" [style.color]="getProfilMeta(role.nom)?.couleur">
+                      {{ getProfilMeta(role.nom)?.icone || 'person' }}
+                    </mat-icon>
+                    <span class="profil-nom">{{ role.libelle || role.nom }}</span>
+                  </div>
+                </mat-option>
+              </ng-container>
+            </mat-optgroup>
+
           </mat-select>
           <mat-icon matSuffix>shield</mat-icon>
-          <mat-error *ngIf="getFieldError('roleId')">{{ getFieldError('roleId') }}</mat-error>
+          <mat-error>{{ getFieldError('roleId') }}</mat-error>
         </mat-form-field>
 
-        <!-- Aperçu du rôle sélectionné -->
+        <!-- Aperçu du profil sélectionné -->
         <div class="role-preview" *ngIf="selectedRole">
           <div class="role-preview-header">
-            <mat-icon>verified_user</mat-icon>
-            <strong>{{ selectedRole.nom }}</strong>
+            <mat-icon [style.color]="getProfilMeta(selectedRole.nom)?.couleur">
+              {{ getProfilMeta(selectedRole.nom)?.icone || 'verified_user' }}
+            </mat-icon>
+            <strong>{{ selectedRole.libelle || selectedRole.nom }}</strong>
+            <span class="niveau-badge" [attr.data-niveau]="selectedRole.niveauAdministratif">
+              {{ getNiveauLabel(selectedRole.niveauAdministratif) }}
+            </span>
             <span class="role-perm-count" *ngIf="selectedRole.permissions?.length">
               {{ selectedRole.permissions!.length }} permission(s)
             </span>
@@ -131,6 +185,59 @@
         </div>
       </div>
 
+      <!-- ── 4. Affectation territoriale (conditionnelle) ───────────────── -->
+      <div class="form-section territory-section" *ngIf="showRegion">
+        <div class="section-header">
+          <mat-icon class="section-icon">location_on</mat-icon>
+          <span class="section-title">Affectation territoriale</span>
+          <span class="section-hint">Obligatoire pour ce profil</span>
+        </div>
+
+        <!-- Région -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Région</mat-label>
+          <mat-select formControlName="regionId" placeholder="Sélectionner une région">
+            <mat-option *ngFor="let region of regions" [value]="region.id">
+              {{ region.nom }}
+            </mat-option>
+          </mat-select>
+          <mat-icon matSuffix>map</mat-icon>
+          <mat-error>{{ getFieldError('regionId') }}</mat-error>
+        </mat-form-field>
+
+        <!-- Préfecture (PREFECTORAL et COMMUNAL) -->
+        <mat-form-field appearance="outline" class="full-width" *ngIf="showPrefecture">
+          <mat-label>Préfecture</mat-label>
+          <mat-select formControlName="prefectureId" placeholder="Sélectionner une préfecture"
+                      [disabled]="!userForm.get('regionId')?.value || loadingPrefectures">
+            <mat-option *ngFor="let pref of prefectures" [value]="pref.id">
+              {{ pref.nom }}
+            </mat-option>
+          </mat-select>
+          <mat-icon matSuffix>
+            {{ loadingPrefectures ? 'hourglass_empty' : 'location_city' }}
+          </mat-icon>
+          <mat-hint *ngIf="!userForm.get('regionId')?.value">Sélectionnez d'abord une région</mat-hint>
+          <mat-error>{{ getFieldError('prefectureId') }}</mat-error>
+        </mat-form-field>
+
+        <!-- Commune (COMMUNAL seulement) -->
+        <mat-form-field appearance="outline" class="full-width" *ngIf="showCommune">
+          <mat-label>Commune</mat-label>
+          <mat-select formControlName="communeId" placeholder="Sélectionner une commune"
+                      [disabled]="!userForm.get('prefectureId')?.value || loadingCommunes">
+            <mat-option *ngFor="let commune of communes" [value]="commune.id">
+              {{ commune.nom }}
+            </mat-option>
+          </mat-select>
+          <mat-icon matSuffix>
+            {{ loadingCommunes ? 'hourglass_empty' : 'home_work' }}
+          </mat-icon>
+          <mat-hint *ngIf="!userForm.get('prefectureId')?.value">Sélectionnez d'abord une préfecture</mat-hint>
+          <mat-error>{{ getFieldError('communeId') }}</mat-error>
+        </mat-form-field>
+      </div>
+
     </div>
   </mat-dialog-content>
 
@@ -139,10 +246,11 @@
       <mat-icon>close</mat-icon>
       Annuler
     </button>
-    <button mat-raised-button color="primary" type="submit" [disabled]="!userForm.valid || loading" class="submit-btn">
+    <button mat-raised-button color="primary" type="submit"
+            [disabled]="!userForm.valid || loading" class="submit-btn">
       <mat-spinner *ngIf="loading" diameter="18" class="spinner-inline"></mat-spinner>
       <mat-icon *ngIf="!loading">{{ isEditMode ? 'save' : 'person_add' }}</mat-icon>
-      {{ isEditMode ? 'Enregistrer' : 'Créer l\'utilisateur' }}
+      {{ isEditMode ? 'Enregistrer' : "Créer l'utilisateur" }}
     </button>
   </mat-dialog-actions>
 </form>

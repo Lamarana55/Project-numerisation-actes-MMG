@@ -544,7 +544,7 @@ tr.row-selected td { background:rgba(0,133,63,.04) !important; }
   color:var(--P); opacity:.65;
 }
 
-/* ── Badge rôle ──────────────────────────────────────────── */
+/* ── Badge rôle (legacy) ─────────────────────────────────── */
 .role-badge {
   display:inline-flex; align-items:center; gap:5px;
   background:var(--blue-l);
@@ -558,6 +558,58 @@ tr.row-selected td { background:rgba(0,133,63,.04) !important; }
 }
 .role-badge mat-icon { font-size:.85rem; width:.85rem; height:.85rem; }
 .no-role { color:var(--txt-3); font-size:.85rem; }
+
+/* ── Cellule profil ──────────────────────────────────────── */
+.profil-cell {
+  display:flex; flex-direction:column; gap:4px;
+}
+
+.profil-badge-row {
+  display:inline-flex; align-items:center; gap:6px;
+}
+
+.profil-icon {
+  font-size:1rem; width:1rem; height:1rem; flex-shrink:0;
+}
+
+.profil-libelle {
+  font-size:.83rem; font-weight:600; color:var(--txt-1);
+}
+
+/* ── Badge niveau administratif ──────────────────────────── */
+.niveau-badge {
+  display:inline-block;
+  font-size:.68rem; font-weight:700;
+  padding:2px 8px; border-radius:20px;
+  text-transform:uppercase; letter-spacing:.04em;
+  align-self:flex-start;
+}
+.niveau-badge[data-niveau="CENTRAL"]     { background:#ede7f6; color:#4527a0; }
+.niveau-badge[data-niveau="REGIONAL"]    { background:#e8f5e9; color:#1b5e20; }
+.niveau-badge[data-niveau="PREFECTORAL"] { background:#fff8e1; color:#e65100; }
+.niveau-badge[data-niveau="COMMUNAL"]    { background:#fce4ec; color:#880e4f; }
+
+/* ── Cellule territoire ──────────────────────────────────── */
+.territoire-cell {
+  display:inline-flex; align-items:flex-start; gap:6px;
+}
+
+.terr-icon {
+  font-size:.95rem; width:.95rem; height:.95rem;
+  color:#1565c0; flex-shrink:0; margin-top:1px;
+}
+
+.terr-info {
+  display:flex; flex-direction:column; gap:1px;
+}
+
+.terr-principal {
+  font-size:.82rem; font-weight:600; color:var(--txt-1);
+}
+
+.terr-parent {
+  font-size:.73rem; color:var(--txt-3);
+}
 
 /* ── Badge statut ────────────────────────────────────────── */
 .status-badge {

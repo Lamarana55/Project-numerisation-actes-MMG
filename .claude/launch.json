@@ -4,9 +4,9 @@
     {
       "name": "Frontend (Angular)",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["start"],
+      "runtimeArgs": ["start", "--", "--port=4201"],
       "cwd": "frontend",
-      "port": 4200
+      "port": 4201
     },
     {
       "name": "Backend (Spring Boot)",

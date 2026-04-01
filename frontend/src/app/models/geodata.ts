@@ -1,9 +1,11 @@
 export interface RegionDTO {
+  id?: string;
   code: string;
   nom: string;
 }
 
 export interface PaysDTO {
+  id?: string;
   code: string;
   nom: string;
   codeRegion: string;
@@ -11,12 +13,15 @@ export interface PaysDTO {
 }
 
 export interface PrefectureDTO {
+  id?: string;
   code: string;
   nom: string;
   regionCode: string;
+  codeRegion?: string;  // alias retourné par le backend
 }
 
 export interface CommuneDTO {
+  id?: string;
   code: string;
   nom: string;
   codePrefecture: string;

@@ -300,6 +300,62 @@
   stroke: #fff !important;
 }
 
+/* ── Profil option dans le select ──────────────────────────── */
+.profil-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 0;
+}
+
+.profil-icon {
+  font-size: 1.1rem;
+  width: 1.1rem;
+  height: 1.1rem;
+  flex-shrink: 0;
+}
+
+.profil-nom {
+  font-size: 0.93rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+/* ── Badge de niveau administratif ─────────────────────────── */
+.niveau-badge {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 2px 9px;
+  border-radius: 20px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.niveau-badge[data-niveau="CENTRAL"]    { background: #ede7f6; color: #4527a0; }
+.niveau-badge[data-niveau="REGIONAL"]   { background: #e8f5e9; color: #1b5e20; }
+.niveau-badge[data-niveau="PREFECTORAL"]{ background: #fff8e1; color: #e65100; }
+.niveau-badge[data-niveau="COMMUNAL"]   { background: #fce4ec; color: #880e4f; }
+
+/* ── Section territoire ─────────────────────────────────────── */
+.territory-section {
+  border-color: rgba(21, 101, 192, 0.3);
+  background: #f0f7ff;
+}
+
+.territory-section .section-icon { color: #1565c0; }
+.territory-section .section-title { color: #1565c0; }
+
+.section-hint {
+  font-size: 0.78rem;
+  color: #1565c0;
+  background: rgba(21, 101, 192, 0.1);
+  padding: 2px 8px;
+  border-radius: 20px;
+  margin-left: auto;
+  font-weight: 500;
+}
+
 /* ── Champ username verrouillé (mode édition) ──────────────── */
 input[readonly] {
   cursor: not-allowed;
