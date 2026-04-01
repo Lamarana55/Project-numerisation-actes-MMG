@@ -1,72 +1,215 @@
-<div class="localites-root">
+<div class="loc-root">
+<div class="loc-container">
 
-  <!-- ══ EN-TÊTE AVEC ONGLETS ══════════════════════════════════ -->
-  <div class="page-header">
-    <div class="header-top">
-      <div class="page-header-left">
-        <div class="page-header-icon"><mat-icon>public</mat-icon></div>
-        <div>
-          <h1 class="page-title">Gestion des Localités</h1>
-          <p class="page-subtitle">Gérez les régions, préfectures, communes, quartiers, pays et villes</p>
-        </div>
+  <!-- ════════════════════════════════════════════════════════
+       EN-TÊTE  — même style que Gestion des Utilisateurs
+  ════════════════════════════════════════════════════════ -->
+  <header class="page-header">
+    <!-- Gauche : icône + titre + sous-titre -->
+    <div class="page-header-left">
+      <div class="page-header-icon">
+        <mat-icon>public</mat-icon>
+      </div>
+      <div>
+        <h1 class="page-title">Gestion des Localités</h1>
+        <p class="page-subtitle">
+          {{ totalCount }} localité(s) enregistrée(s) —
+          {{ activeTab === 'admin' ? 'Hiérarchie Administrative' : 'Pays &amp; Villes' }}
+        </p>
       </div>
     </div>
 
-    <!-- Onglets principal / Monde -->
-    <div class="tabs-container">
-      <button 
-        class="tab-btn" 
-        [class.active]="activeTab === 'admin'"
-        (click)="switchTab('admin')">
+    <!-- Droite : stat pills selon l'onglet actif -->
+    <div class="page-header-stats" *ngIf="activeTab === 'admin'">
+      <span class="stat-pill">
         <mat-icon>public</mat-icon>
-        <span>Hiérarchie Administrative</span>
-        <span class="tab-badge" *ngIf="activeTab === 'admin'">→</span>
-      </button>
-      <button 
-        class="tab-btn" 
-        [class.active]="activeTab === 'monde'"
-        (click)="switchTab('monde')">
+        {{ totalRegions }} Région(s)
+      </span>
+      <span class="stat-pill">
+        <mat-icon>location_city</mat-icon>
+        {{ totalPrefectures }} Préfecture(s)
+      </span>
+      <span class="stat-pill">
+        <mat-icon>apartment</mat-icon>
+        {{ totalCommunes }} Commune(s)
+      </span>
+      <span class="stat-pill">
+        <mat-icon>home</mat-icon>
+        {{ totalQuartiers }} Quartier(s)
+      </span>
+    </div>
+    <div class="page-header-stats" *ngIf="activeTab === 'monde'">
+      <span class="stat-pill">
         <mat-icon>language</mat-icon>
-        <span>Pays & Villes</span>
-        <span class="tab-badge" *ngIf="activeTab === 'monde'">→</span>
+        {{ totalPays }} Pays
+      </span>
+      <span class="stat-pill">
+        <mat-icon>location_city</mat-icon>
+        {{ totalVilles }} Ville(s)
+      </span>
+    </div>
+  </header>
+
+  <!-- ════════════════════════════════════════════════════════
+       PANNEAU FILTRES — même style que Gestion des Utilisateurs
+  ════════════════════════════════════════════════════════ -->
+  <div class="filter-panel">
+
+    <!-- Topbar sombre -->
+    <div class="filter-topbar">
+      <!-- Onglets Admin / Monde -->
+      <div class="filter-tabs">
+        <button class="ftab" [class.ftab--active]="activeTab === 'admin'" (click)="switchTab('admin')">
+          <mat-icon>account_balance</mat-icon>
+          Hiérarchie Admin.
+        </button>
+        <button class="ftab" [class.ftab--active]="activeTab === 'monde'" (click)="switchTab('monde')">
+          <mat-icon>language</mat-icon>
+          Pays &amp; Villes
+        </button>
+      </div>
+
+      <div class="fp-sep"></div>
+
+      <!-- Badge résultats (quand filtres actifs) -->
+      <span class="results-count" *ngIf="hasActiveFilters">
+        <mat-icon>filter_alt</mat-icon>
+        {{ filteredHierarchy.length }} racine(s) filtrée(s)
+      </span>
+
+      <div class="fp-spacer"></div>
+
+      <!-- Rafraîchir -->
+      <button mat-icon-button class="fp-refresh" (click)="loadData()" [disabled]="loading" matTooltip="Rafraîchir">
+        <mat-icon>refresh</mat-icon>
       </button>
+
+      <!-- Bouton créer (Commune uniquement dans l'onglet admin) -->
+      <button class="fp-add-btn" *ngIf="activeTab === 'admin'" (click)="openCreateCommune()" [disabled]="loading">
+        <mat-icon>add</mat-icon>
+        Nouvelle Commune
+      </button>
+      <button class="fp-add-btn" *ngIf="activeTab === 'monde'" (click)="openCreateVille()" [disabled]="loading">
+        <mat-icon>add</mat-icon>
+        Nouvelle Ville
+      </button>
+    </div>
+
+    <!-- Corps filtres -->
+    <div class="filter-body">
+
+      <!-- ① Recherche -->
+      <div class="filter-seg filter-seg--search">
+        <span class="filter-seg-label"><mat-icon>search</mat-icon>Recherche</span>
+        <div class="search-input-wrap">
+          <mat-icon>search</mat-icon>
+          <input
+            type="text"
+            placeholder="Nom, code..."
+            [(ngModel)]="searchQuery"
+            (input)="onSearch()"
+            autocomplete="off">
+          <button class="search-clear-btn" *ngIf="searchQuery" (click)="clearSearch()" type="button">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <!-- ② Filtre par type -->
+      <div class="filter-seg filter-seg--type">
+        <span class="filter-seg-label"><mat-icon>filter_list</mat-icon>Type</span>
+        <div class="type-chips">
+          <button
+            class="type-chip"
+            [class.type-chip--active]="filterType === ''"
+            (click)="setTypeFilter('')">
+            Tous
+          </button>
+          <button
+            *ngFor="let f of availableTypeFilters"
+            class="type-chip"
+            [class.type-chip--active]="filterType === f.value"
+            [style.--chip-color]="f.color"
+            (click)="setTypeFilter(f.value)">
+            <span class="type-chip__dot" [style.background]="f.color"></span>
+            {{ f.label }}
+            <span class="type-chip__count">{{ f.count }}</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ③ Effacer filtres -->
+      <div class="filter-seg filter-seg--clear">
+        <button
+          class="btn-clear-filters"
+          [class.disabled]="!hasActiveFilters"
+          [disabled]="!hasActiveFilters"
+          (click)="clearFilters()">
+          <mat-icon>filter_alt_off</mat-icon>
+          Effacer
+        </button>
+      </div>
+
     </div>
   </div>
 
-  <!-- ══ CHARGEMENT ════════════════════════════════════════════ -->
-  <div *ngIf="loading" class="state-box">
-    <mat-spinner diameter="48"></mat-spinner>
-    <p>Chargement des données...</p>
+  <!-- ════════════════════════════════════════════════════════
+       ÉTATS CHARGEMENT / ERREUR
+  ════════════════════════════════════════════════════════ -->
+  <div *ngIf="loading" class="loc-state">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Chargement en cours…</p>
   </div>
 
-  <!-- ══ ERREUR ════════════════════════════════════════════════ -->
-  <div *ngIf="error && !loading" class="state-box state-box--error">
-    <mat-icon>error_outline</mat-icon>
-    <h3>Erreur</h3>
+  <div *ngIf="error && !loading" class="loc-state loc-state--error">
+    <div class="loc-state__icon"><mat-icon>error_outline</mat-icon></div>
+    <h3>Impossible de charger les données</h3>
     <p>{{ error }}</p>
     <button mat-flat-button color="primary" (click)="loadData()">
-      <mat-icon>refresh</mat-icon> Réessayer
+      <mat-icon>refresh</mat-icon>&nbsp;Réessayer
     </button>
   </div>
 
-  <!-- ══ CONTENU PRINCIPAL ════════════════════════════════════ -->
-  <div *ngIf="!loading && !error" class="main-layout">
+  <!-- ════════════════════════════════════════════════════════
+       CORPS PRINCIPAL : SIDEBAR + PANNEAU DROIT
+  ════════════════════════════════════════════════════════ -->
+  <div *ngIf="!loading && !error" class="loc-body">
 
-    <!-- Panneau Hiérarchique Gauche -->
-    <div class="hierarchy-panel">
-      <div class="hierarchy-header">
-        <h2>{{ activeTab === 'admin' ? 'Hiérarchie Administrative' : 'Pays & Villes' }}</h2>
-        <button mat-icon-button (click)="loadData()" matTooltip="Rafraîchir">
+    <!-- ── Sidebar gauche ──────────────────────────────── -->
+    <aside class="loc-sidebar">
+
+      <!-- En-tête sidebar -->
+      <div class="sidebar-head">
+        <mat-icon class="sidebar-head__icon">account_tree</mat-icon>
+        <span class="sidebar-head__label">Arborescence</span>
+        <button mat-icon-button class="sidebar-head__refresh"
+                (click)="loadData()" matTooltip="Rafraîchir">
           <mat-icon>refresh</mat-icon>
         </button>
       </div>
 
-      <!-- Arborescence Hiérarchique -->
-      <div class="hierarchy-tree">
-        <ng-container *ngFor="let node of getHierarchyForTab()">
+      <!-- Légende des niveaux -->
+      <div class="sidebar-legend">
+        <ng-container *ngIf="activeTab === 'admin'">
+          <span class="legend-item" style="--c:#00853F"><span class="legend-dot"></span>Région</span>
+          <span class="legend-item" style="--c:#0284c7"><span class="legend-dot"></span>Préfecture</span>
+          <span class="legend-item" style="--c:#d97706"><span class="legend-dot"></span>Commune</span>
+          <span class="legend-item" style="--c:#7c3aed"><span class="legend-dot"></span>Quartier</span>
+        </ng-container>
+        <ng-container *ngIf="activeTab === 'monde'">
+          <span class="legend-item" style="--c:#00853F"><span class="legend-dot"></span>Pays</span>
+          <span class="legend-item" style="--c:#0284c7"><span class="legend-dot"></span>Ville</span>
+        </ng-container>
+      </div>
+
+      <!-- Arbre -->
+      <div class="sidebar-tree">
+        <ng-container *ngIf="filteredHierarchy.length > 0; else emptyTree">
           <app-hierarchy-node
+            *ngFor="let node of filteredHierarchy; trackBy: trackById"
             [node]="node"
             [isSelected]="selectedNode?.data.id === node.data.id"
+            [selectedNodeId]="selectedNode?.data.id ?? null"
             [expandedNodes]="expandedNodes"
             (select)="selectNode($event)"
             (toggleNode)="toggleNode($event)"
@@ -76,132 +219,211 @@
           </app-hierarchy-node>
         </ng-container>
 
-        <!-- État Vide -->
-        <div *ngIf="getHierarchyForTab().length === 0" class="empty-state">
-          <mat-icon>folder_open</mat-icon>
-          <p>Aucune données. Créez une nouvelle entrée.</p>
+        <ng-template #emptyTree>
+          <div class="sidebar-empty">
+            <mat-icon>{{ hasActiveFilters ? 'search_off' : 'folder_open' }}</mat-icon>
+            <span *ngIf="!hasActiveFilters">Aucune donnée disponible.</span>
+            <span *ngIf="hasActiveFilters">Aucun résultat pour ces filtres.</span>
+            <button *ngIf="hasActiveFilters" class="btn-link" (click)="clearFilters()">
+              Effacer les filtres
+            </button>
+          </div>
+        </ng-template>
+      </div>
+
+      <!-- Pied sidebar -->
+      <div class="sidebar-footer">
+        <button *ngIf="activeTab === 'admin'" class="btn-add-root" (click)="openCreateCommune()">
+          <mat-icon>add</mat-icon>
+          Nouvelle Commune
+        </button>
+        <button *ngIf="activeTab === 'monde'" class="btn-add-root" (click)="openCreateVille()">
+          <mat-icon>add</mat-icon>
+          Nouvelle Ville
+        </button>
+      </div>
+    </aside>
+
+    <!-- ── Panneau droit ───────────────────────────────── -->
+    <main class="loc-main">
+
+      <!-- Aucune sélection -->
+      <div *ngIf="!selectedNode && !showForm" class="loc-placeholder">
+        <div class="loc-placeholder__visual">
+          <div class="loc-placeholder__circle loc-placeholder__circle--1">
+            <mat-icon>touch_app</mat-icon>
+          </div>
+          <div class="loc-placeholder__circle loc-placeholder__circle--2"></div>
+          <div class="loc-placeholder__circle loc-placeholder__circle--3"></div>
         </div>
+        <h2 class="loc-placeholder__title">Sélectionnez une localité</h2>
+        <p class="loc-placeholder__text">
+          Cliquez sur un élément dans l'arborescence pour afficher ses détails,
+          ou créez une nouvelle entrée.
+        </p>
+        <button *ngIf="activeTab === 'admin'" class="btn-add-root btn-add-root--outline" (click)="openCreateCommune()">
+          <mat-icon>add_circle_outline</mat-icon>
+          Nouvelle Commune
+        </button>
+        <button *ngIf="activeTab === 'monde'" class="btn-add-root btn-add-root--outline" (click)="openCreateVille()">
+          <mat-icon>add_circle_outline</mat-icon>
+          Nouvelle Ville
+        </button>
       </div>
 
-      <!-- Bouton Créer Racine -->
-      <button 
-        mat-flat-button 
-        color="primary" 
-        class="btn-create-root"
-        (click)="openCreate()">
-        <mat-icon>add</mat-icon>
-        Créer {{ activeTab === 'admin' ? 'Région' : 'Pays' }}
-      </button>
-    </div>
+      <!-- Détails nœud -->
+      <div *ngIf="selectedNode && !showForm" class="loc-detail">
 
-    <!-- Panneau Détails & Édition Droite -->
-    <div class="details-panel">
-
-      <!-- Pas de sélection -->
-      <div *ngIf="!selectedNode && !editMode" class="empty-details">
-        <mat-icon>info</mat-icon>
-        <p>Sélectionnez une localité pour voir les détails</p>
-      </div>
-
-      <!-- Mode Lecture -->
-      <div *ngIf="selectedNode && !editMode" class="node-details">
-        <div class="details-header">
-          <div class="header-badge" [style.background]="getColor(selectedNode.type)">
+        <div class="detail-header">
+          <div class="detail-header__badge" [style.background]="getColor(selectedNode.type)">
             <mat-icon>{{ getIcon(selectedNode.type) }}</mat-icon>
           </div>
-          <div>
-            <h3 class="node-label">
+          <div class="detail-header__text">
+            <span class="detail-type"
+                  [style.color]="getColor(selectedNode.type)"
+                  [style.background]="getColor(selectedNode.type) + '18'">
               {{ formatLabel(selectedNode.type) }}
+            </span>
+            <h2 class="detail-name">{{ selectedNode.data.nom }}</h2>
+          </div>
+          <div class="detail-header__actions">
+            <button mat-icon-button class="detail-btn-edit" matTooltip="Modifier" (click)="openEdit(selectedNode)">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button class="detail-btn-delete" matTooltip="Supprimer" (click)="deleteNode(selectedNode)">
+              <mat-icon>delete_outline</mat-icon>
+            </button>
+          </div>
+        </div>
+
+        <div class="detail-body">
+          <!-- Infos -->
+          <div class="detail-section">
+            <h3 class="detail-section__title">Informations</h3>
+            <div class="detail-grid">
+              <div class="detail-field">
+                <span class="detail-field__label">Code</span>
+                <span class="detail-field__value detail-field__value--code">{{ selectedNode.data.code }}</span>
+              </div>
+              <div class="detail-field">
+                <span class="detail-field__label">Nom complet</span>
+                <span class="detail-field__value">{{ selectedNode.data.nom }}</span>
+              </div>
+              <div class="detail-field" *ngIf="selectedNode.data.createdAt">
+                <span class="detail-field__label">Créé le</span>
+                <span class="detail-field__value">{{ selectedNode.data.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+              </div>
+              <div class="detail-field" *ngIf="selectedNode.data.updatedAt">
+                <span class="detail-field__label">Modifié le</span>
+                <span class="detail-field__value">{{ selectedNode.data.updatedAt | date:'dd/MM/yyyy HH:mm' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sous-éléments -->
+          <div class="detail-section" *ngIf="selectedNode.children?.length">
+            <h3 class="detail-section__title">
+              Sous-éléments
+              <span class="detail-count">{{ selectedNode.children!.length }}</span>
             </h3>
-            <p class="node-code">{{ selectedNode.data.code }}</p>
+            <div class="detail-children">
+              <div *ngFor="let child of selectedNode.children"
+                   class="child-chip"
+                   (click)="selectNode(child)"
+                   [style.border-color]="getColor(child.type) + '55'"
+                   [style.background]="getColor(child.type) + '0d'">
+                <span class="child-chip__dot" [style.background]="getColor(child.type)"></span>
+                <span class="child-chip__name">{{ child.data.nom }}</span>
+                <span class="child-chip__code">{{ child.data.code }}</span>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="details-info">
-          <div class="info-item">
-            <label>Nom</label>
-            <span>{{ selectedNode.data.nom }}</span>
-          </div>
-          <div class="info-item" *ngIf="selectedNode.data.createdAt">
-            <label>Créé le</label>
-            <span>{{ selectedNode.data.createdAt | date: 'short' }}</span>
-          </div>
-          <div class="info-item" *ngIf="selectedNode.data.updatedAt">
-            <label>Modifié le</label>
-            <span>{{ selectedNode.data.updatedAt | date: 'short' }}</span>
-          </div>
-        </div>
-
-        <div class="details-actions">
-          <button mat-stroked-button color="primary" (click)="openEdit(selectedNode)">
+        <div class="detail-footer">
+          <button *ngIf="selectedNode.type === 'prefecture' || selectedNode.type === 'commune' || selectedNode.type === 'pays'"
+                  class="btn-primary" (click)="openCreate(selectedNode)">
+            <mat-icon>add</mat-icon> Ajouter {{ getChildTypeLabel(selectedNode.type) }}
+          </button>
+          <button class="btn-secondary" (click)="openEdit(selectedNode)">
             <mat-icon>edit</mat-icon> Modifier
           </button>
-          <button mat-stroked-button color="warn" (click)="deleteNode(selectedNode)">
+          <button class="btn-danger" (click)="deleteNode(selectedNode)">
             <mat-icon>delete_outline</mat-icon> Supprimer
           </button>
         </div>
       </div>
 
-      <!-- Mode Édition / Création -->
-      <div *ngIf="editMode" class="edit-form-container">
-        <div class="form-header">
-          <h3>
-            {{ editMode ? 'Modifier' : 'Créer' }} 
-            {{ selectedNode ? formatLabel(selectedNode.type) : 'Nouvel élément' }}
-          </h3>
+      <!-- Formulaire Création / Édition -->
+      <div *ngIf="showForm" class="loc-form">
+
+        <div class="form-head">
+          <div class="form-head__badge"
+               [style.background]="editMode && selectedNode ? getColor(selectedNode.type) : '#00853F'">
+            <mat-icon>{{ editMode ? 'edit' : 'add' }}</mat-icon>
+          </div>
+          <div class="form-head__text">
+            <h2 class="form-head__title">
+              {{ editMode
+                  ? 'Modifier — ' + formatLabel(selectedNode!.type)
+                  : 'Créer — ' + getCreateTypeLabel() }}
+            </h2>
+            <p class="form-head__sub" *ngIf="!editMode && selectedNode">
+              Rattaché à : <strong>{{ selectedNode.data.nom }}</strong>
+              ({{ formatLabel(selectedNode.type) }})
+            </p>
+          </div>
+          <button mat-icon-button class="form-head__close" matTooltip="Annuler" (click)="closeEdit()">
+            <mat-icon>close</mat-icon>
+          </button>
         </div>
 
-        <form [formGroup]="editForm" (ngSubmit)="saveNode()" class="edit-form">
+        <form [formGroup]="editForm" (ngSubmit)="saveNode()" class="form-body">
 
-          <!-- Champ Code -->
-          <mat-form-field appearance="outline" class="form-field">
-            <mat-label>Code</mat-label>
-            <input matInput formControlName="code" placeholder="Ex: GN, CA, etc." autocomplete="off">
-            <mat-icon matSuffix>code</mat-icon>
-            <mat-error *ngIf="editForm.get('code')?.hasError('required')">
-              Le code est requis
-            </mat-error>
-            <mat-error *ngIf="editForm.get('code')?.hasError('minlength')">
-              Minimum 2 caractères
-            </mat-error>
-          </mat-form-field>
-
-          <!-- Champ Nom -->
-          <mat-form-field appearance="outline" class="form-field">
-            <mat-label>Nom</mat-label>
-            <input matInput formControlName="nom" placeholder="Ex: Guinée, Conakry, etc." autocomplete="off">
-            <mat-icon matSuffix>label</mat-icon>
-            <mat-error *ngIf="editForm.get('nom')?.hasError('required')">
-              Le nom est requis
-            </mat-error>
-            <mat-error *ngIf="editForm.get('nom')?.hasError('minlength')">
-              Minimum 2 caractères
-            </mat-error>
-          </mat-form-field>
-
-          <!-- Erreurs personnalisées -->
-          <div *ngIf="formErrors.length > 0" class="form-errors">
-            <div *ngFor="let err of formErrors" class="error-msg">
-              <mat-icon>warning</mat-icon>
-              <span>{{ err.message }}</span>
+          <div class="form-group">
+            <label class="form-label" for="field-code">Code <span class="form-required">*</span></label>
+            <div class="form-input-wrap"
+                 [class.form-input-wrap--error]="editForm.get('code')?.invalid && editForm.get('code')?.touched">
+              <mat-icon class="form-input-icon">tag</mat-icon>
+              <input id="field-code" class="form-input" formControlName="code"
+                     placeholder="Ex : GN, GN-C…" autocomplete="off">
             </div>
+            <span class="form-hint">Identifiant court et unique (min. 2 caractères)</span>
+            <span class="form-error" *ngIf="editForm.get('code')?.touched && editForm.get('code')?.hasError('required')">Le code est requis.</span>
+            <span class="form-error" *ngIf="editForm.get('code')?.touched && editForm.get('code')?.hasError('minlength')">Minimum 2 caractères.</span>
           </div>
 
-          <!-- Boutons Action -->
+          <div class="form-group">
+            <label class="form-label" for="field-nom">Nom <span class="form-required">*</span></label>
+            <div class="form-input-wrap"
+                 [class.form-input-wrap--error]="editForm.get('nom')?.invalid && editForm.get('nom')?.touched">
+              <mat-icon class="form-input-icon">label</mat-icon>
+              <input id="field-nom" class="form-input" formControlName="nom"
+                     placeholder="Ex : Guinée, Conakry…" autocomplete="off">
+            </div>
+            <span class="form-hint">Nom complet de la localité (min. 2 caractères)</span>
+            <span class="form-error" *ngIf="editForm.get('nom')?.touched && editForm.get('nom')?.hasError('required')">Le nom est requis.</span>
+            <span class="form-error" *ngIf="editForm.get('nom')?.touched && editForm.get('nom')?.hasError('minlength')">Minimum 2 caractères.</span>
+          </div>
+
+          <div *ngIf="formErrors.length > 0" class="form-api-errors">
+            <mat-icon>warning_amber</mat-icon>
+            <div><p *ngFor="let err of formErrors">{{ err.message }}</p></div>
+          </div>
+
           <div class="form-actions">
-            <button type="submit" mat-flat-button color="primary" [disabled]="!formValid || loading">
-              <mat-icon>{{ editMode ? 'save' : 'add' }}</mat-icon>
-              {{ editMode ? 'Enregistrer' : 'Créer' }}
+            <button type="submit" class="btn-primary btn-primary--full" [disabled]="!formValid || loading">
+              <mat-spinner *ngIf="loading" diameter="16"></mat-spinner>
+              <mat-icon *ngIf="!loading">{{ editMode ? 'save' : 'add_circle' }}</mat-icon>
+              {{ editMode ? 'Enregistrer les modifications' : 'Créer ' + getCreateTypeLabel() }}
             </button>
-            <button type="button" mat-stroked-button (click)="closeEdit()">
-              <mat-icon>close</mat-icon> Annuler
-            </button>
+            <button type="button" class="btn-ghost" (click)="closeEdit()">Annuler</button>
           </div>
         </form>
       </div>
 
-    </div>
+    </main>
+  </div><!-- /loc-body -->
 
-  </div>
-
-</div>
+</div><!-- /loc-container -->
+</div><!-- /loc-root -->
