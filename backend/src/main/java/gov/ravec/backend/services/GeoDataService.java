@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -101,6 +102,116 @@ public class GeoDataService {
         return villeRepository.findByPays(pays).stream()
                 .map(this::toVilleDTO)
                 .collect(Collectors.toList());
+    }
+
+    // ========== Opérations CRUD Commune ==========
+
+    @Transactional
+    public CommuneDTO createCommune(CreateCommuneRequest request) {
+        log.info("Création d'une commune: {}", request.getCode());
+        Prefecture prefecture = prefectureRepository.findByCode(request.getPrefectureCode())
+                .orElseThrow(() -> new RuntimeException("Préfecture non trouvée: " + request.getPrefectureCode()));
+        Commune commune = Commune.builder()
+                .code(request.getCode())
+                .nom(request.getNom())
+                .prefecture(prefecture)
+                .build();
+        return toCommuneDTO(communeRepository.save(commune));
+    }
+
+    @Transactional
+    public CommuneDTO updateCommune(UUID id, CreateCommuneRequest request) {
+        log.info("Mise à jour de la commune: {}", id);
+        Commune commune = communeRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Commune non trouvée: " + id));
+        commune.setCode(request.getCode());
+        commune.setNom(request.getNom());
+        if (request.getPrefectureCode() != null && !request.getPrefectureCode().isBlank()) {
+            Prefecture prefecture = prefectureRepository.findByCode(request.getPrefectureCode())
+                    .orElseThrow(() -> new RuntimeException("Préfecture non trouvée: " + request.getPrefectureCode()));
+            commune.setPrefecture(prefecture);
+        }
+        return toCommuneDTO(communeRepository.save(commune));
+    }
+
+    @Transactional
+    public void deleteCommune(UUID id) {
+        log.info("Suppression de la commune: {}", id);
+        communeRepository.deleteById(id);
+    }
+
+    // ========== Opérations CRUD Quartier ==========
+
+    @Transactional
+    public QuartierDTO createQuartier(CreateQuartierRequest request) {
+        log.info("Création d'un quartier: {}", request.getCode());
+        Commune commune = communeRepository.findByCode(request.getCommuneCode())
+                .orElseThrow(() -> new RuntimeException("Commune non trouvée: " + request.getCommuneCode()));
+        Quartier quartier = Quartier.builder()
+                .code(request.getCode())
+                .nom(request.getNom())
+                .commune(commune)
+                .build();
+        return toQuartierDTO(quartierRepository.save(quartier));
+    }
+
+    @Transactional
+    public QuartierDTO updateQuartier(UUID id, CreateQuartierRequest request) {
+        log.info("Mise à jour du quartier: {}", id);
+        Quartier quartier = quartierRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Quartier non trouvé: " + id));
+        quartier.setCode(request.getCode());
+        quartier.setNom(request.getNom());
+        if (request.getCommuneCode() != null && !request.getCommuneCode().isBlank()) {
+            Commune commune = communeRepository.findByCode(request.getCommuneCode())
+                    .orElseThrow(() -> new RuntimeException("Commune non trouvée: " + request.getCommuneCode()));
+            quartier.setCommune(commune);
+        }
+        return toQuartierDTO(quartierRepository.save(quartier));
+    }
+
+    @Transactional
+    public void deleteQuartier(UUID id) {
+        log.info("Suppression du quartier: {}", id);
+        quartierRepository.deleteById(id);
+    }
+
+    // ========== Opérations CRUD Ville ==========
+
+    @Transactional
+    public VilleDTO createVille(CreateVilleRequest request) {
+        log.info("Création d'une ville: {}", request.getCode());
+        Pays pays = paysRepository.findByCode(request.getPaysCode())
+                .orElseThrow(() -> new RuntimeException("Pays non trouvé: " + request.getPaysCode()));
+        Ville ville = Ville.builder()
+                .code(request.getCode())
+                .nom(request.getNom())
+                .codePays(request.getPaysCode())
+                .pays(pays)
+                .build();
+        return toVilleDTO(villeRepository.save(ville));
+    }
+
+    @Transactional
+    public VilleDTO updateVille(UUID id, CreateVilleRequest request) {
+        log.info("Mise à jour de la ville: {}", id);
+        Ville ville = villeRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Ville non trouvée: " + id));
+        ville.setCode(request.getCode());
+        ville.setNom(request.getNom());
+        if (request.getPaysCode() != null && !request.getPaysCode().isBlank()) {
+            Pays pays = paysRepository.findByCode(request.getPaysCode())
+                    .orElseThrow(() -> new RuntimeException("Pays non trouvé: " + request.getPaysCode()));
+            ville.setCodePays(request.getPaysCode());
+            ville.setPays(pays);
+        }
+        return toVilleDTO(villeRepository.save(ville));
+    }
+
+    @Transactional
+    public void deleteVille(UUID id) {
+        log.info("Suppression de la ville: {}", id);
+        villeRepository.deleteById(id);
     }
 
     // ========== Méthodes de mapping ==========
