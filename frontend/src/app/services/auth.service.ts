@@ -16,6 +16,17 @@ interface JwtResponse {
   name: string;
   username: string;
   authorities: any[];
+  // Profil métier
+  profil?: string;
+  profilLibelle?: string;
+  niveauAdministratif?: string;
+  // Territoire
+  regionId?: string;
+  regionNom?: string;
+  prefectureId?: string;
+  prefectureNom?: string;
+  communeId?: string;
+  communeNom?: string;
 }
 
 @Injectable({
@@ -148,6 +159,37 @@ export class AuthService {
     return roles.some(role => this.hasRole(role));
   }
 
+  // ── Profil métier ────────────────────────────────────────────────────────
+
+  /** Nom technique du profil (ex: SUPER_ADMINISTRATEUR) */
+  get profil(): string | null {
+    return this.getCurrentUser()?.profil ?? null;
+  }
+
+  /** Libellé affiché (ex: Super-Administrateur) */
+  get profilLibelle(): string | null {
+    return this.getCurrentUser()?.profilLibelle ?? null;
+  }
+
+  /** Niveau administratif (CENTRAL | REGIONAL | PREFECTORAL | COMMUNAL) */
+  get niveauAdministratif(): string | null {
+    return this.getCurrentUser()?.niveauAdministratif ?? null;
+  }
+
+  get isCentral(): boolean     { return this.niveauAdministratif === 'CENTRAL'; }
+  get isRegional(): boolean    { return this.niveauAdministratif === 'REGIONAL'; }
+  get isPrefectoral(): boolean { return this.niveauAdministratif === 'PREFECTORAL'; }
+  get isCommunal(): boolean    { return this.niveauAdministratif === 'COMMUNAL'; }
+
+  // ── Territoire ───────────────────────────────────────────────────────────
+
+  get regionId(): string | null    { return this.getCurrentUser()?.regionId    ?? null; }
+  get regionNom(): string | null   { return this.getCurrentUser()?.regionNom   ?? null; }
+  get prefectureId(): string | null{ return this.getCurrentUser()?.prefectureId?? null; }
+  get prefectureNom(): string | null{ return this.getCurrentUser()?.prefectureNom?? null; }
+  get communeId(): string | null   { return this.getCurrentUser()?.communeId   ?? null; }
+  get communeNom(): string | null  { return this.getCurrentUser()?.communeNom  ?? null; }
+
   /**
    * Mettre à jour les informations de l'utilisateur connecté
    */
@@ -244,14 +286,23 @@ export class AuthService {
    * Définir la session utilisateur
    */
   private setSession(authResult: JwtResponse): void {
-
-    // Stocker le token
     sessionStorage.setItem(this.tokenKey, authResult.accessToken);
-    // Créer l'objet utilisateur avec toutes les données nécessaires
+
     const userData = {
-      username: authResult.username,
-      name : authResult.name,
-      authorities: authResult.authorities,
+      username:           authResult.username,
+      name:               authResult.name,
+      authorities:        authResult.authorities,
+      // Profil métier
+      profil:             authResult.profil,
+      profilLibelle:      authResult.profilLibelle,
+      niveauAdministratif: authResult.niveauAdministratif,
+      // Territoire
+      regionId:           authResult.regionId,
+      regionNom:          authResult.regionNom,
+      prefectureId:       authResult.prefectureId,
+      prefectureNom:      authResult.prefectureNom,
+      communeId:          authResult.communeId,
+      communeNom:         authResult.communeNom,
     };
 
     sessionStorage.setItem(this.userKey, JSON.stringify(userData));

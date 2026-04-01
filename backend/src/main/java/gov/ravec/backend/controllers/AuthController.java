@@ -27,7 +27,6 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -86,10 +85,28 @@ public class AuthController {
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
             String jwt = jwtProvider.generateJwtToken(authentication);
-            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            gov.ravec.backend.utils.UserPrinciple userPrincipal =
+                    (gov.ravec.backend.utils.UserPrinciple) authentication.getPrincipal();
             String name = user.get().getPrenom() + "  " + user.get().getNom();
-            return ResponseEntity
-                    .ok(new JwtResponse(jwt, name, loginInfo.getUsername(), "Bearer", userDetails.getAuthorities()));
+
+            JwtResponse response = JwtResponse.builder()
+                    .accessToken(jwt)
+                    .name(name)
+                    .username(loginInfo.getUsername())
+                    .tokenType("Bearer")
+                    .authorities(userPrincipal.getAuthorities())
+                    .profil(userPrincipal.getProfil())
+                    .profilLibelle(userPrincipal.getProfilLibelle())
+                    .niveauAdministratif(userPrincipal.getNiveauAdministratif())
+                    .regionId(userPrincipal.getRegionId())
+                    .regionNom(userPrincipal.getRegionNom())
+                    .prefectureId(userPrincipal.getPrefectureId())
+                    .prefectureNom(userPrincipal.getPrefectureNom())
+                    .communeId(userPrincipal.getCommuneId())
+                    .communeNom(userPrincipal.getCommuneNom())
+                    .build();
+
+            return ResponseEntity.ok(response);
 
         } catch (BadCredentialsException e) {
             return new ResponseEntity<>(

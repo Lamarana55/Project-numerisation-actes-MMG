@@ -10,8 +10,8 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { Subject, takeUntil, debounceTime } from 'rxjs';
 import { FormControl } from '@angular/forms';
 
-import { User } from '../../models/user';
-import { Role } from '../../models/role';
+import { User, NiveauAdministratif } from '../../models/user';
+import { Role, PROFIL_META, NIVEAU_LABELS } from '../../models/role';
 import { UserService } from '../../services/user.service';
 import { RoleService } from '../../services/role.service';
 import { UserFormDialogComponent } from '../user-form-dialog/user-form-dialog.component';
@@ -44,7 +44,18 @@ export class UserListComponent implements OnInit, OnDestroy {
   searchTerm     = '';
   selectedStatus = '';
   selectedRole   = '';
+  selectedNiveau = '';    // filtre par niveau administratif
   searchControl  = new FormControl();
+
+  readonly PROFIL_META   = PROFIL_META;
+  readonly NIVEAU_LABELS = NIVEAU_LABELS;
+
+  readonly niveaux: { value: NiveauAdministratif; label: string }[] = [
+    { value: 'CENTRAL',     label: 'National (PN-RAVEC)' },
+    { value: 'REGIONAL',    label: 'Régional' },
+    { value: 'PREFECTORAL', label: 'Préfectoral' },
+    { value: 'COMMUNAL',    label: 'Communal' },
+  ];
 
   // Pagination
   pageSize        = 10;
@@ -55,7 +66,7 @@ export class UserListComponent implements OnInit, OnDestroy {
   // Sélection
   selection = new SelectionModel<User>(true, []);
 
-  displayedColumns: string[] = ['select', 'profile', 'userInfo', 'role', 'statut', 'actions'];
+  displayedColumns: string[] = ['select', 'profile', 'userInfo', 'role', 'territoire', 'statut', 'actions'];
 
   // ── Lifecycle ────────────────────────────────────────────────
   ngOnInit(): void {
@@ -132,6 +143,9 @@ export class UserListComponent implements OnInit, OnDestroy {
         (u.roleName ?? u.role?.nom) === this.selectedRole
       );
     }
+    if (this.selectedNiveau) {
+      filtered = filtered.filter(u => u.niveauAdministratif === this.selectedNiveau);
+    }
 
     this.filteredUsers = filtered;
     this.totalItems    = filtered.length;
@@ -156,6 +170,7 @@ export class UserListComponent implements OnInit, OnDestroy {
     this.searchTerm     = '';
     this.selectedStatus = '';
     this.selectedRole   = '';
+    this.selectedNiveau = '';
     this.searchControl.setValue('', { emitEvent: false });
     this.applyFilters();
   }
@@ -354,17 +369,34 @@ export class UserListComponent implements OnInit, OnDestroy {
   }
 
   getRoleDisplay(user: User): string {
-    return user.roleName ?? user.role?.nom ?? 'Aucun rôle';
+    const nom = user.roleName ?? user.role?.nom ?? '';
+    return PROFIL_META[nom]?.libelle || user.roleLibelle || nom || 'Aucun profil';
+  }
+
+  getProfilMeta(user: User) {
+    const nom = user.roleName ?? user.role?.nom ?? '';
+    return PROFIL_META[nom] ?? null;
+  }
+
+  getNiveauLabel(user: User): string {
+    return user.niveauAdministratif ? NIVEAU_LABELS[user.niveauAdministratif] : '';
+  }
+
+  getTerritoireLabel(user: User): string {
+    if (user.communeNom)    return user.communeNom;
+    if (user.prefectureNom) return user.prefectureNom;
+    if (user.regionNom)     return user.regionNom;
+    return '';
   }
 
   isAdminUser(user: User): boolean {
     const role = (user.roleName ?? user.role?.nom ?? '').toUpperCase();
-    return role.includes('ADMIN');
+    return role.includes('SUPER_ADMIN');
   }
 
   get activeUsersCount(): number   { return this.users.filter(u => u.statut === 'Activated').length; }
   get inactiveUsersCount(): number { return this.users.filter(u => u.statut === 'Desactivated').length; }
-  get hasActiveFilters(): boolean  { return !!(this.searchTerm || this.selectedStatus || this.selectedRole); }
+  get hasActiveFilters(): boolean  { return !!(this.searchTerm || this.selectedStatus || this.selectedRole || this.selectedNiveau); }
 
   private notify(message: string, type: 'success' | 'error'): void {
     this.snackBar.open(message, 'Fermer', {

@@ -5,9 +5,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * DTO reçu par le contrôleur lors de la mise à jour d'un utilisateur.
- * On n'expose jamais l'entité User directement pour éviter les problèmes
- * de cascade JPA avec les entités détachées.
+ * DTO reçu lors de la mise à jour d'un utilisateur.
+ * Les champs territoriaux suivent les mêmes règles que UserCreateRequest.
  */
 @Getter
 @Setter
@@ -18,7 +17,13 @@ public class UserUpdateRequest {
     private String username;
     private String telephone;
     private String fonction;
-    /** ID du rôle à affecter — le service résoudra l'entité Role depuis la BDD */
+
+    /** ID du profil (role) */
     private String roleId;
     private Statut statut;
+
+    // ── Affectation territoriale ─────────────────────────────────────────────
+    private String regionId;
+    private String prefectureId;
+    private String communeId;
 }
