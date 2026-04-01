@@ -4,45 +4,50 @@ import { HierarchyLevel } from './localites.models';
 @Component({
   selector: 'app-hierarchy-node',
   template: `
-    <div class="hierarchy-node" [class.expanded]="node.expanded">
-      <!-- Nœud Lui-même -->
-      <div class="node-item" [class.selected]="isSelected">
-        <!-- Bouton Expand/Collapse -->
-        <button 
-          *ngIf="node.children && node.children.length > 0"
+    <div class="tree-node">
+      <!-- Ligne principale du nœud -->
+      <div
+        class="node-row"
+        [class.is-selected]="isSelected"
+        [attr.data-type]="node.type"
+        (click)="onSelect()">
+
+        <!-- Bouton toggle expand/collapse -->
+        <button
           class="toggle-btn"
-          (click)="onToggle()">
-          <mat-icon>{{ node.expanded ? 'expand_less' : 'expand_more' }}</mat-icon>
+          *ngIf="node.children && node.children.length > 0"
+          (click)="$event.stopPropagation(); onToggle()">
+          <mat-icon>{{ expandedNodes.has(node.data.id) ? 'expand_more' : 'chevron_right' }}</mat-icon>
         </button>
-        <div *ngIf="!node.children || node.children.length === 0" class="toggle-placeholder"></div>
+        <span
+          class="toggle-leaf"
+          *ngIf="!node.children || node.children.length === 0">
+        </span>
 
-        <!-- Icône et Label -->
-        <div class="node-info" (click)="onSelect()">
-          <div class="node-icon" [style.background]="node.color">
-            <mat-icon>{{ node.icon }}</mat-icon>
-          </div>
-          <div class="node-text">
-            <span class="node-label">{{ node.data.nom }}</span>
-            <span class="node-code">{{ node.data.code }}</span>
-          </div>
-        </div>
+        <!-- Icône type -->
+        <span class="node-dot" [style.background]="node.color"></span>
 
-        <!-- Actions Rapides -->
-        <div class="node-actions">
-          <button 
-            mat-icon-button 
+        <!-- Texte -->
+        <span class="node-name">{{ node.data.nom }}</span>
+        <span class="node-code-badge">{{ node.data.code }}</span>
+
+        <!-- Actions rapides -->
+        <div class="node-actions" (click)="$event.stopPropagation()">
+          <button
+            *ngIf="node.type === 'prefecture' || node.type === 'commune' || node.type === 'pays'"
+            class="action-btn action-add"
             matTooltip="Ajouter un sous-élément"
             (click)="onCreateChild()">
             <mat-icon>add</mat-icon>
           </button>
-          <button 
-            mat-icon-button 
+          <button
+            class="action-btn action-edit"
             matTooltip="Modifier"
             (click)="onEdit()">
             <mat-icon>edit</mat-icon>
           </button>
-          <button 
-            mat-icon-button 
+          <button
+            class="action-btn action-delete"
             matTooltip="Supprimer"
             (click)="onDelete()">
             <mat-icon>delete_outline</mat-icon>
@@ -50,335 +55,163 @@ import { HierarchyLevel } from './localites.models';
         </div>
       </div>
 
-      <!-- Enfants -->
-      <div class="node-children" *ngIf="node.expanded && node.children && node.children.length > 0">
+      <!-- Enfants (récursif) — utilise expandedNodes.has() qui est la vraie source de vérité -->
+      <div
+        class="node-children"
+        *ngIf="expandedNodes.has(node.data.id) && node.children && node.children.length > 0">
         <app-hierarchy-node
-          *ngFor="let child of node.children"
+          *ngFor="let child of node.children; trackBy: trackById"
           [node]="child"
-          [isSelected]="false"
+          [isSelected]="selectedNodeId === child.data.id"
+          [selectedNodeId]="selectedNodeId"
           [expandedNodes]="expandedNodes"
-          (select)="onChildSelect($event)"
-          (toggleNode)="onChildToggle($event)"
-          (createChild)="onCreateChild()"
-          (editNode)="onEdit()"
-          (deleteNode)="onDelete()">
+          (select)="select.emit($event)"
+          (toggleNode)="toggleNode.emit($event)"
+          (createChild)="createChild.emit($event)"
+          (editNode)="editNode.emit($event)"
+          (deleteNode)="deleteNode.emit($event)">
         </app-hierarchy-node>
       </div>
     </div>
   `,
   styles: [`
-    .hierarchy-node {
-      margin-bottom: 2px;
-      animation: fadeIn 0.3s ease-out;
-    }
+    :host { display: block; }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-5px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+    /* ── Nœud ─────────────────────────────── */
+    .tree-node { position: relative; }
 
-    .node-item {
+    .node-row {
       display: flex;
       align-items: center;
-      gap: 12px;
-      padding: 12px 16px;
-      border-radius: 12px;
-      cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      border-left: 4px solid transparent;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .node-item::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-
-    .node-item:hover {
-      background: rgba(0, 133, 63, 0.08);
-      transform: translateX(4px);
-      box-shadow: 0 4px 12px rgba(0, 133, 63, 0.15);
-    }
-
-    .node-item:hover::before {
-      opacity: 1;
-    }
-
-    .node-item.selected {
-      background: linear-gradient(135deg, rgba(0, 133, 63, 0.15) 0%, rgba(0, 133, 63, 0.08) 100%);
-      border-left-color: #00853F;
-      font-weight: 600;
-      box-shadow: 0 6px 20px rgba(0, 133, 63, 0.2);
-      transform: translateX(6px);
-    }
-
-    .node-item.selected::after {
-      content: '';
-      position: absolute;
-      right: 0;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 4px;
-      height: 60%;
-      background: #00853F;
-      border-radius: 2px 0 0 2px;
-    }
-
-    .toggle-btn {
-      width: 32px;
-      height: 32px;
-      padding: 0;
-      min-width: 32px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      gap: 6px;
+      padding: 7px 10px 7px 6px;
       border-radius: 8px;
-      transition: all 0.2s ease;
-      background: rgba(255, 255, 255, 0.8);
-      border: 1px solid rgba(0, 0, 0, 0.1);
-      color: #64748b;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s ease;
+      position: relative;
     }
 
-    .toggle-btn:hover {
-      background: #00853F;
-      color: white;
-      transform: scale(1.05);
-      box-shadow: 0 2px 8px rgba(0, 133, 63, 0.3);
+    .node-row:hover { background: rgba(0,0,0,.04); }
+
+    .node-row.is-selected {
+      background: rgba(0, 133, 63, .1);
     }
 
-    .toggle-btn mat-icon {
-      font-size: 18px;
-      width: 18px;
-      height: 18px;
-      transition: transform 0.3s ease;
+    .node-row.is-selected .node-name {
+      color: #00853F;
+      font-weight: 700;
     }
 
-    .toggle-placeholder {
-      width: 32px;
-      height: 32px;
+    /* ── Toggle ────────────────────────────── */
+    .toggle-btn {
+      width: 22px; height: 22px; min-width: 22px;
+      padding: 0; border: none; background: transparent;
+      color: #9ca3af; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 4px; flex-shrink: 0;
+      transition: color .15s, background .15s;
+    }
+    .toggle-btn:hover { color: #374151; background: rgba(0,0,0,.06); }
+    .toggle-btn mat-icon { font-size: 16px; width: 16px; height: 16px; }
+
+    .toggle-leaf {
+      width: 22px; height: 22px; flex-shrink: 0;
     }
 
-    .node-info {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex: 1;
-      min-width: 0;
-    }
-
-    .node-icon {
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    /* ── Dot couleur type ─────────────────── */
+    .node-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
       flex-shrink: 0;
-      color: white;
-      font-size: 16px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-      transition: all 0.3s ease;
     }
 
-    .node-icon:hover {
-      transform: scale(1.1);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-    }
-
-    .node-icon mat-icon {
-      font-size: 16px;
-      width: 16px;
-      height: 16px;
-    }
-
-    .node-text {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      min-width: 0;
+    /* ── Texte ─────────────────────────────── */
+    .node-name {
       flex: 1;
-    }
-
-    .node-label {
-      font-size: 0.95rem;
-      font-weight: 600;
-      color: #0f172a;
+      font-size: .875rem;
+      font-weight: 500;
+      color: #111827;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      transition: color 0.2s ease;
+      min-width: 0;
+      transition: color .15s;
     }
 
-    .node-item.selected .node-label {
-      color: #00853F;
+    .node-code-badge {
+      font-size: .7rem;
+      font-weight: 600;
+      color: #9ca3af;
+      font-family: 'SF Mono', 'Roboto Mono', monospace;
+      letter-spacing: .02em;
+      flex-shrink: 0;
+      padding: 1px 5px;
+      background: #f3f4f6;
+      border-radius: 4px;
     }
 
-    .node-code {
-      font-size: 0.8rem;
-      color: #64748b;
-      font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
-      font-weight: 500;
-      letter-spacing: 0.025em;
-    }
-
+    /* ── Actions (apparaissent au hover) ───── */
     .node-actions {
-      display: none;
-      gap: 6px;
+      display: flex;
+      gap: 2px;
       flex-shrink: 0;
       opacity: 0;
-      transform: translateX(10px);
-      transition: all 0.3s ease;
+      visibility: hidden;
+      transition: opacity .15s, visibility .15s;
     }
-
-    .node-item:hover .node-actions {
-      display: flex;
+    .node-row:hover .node-actions {
       opacity: 1;
-      transform: translateX(0);
+      visibility: visible;
     }
 
-    .node-actions button {
-      width: 32px;
-      height: 32px;
-      border-radius: 8px;
-      transition: all 0.2s ease;
-      background: rgba(255, 255, 255, 0.9);
-      border: 1px solid rgba(0, 0, 0, 0.1);
-      color: #64748b;
+    .action-btn {
+      width: 24px; height: 24px;
+      padding: 0; border: none; background: transparent;
+      border-radius: 5px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: #9ca3af;
+      transition: background .15s, color .15s;
     }
+    .action-btn mat-icon { font-size: 14px; width: 14px; height: 14px; }
 
-    .node-actions button:hover {
-      transform: scale(1.1);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-    }
+    .action-add:hover    { background: #d1fae5; color: #059669; }
+    .action-edit:hover   { background: #dbeafe; color: #2563eb; }
+    .action-delete:hover { background: #fee2e2; color: #dc2626; }
 
-    .node-actions button:nth-child(1):hover {
-      background: #10b981;
-      color: white;
-    }
-
-    .node-actions button:nth-child(2):hover {
-      background: #3b82f6;
-      color: white;
-    }
-
-    .node-actions button:nth-child(3):hover {
-      background: #ef4444;
-      color: white;
-    }
-
+    /* ── Enfants ────────────────────────────── */
     .node-children {
-      padding-left: 20px;
-      border-left: 2px solid #e2e8f0;
       margin-left: 16px;
-      margin-top: 8px;
-      position: relative;
+      padding-left: 14px;
+      border-left: 1.5px solid #e5e7eb;
+      animation: fadeIn .18s ease-out;
     }
 
-    .node-children::before {
-      content: '';
-      position: absolute;
-      left: -2px;
-      top: 0;
-      bottom: 0;
-      width: 2px;
-      background: linear-gradient(to bottom, #e2e8f0 0%, rgba(226, 232, 240, 0.3) 100%);
-    }
-
-    /* Animation d'expansion */
-    .node-children {
-      animation: slideDown 0.3s ease-out;
-    }
-
-    @keyframes slideDown {
-      from {
-        opacity: 0;
-        max-height: 0;
-        transform: translateY(-10px);
-      }
-      to {
-        opacity: 1;
-        max-height: 1000px;
-        transform: translateY(0);
-      }
-    }
-
-    /* États responsives */
-    @media (max-width: 768px) {
-      .node-item {
-        padding: 10px 12px;
-        gap: 8px;
-      }
-
-      .node-icon {
-        width: 32px;
-        height: 32px;
-      }
-
-      .node-label {
-        font-size: 0.9rem;
-      }
-
-      .node-code {
-        font-size: 0.75rem;
-      }
-
-      .node-actions {
-        gap: 4px;
-      }
-
-      .node-actions button {
-        width: 28px;
-        height: 28px;
-      }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
   `]
 })
 export class HierarchyNodeComponent {
   @Input() node!: HierarchyLevel;
   @Input() isSelected = false;
+  @Input() selectedNodeId: string | null = null;
   @Input() expandedNodes: Set<string> = new Set();
 
-  @Output() select = new EventEmitter<HierarchyLevel>();
-  @Output() toggleNode = new EventEmitter<string>();
+  @Output() select      = new EventEmitter<HierarchyLevel>();
+  @Output() toggleNode  = new EventEmitter<string>();
   @Output() createChild = new EventEmitter<HierarchyLevel>();
-  @Output() editNode = new EventEmitter<HierarchyLevel>();
-  @Output() deleteNode = new EventEmitter<HierarchyLevel>();
+  @Output() editNode    = new EventEmitter<HierarchyLevel>();
+  @Output() deleteNode  = new EventEmitter<HierarchyLevel>();
 
-  onToggle(): void {
-    this.toggleNode.emit(this.node.data.id!);
-  }
+  onToggle(): void  { this.toggleNode.emit(this.node.data.id!); }
+  onSelect(): void  { this.select.emit(this.node); }
+  onCreateChild(): void { this.createChild.emit(this.node); }
+  onEdit(): void    { this.editNode.emit(this.node); }
+  onDelete(): void  { this.deleteNode.emit(this.node); }
 
-  onSelect(): void {
-    this.select.emit(this.node);
-  }
-
-  onCreateChild(): void {
-    this.createChild.emit(this.node);
-  }
-
-  onEdit($event?: any): void {
-    $event?.stopPropagation();
-    this.editNode.emit(this.node);
-  }
-
-  onDelete($event?: any): void {
-    $event?.stopPropagation();
-    this.deleteNode.emit(this.node);
-  }
-
-  onChildSelect(node: HierarchyLevel): void {
-    this.select.emit(node);
-  }
-
-  onChildToggle(nodeId: string): void {
-    this.toggleNode.emit(nodeId);
+  trackById(_: number, node: HierarchyLevel): string {
+    return node.data.id ?? node.data.code;
   }
 }
