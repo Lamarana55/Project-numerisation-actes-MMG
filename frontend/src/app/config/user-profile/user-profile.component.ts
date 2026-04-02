@@ -240,10 +240,10 @@ export class UserProfileComponent implements OnInit, OnDestroy {
           this.savingPassword  = false;
           this.passwordSuccess = true;
           this.passwordForm.reset();
-          this.authService.clearMustChangePassword();
-          this.snack('Mot de passe modifié avec succès', 'success');
           this.track('change_password', 'Mot de passe modifié', 'Changement du mot de passe de connexion');
-          setTimeout(() => this.passwordSuccess = false, 5000);
+          this.snack('Mot de passe modifié. Déconnexion en cours…', 'success');
+          // Déconnecter après 2 s pour que l'utilisateur lise le message
+          setTimeout(() => this.authService.logout(), 2000);
         },
         error: () => {
           this.savingPassword = false;

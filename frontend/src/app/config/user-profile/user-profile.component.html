@@ -219,7 +219,10 @@
                 <!-- Succès -->
                 <div class="pwd-success" *ngIf="passwordSuccess">
                   <mat-icon>check_circle</mat-icon>
-                  <span>Mot de passe modifié avec succès !</span>
+                  <div>
+                    <strong>Mot de passe modifié avec succès !</strong>
+                    <p class="pwd-success-hint">Vous allez être déconnecté dans quelques instants…</p>
+                  </div>
                 </div>
 
                 <form [formGroup]="passwordForm" (ngSubmit)="changePassword()" *ngIf="!passwordSuccess">

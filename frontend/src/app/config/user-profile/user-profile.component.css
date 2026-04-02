@@ -333,7 +333,11 @@
   margin-bottom: 8px;
 }
 
-.pwd-success mat-icon { color: var(--success); }
+.pwd-success mat-icon { color: var(--success); flex-shrink: 0; }
+
+.pwd-success p { margin: 4px 0 0; font-size: .82rem; font-weight: 400; opacity: .85; }
+
+.pwd-success-hint { margin: 4px 0 0; font-size: .82rem; opacity: .8; }
 
 /* Indicateur de force */
 .strength-wrapper {
