@@ -39,7 +39,7 @@ import java.util.*;
  *    sup_[commune]@ravec.gov.gn   → SUPERVISEUR
  *    odec_[commune]@ravec.gov.gn  → ODEC
  *
- *  Mot de passe par défaut : Ravec@2024
+ *  Mot de passe par défaut : ChangeMe2026!
  * ============================================================
  */
 @Component
