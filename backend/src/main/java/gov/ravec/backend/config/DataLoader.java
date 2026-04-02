@@ -49,7 +49,7 @@ public class DataLoader implements CommandLineRunner {
     private static final Logger log = LoggerFactory.getLogger(DataLoader.class);
 
     /** Mot de passe initial commun à tous les comptes de référence. */
-    static final String DEFAULT_PASSWORD = "Ravec@2024";
+    static final String DEFAULT_PASSWORD = "ChangeMe2026!";
 
     // ── Noms techniques des profils (doivent correspondre à DataInitializer) ─
     private static final String PROFIL_SUPER_ADMIN       = "SUPER_ADMINISTRATEUR";
@@ -132,7 +132,7 @@ public class DataLoader implements CommandLineRunner {
         count += creer(User.builder()
                 .id("USR-SA-001")
                 .code("SA-001")
-                .nom("DIALLO").prenom("Mamadou Alpha")
+                .nom("DIALLO").prenom("Mamadou lamarana")
                 .email("superadmin@ravec.gov.gn").username("superadmin@ravec.gov.gn")
                 .telephone("+224621000001")
                 .fonction("Super-Administrateur National")
