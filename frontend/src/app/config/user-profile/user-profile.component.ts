@@ -1,18 +1,19 @@
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatDialog } from '@angular/material/dialog';
-import { Role } from '../../models/role';
-import { User } from '../../models/user';
-import { UserService } from '../../services/user.service';
-import { AuthService } from '../../services/auth.service';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
-interface Activity {
-  id: string;
-  type: 'login' | 'update' | 'create' | 'delete' | 'validation';
-  title: string;
-  description: string;
-  timestamp: Date;
+import { AuthService } from '../../services/auth.service';
+import { ActivityService, Activity, ActivityType } from '../../services/activity.service';
+import { PreferencesService, UserPreferences } from '../../services/preferences.service';
+import { User } from '../../models/user';
+
+/** Validateur de groupe : newPassword doit être identique à confirmPassword */
+function passwordsMatch(group: AbstractControl): { [key: string]: boolean } | null {
+  const np = group.get('newPassword')?.value;
+  const cp = group.get('confirmPassword')?.value;
+  return np && cp && np !== cp ? { passwordsMismatch: true } : null;
 }
 
 @Component({
@@ -20,325 +21,316 @@ interface Activity {
   templateUrl: './user-profile.component.html',
   styleUrls: ['./user-profile.component.css']
 })
-export class UserProfileComponent implements OnInit {
+export class UserProfileComponent implements OnInit, OnDestroy {
 
   currentUser: User | null = null;
+  loading          = false;
   selectedTabIndex = 0;
 
-  // Forms
-  profileForm: FormGroup;
-  preferencesForm: FormGroup;
+  // ── Formulaire profil ────────────────────────────────────────────────────
+  profileForm!: FormGroup;
+  savingProfile = false;
 
-  // État
-  saving = false;
+  // ── Formulaire mot de passe ──────────────────────────────────────────────
+  passwordForm!: FormGroup;
+  savingPassword  = false;
+  passwordSuccess = false;
+  showCurrentPwd  = false;
+  showNewPwd      = false;
+  showConfirmPwd  = false;
+
+  // ── Activités ────────────────────────────────────────────────────────────
+  activities: Activity[] = [];
+
+  // ── Préférences ──────────────────────────────────────────────────────────
+  preferencesForm!: FormGroup;
   savingPreferences = false;
 
-  // Données de sécurité
-  lastPasswordChange = new Date();
-  activeSessions = 1;
-  lastLogin = new Date();
-  lastLoginLocation = 'Conakry, Guinée';
-
-  // Activités récentes
-  recentActivities: Activity[] = [
-    {
-      id: '1',
-      type: 'login',
-      title: 'Connexion réussie',
-      description: 'Connexion depuis Conakry, Guinée',
-      timestamp: new Date()
-    },
-    {
-      id: '2',
-      type: 'validation',
-      title: 'Validation de données',
-      description: 'Validation de 5 actes de naissance',
-      timestamp: new Date(Date.now() - 3600000)
-    },
-    {
-      id: '3',
-      type: 'update',
-      title: 'Profil mis à jour',
-      description: 'Modification des informations personnelles',
-      timestamp: new Date(Date.now() - 7200000)
-    }
-  ];
+  private destroy$ = new Subject<void>();
 
   constructor(
-    private fb: FormBuilder,
-    private userService: UserService,
+    private fb:          FormBuilder,
     private authService: AuthService,
-    private snackBar: MatSnackBar,
-    private dialog: MatDialog
-  ) {
-    this.profileForm = this.createProfileForm();
-    this.preferencesForm = this.createPreferencesForm();
-  }
+    private activitySvc: ActivityService,
+    private prefSvc:     PreferencesService,
+    private snackBar:    MatSnackBar
+  ) {}
 
   ngOnInit(): void {
-    this.loadCurrentUser();
+    this.buildForms();
+    this.loadProfile();
   }
 
-  /**
-   * Charger les informations de l'utilisateur connecté
-   */
-  loadCurrentUser(): void {
-    // Récupérer l'ID de l'utilisateur connecté depuis AuthService
-    const userId = this.authService.getCurrentUserId();
-    if (userId) {
-      this.userService.getUserById(userId).subscribe({
-        next: (user) => {
-          this.currentUser = user;
-          this.updateForms();
-        },
-        error: (error) => {
-          console.error('Erreur lors du chargement du profil:', error);
-          this.showSnackBar('Erreur lors du chargement du profil', 'error');
-        }
-      });
-    }
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
-  /**
-   * Créer le formulaire de profil
-   */
-  createProfileForm(): FormGroup {
-    return this.fb.group({
-      prenom: ['', [Validators.required]],
-      nom: ['', [Validators.required]],
-      email: ['', [Validators.required, Validators.email]],
-      telephone: [''],
-      username: ['', [Validators.required]]
+  // ── Construction des formulaires ─────────────────────────────────────────
+
+  private buildForms(): void {
+    this.profileForm = this.fb.group({
+      prenom:    ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
+      nom:       ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
+      email:     ['', [Validators.required, Validators.email]],
+      telephone: ['', [Validators.pattern('^[0-9+\\-\\s()]{8,20}$')]],
+      fonction:  ['']
+    });
+
+    this.passwordForm = this.fb.group({
+      currentPassword: ['', Validators.required],
+      newPassword: ['', [
+        Validators.required,
+        Validators.minLength(8),
+        Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).+$/)
+      ]],
+      confirmPassword: ['', Validators.required]
+    }, { validators: passwordsMatch });
+
+    this.preferencesForm = this.fb.group({
+      language:             ['fr'],
+      timezone:             ['Africa/Conakry'],
+      darkMode:             [false],
+      emailNotifications:   [true],
+      browserNotifications: [false],
+      soundNotifications:   [false]
     });
   }
 
-  /**
-   * Créer le formulaire de préférences
-   */
-  createPreferencesForm(): FormGroup {
-    return this.fb.group({
-      language: ['fr'],
-      timezone: ['Africa/Conakry'],
-      darkMode: [false],
-      emailNotifications: [true],
-      browserNotifications: [true],
-      soundNotifications: [false]
-    });
-  }
+  // ── Chargement initial ───────────────────────────────────────────────────
 
-  /**
-   * Mettre à jour les formulaires avec les données utilisateur
-   */
-  updateForms(): void {
-    if (this.currentUser) {
-      this.profileForm.patchValue({
-        prenom: this.currentUser.prenom,
-        nom: this.currentUser.nom,
-        email: this.currentUser.email,
-        telephone: this.currentUser.telephone,
-        username: this.currentUser.username
-      });
-    }
-  }
-
-  /**
-   * Obtenir le rôle principal de l'utilisateur
-   */
-  getUserRole(): string {
-    if (this.currentUser?.role) {
-      return this.currentUser.role.nom.replace('ROLE_', '').replace('_', ' ');
-    }
-    return 'Utilisateur';
-  }
-
-  /**
-   * Mettre à jour le profil
-   */
-  updateProfile(): void {
-    if (this.profileForm.valid && this.currentUser) {
-      this.saving = true;
-
-      const updatedUser: User = {
-        ...this.currentUser,
-        ...this.profileForm.value
-      };
-
-      this.userService.updateUser(this.currentUser.id!, updatedUser).subscribe({
-        next: (user) => {
+  loadProfile(): void {
+    this.loading = true;
+    this.authService.getMyProfile()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (user: User) => {
           this.currentUser = user;
-          this.saving = false;
-          this.showSnackBar('Profil mis à jour avec succès', 'success');
-
-          // Ajouter une activité
-          this.addActivity('update', 'Profil mis à jour', 'Modification des informations personnelles');
+          this.loading = false;
+          this.profileForm.patchValue({
+            prenom:    user.prenom    || '',
+            nom:       user.nom       || '',
+            email:     user.email     || '',
+            telephone: user.telephone || '',
+            fonction:  user.fonction  || ''
+          });
+          this.loadActivities();
+          this.loadPreferences();
         },
-        error: (error) => {
-          console.error('Erreur lors de la mise à jour:', error);
-          this.saving = false;
-          this.showSnackBar('Erreur lors de la mise à jour du profil', 'error');
+        error: () => {
+          this.loading = false;
+          this.snack('Impossible de charger le profil', 'error');
         }
       });
-    }
   }
 
-  /**
-   * Réinitialiser le formulaire
-   */
-  resetForm(): void {
-    this.updateForms();
+  private loadActivities(): void {
+    this.activities = this.activitySvc.getActivities(this.currentUser?.username || '');
   }
 
-  /**
-   * Ouvrir le dialogue de changement de mot de passe
-   */
-  openChangePasswordDialog(): void {
-    // const dialogRef = this.dialog.open(ChangePasswordDialogComponent, {
-    //   width: '400px',
-    //   data: { userId: this.currentUser?.id }
-    // });
-
-    // dialogRef.afterClosed().subscribe(result => {
-    //   if (result) {
-    //     this.lastPasswordChange = new Date();
-    //     this.showSnackBar('Mot de passe modifié avec succès', 'success');
-    //     this.addActivity('update', 'Mot de passe modifié', 'Changement du mot de passe');
-    //   }
-    // });
-
-    console.log('Ouverture du dialogue de changement de mot de passe');
-    this.showSnackBar('Fonctionnalité de changement de mot de passe à implémenter', 'info');
+  private loadPreferences(): void {
+    const prefs = this.prefSvc.get(this.currentUser?.username || '');
+    this.preferencesForm.patchValue(prefs, { emitEvent: false });
   }
 
-  /**
-   * Modifier le profil (mode édition)
-   */
-  editProfile(): void {
-    this.selectedTabIndex = 0; // Aller à l'onglet des informations personnelles
-  }
+  // ── Getters template ─────────────────────────────────────────────────────
 
-  /**
-   * Mettre à jour les préférences
-   */
-  updatePreferences(): void {
-    if (this.preferencesForm.valid) {
-      this.savingPreferences = true;
-
-      // Simuler la sauvegarde des préférences
-      setTimeout(() => {
-        this.savingPreferences = false;
-        this.showSnackBar('Préférences mises à jour avec succès', 'success');
-        this.addActivity('update', 'Préférences modifiées', 'Mise à jour des préférences de l\'application');
-      }, 1000);
-    }
-  }
-
-  /**
-   * Déconnecter tous les appareils
-   */
-  logoutAllDevices(): void {
-    if (confirm('Voulez-vous vraiment déconnecter tous les appareils ? Vous devrez vous reconnecter.')) {
-      // Implémenter la déconnexion de tous les appareils
-      this.activeSessions = 1;
-      this.showSnackBar('Tous les appareils ont été déconnectés', 'success');
-      this.addActivity('update', 'Déconnexion massive', 'Déconnexion de tous les appareils');
-    }
-  }
-
-  /**
-   * Charger plus d'activités
-   */
-  loadMoreActivities(): void {
-    // Simuler le chargement de plus d'activités
-    const moreActivities: Activity[] = [
-      {
-        id: '4',
-        type: 'create',
-        title: 'Création d\'utilisateur',
-        description: 'Création d\'un nouvel utilisateur: John Doe',
-        timestamp: new Date(Date.now() - 86400000)
-      },
-      {
-        id: '5',
-        type: 'login',
-        title: 'Connexion',
-        description: 'Connexion depuis un nouvel appareil',
-        timestamp: new Date(Date.now() - 172800000)
-      }
-    ];
-
-    this.recentActivities = [...this.recentActivities, ...moreActivities];
-    this.showSnackBar('Plus d\'activités chargées', 'success');
-  }
-
-  /**
-   * Exporter l'historique d'activité
-   */
-  exportActivityLog(): void {
-    // Implémenter l'export de l'historique
-    console.log('Export de l\'historique d\'activité');
-    this.showSnackBar('Export de l\'historique en cours...', 'info');
-  }
-
-  /**
-   * Obtenir l'icône pour un type d'activité
-   */
-  getActivityIcon(type: string): string {
-    switch (type) {
-      case 'login': return 'login';
-      case 'update': return 'edit';
-      case 'create': return 'add';
-      case 'delete': return 'delete';
-      case 'validation': return 'check_circle';
-      default: return 'info';
-    }
-  }
-
-  /**
-   * Vérifier si l'utilisateur a des rôles
-   */
-  hasRoles(): boolean {
-    return !!(this.currentUser && this.currentUser.role);
-  }
-
-  /**
-   * Obtenir les rôles de manière sécurisée
-   */
-  getUserRoles(): Role | undefined {
-    return this.currentUser?.role;
-  }
-
-  /**
-   * Obtenir le nom complet de l'utilisateur
-   */
-  getFullName(): string {
+  get fullName(): string {
     if (!this.currentUser) return '';
     return `${this.currentUser.prenom || ''} ${this.currentUser.nom || ''}`.trim();
   }
 
-  /**
-   * Ajouter une nouvelle activité
-   */
-  private addActivity(type: Activity['type'], title: string, description: string): void {
-    const newActivity: Activity = {
-      id: Date.now().toString(),
-      type,
-      title,
-      description,
-      timestamp: new Date()
+  get profilLabel(): string {
+    return this.currentUser?.roleLibelle ?? this.currentUser?.roleName ?? 'Utilisateur';
+  }
+
+  get niveauLabel(): string {
+    const map: Record<string, string> = {
+      CENTRAL:     'Niveau National',
+      REGIONAL:    'Niveau Régional',
+      PREFECTORAL: 'Niveau Préfectoral',
+      COMMUNAL:    'Niveau Communal'
     };
+    return map[this.currentUser?.niveauAdministratif ?? ''] || '';
+  }
 
-    this.recentActivities.unshift(newActivity);
+  get initials(): string {
+    const parts = this.fullName.trim().split(/\s+/).filter(p => p.length > 0);
+    if (parts.length === 0) return 'U';
+    if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+    return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+  }
 
-    // Garder seulement les 10 dernières activités
-    if (this.recentActivities.length > 10) {
-      this.recentActivities = this.recentActivities.slice(0, 10);
+  // ── Force du mot de passe ────────────────────────────────────────────────
+
+  get pwd(): string { return this.passwordForm.get('newPassword')?.value || ''; }
+
+  get passwordStrength(): number {
+    return this.authService.checkPasswordStrength(this.pwd).score;
+  }
+
+  get strengthClass(): string {
+    const s = this.passwordStrength;
+    if (s <= 1) return 'very-weak';
+    if (s === 2) return 'weak';
+    if (s === 3) return 'medium';
+    if (s === 4) return 'strong';
+    return 'very-strong';
+  }
+
+  get strengthLabel(): string {
+    const labels = ['', 'Très faible', 'Faible', 'Moyen', 'Fort', 'Très fort'];
+    return labels[Math.min(this.passwordStrength, 5)] || '';
+  }
+
+  get rule8chars(): boolean    { return this.pwd.length >= 8; }
+  get ruleUppercase(): boolean { return /[A-Z]/.test(this.pwd); }
+  get ruleLowercase(): boolean { return /[a-z]/.test(this.pwd); }
+  get ruleDigit(): boolean     { return /\d/.test(this.pwd); }
+  get ruleSpecial(): boolean   { return /[^a-zA-Z0-9]/.test(this.pwd); }
+
+  // ── Soumission profil ────────────────────────────────────────────────────
+
+  updateProfile(): void {
+    if (this.profileForm.invalid) { this.profileForm.markAllAsTouched(); return; }
+    this.savingProfile = true;
+    const v = this.profileForm.value;
+
+    this.authService.updateMyProfile({
+      nom: v.nom, prenom: v.prenom,
+      email: v.email, telephone: v.telephone, fonction: v.fonction
+    }).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (updated: User) => {
+        this.currentUser = { ...this.currentUser!, ...updated };
+        this.savingProfile = false;
+        this.snack('Profil mis à jour avec succès', 'success');
+        this.track('update_profile', 'Profil mis à jour', 'Modification des informations personnelles');
+      },
+      error: () => {
+        this.savingProfile = false;
+        this.snack('Erreur lors de la mise à jour du profil', 'error');
+      }
+    });
+  }
+
+  resetProfileForm(): void {
+    if (this.currentUser) {
+      this.profileForm.patchValue({
+        prenom:    this.currentUser.prenom    || '',
+        nom:       this.currentUser.nom       || '',
+        email:     this.currentUser.email     || '',
+        telephone: this.currentUser.telephone || '',
+        fonction:  this.currentUser.fonction  || ''
+      });
+      this.profileForm.markAsPristine();
     }
   }
 
-  /**
-   * Afficher un message
-   */
-  private showSnackBar(message: string, type: 'success' | 'error' | 'info' = 'success'): void {
+  // ── Soumission mot de passe ──────────────────────────────────────────────
+
+  changePassword(): void {
+    if (this.passwordForm.invalid) { this.passwordForm.markAllAsTouched(); return; }
+    this.savingPassword = true;
+    const { currentPassword, newPassword } = this.passwordForm.value;
+
+    this.authService.changeFirstPassword(currentPassword, newPassword)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.savingPassword  = false;
+          this.passwordSuccess = true;
+          this.passwordForm.reset();
+          this.authService.clearMustChangePassword();
+          this.snack('Mot de passe modifié avec succès', 'success');
+          this.track('change_password', 'Mot de passe modifié', 'Changement du mot de passe de connexion');
+          setTimeout(() => this.passwordSuccess = false, 5000);
+        },
+        error: () => {
+          this.savingPassword = false;
+          this.snack('Mot de passe actuel incorrect. Veuillez réessayer.', 'error');
+        }
+      });
+  }
+
+  // ── Soumission préférences ───────────────────────────────────────────────
+
+  savePreferences(): void {
+    this.savingPreferences = true;
+    const prefs: UserPreferences = this.preferencesForm.value;
+    const username = this.currentUser?.username || '';
+
+    if (prefs.browserNotifications && 'Notification' in window
+        && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+
+    this.prefSvc.save(username, prefs);
+    setTimeout(() => {
+      this.savingPreferences = false;
+      this.snack('Préférences enregistrées', 'success');
+      this.track('update_preferences', 'Préférences mises à jour', 'Modification des préférences');
+    }, 500);
+  }
+
+  resetPreferencesForm(): void {
+    const prefs = this.prefSvc.get(this.currentUser?.username || '');
+    this.preferencesForm.patchValue(prefs, { emitEvent: false });
+  }
+
+  // ── Activités ────────────────────────────────────────────────────────────
+
+  getActivityIcon(type: string): string {
+    const map: Record<string, string> = {
+      login: 'login', logout: 'logout',
+      update_profile: 'edit', change_password: 'lock_reset', update_preferences: 'tune'
+    };
+    return map[type] || 'info';
+  }
+
+  getActivityClass(type: string): string {
+    const map: Record<string, string> = {
+      login: 'act-login', logout: 'act-logout',
+      update_profile: 'act-update', change_password: 'act-password', update_preferences: 'act-prefs'
+    };
+    return map[type] || 'act-default';
+  }
+
+  get lastLoginActivity(): Activity | null {
+    return this.activities.find(a => a.type === 'login') ?? null;
+  }
+
+  get lastPasswordChangeActivity(): Activity | null {
+    return this.activities.find(a => a.type === 'change_password') ?? null;
+  }
+
+  clearActivities(): void {
+    this.activitySvc.clear(this.currentUser?.username || '');
+    this.activities = [];
+    this.snack('Historique effacé', 'success');
+  }
+
+  exportActivityLog(): void {
+    const header = `Historique — ${this.fullName} (${this.currentUser?.username})\n${'─'.repeat(70)}`;
+    const lines = this.activities.map(a => {
+      const d = new Date(a.timestamp).toLocaleString('fr-FR');
+      return `${d}  |  ${a.title.padEnd(28)}  |  ${a.description}`;
+    });
+    const blob = new Blob([[header, ...lines].join('\n')], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `activites_${(this.currentUser?.username || 'user').replace('@', '_')}.txt`;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  private track(type: ActivityType, title: string, description: string): void {
+    const username = this.currentUser?.username || '';
+    this.activitySvc.add(username, type, title, description);
+    this.activities = this.activitySvc.getActivities(username);
+  }
+
+  private snack(message: string, type: 'success' | 'error' | 'info' = 'success'): void {
     this.snackBar.open(message, 'Fermer', {
       duration: 5000,
       panelClass: `snackbar-${type}`

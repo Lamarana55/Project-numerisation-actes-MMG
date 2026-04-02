@@ -1,6 +1,7 @@
 package gov.ravec.backend.services;
 
 import gov.ravec.backend.dto.ChangePasswordRequest;
+import gov.ravec.backend.dto.ProfileUpdateRequest;
 import gov.ravec.backend.dto.ResetPasswordResponse;
 import gov.ravec.backend.dto.UserCreateRequest;
 import gov.ravec.backend.dto.UserDTO;
@@ -184,6 +185,25 @@ public class UserService {
                     userRepository.save(user);
                     return true;
                 }).orElse(false);
+    }
+
+    /**
+     * Met à jour les informations personnelles de l'utilisateur identifié par son
+     * nom d'utilisateur (auto-modification depuis la page "Mon profil").
+     * Le rôle, le statut et le territoire restent inchangés.
+     */
+    public UserDTO updateMyProfile(String username, ProfileUpdateRequest req) {
+        return userRepository.findByUsername(username)
+                .filter(UserService::isNotDeleted)
+                .map(user -> {
+                    if (req.getNom()       != null) user.setNom(req.getNom());
+                    if (req.getPrenom()    != null) user.setPrenom(req.getPrenom());
+                    if (req.getEmail()     != null) user.setEmail(req.getEmail());
+                    if (req.getTelephone() != null) user.setTelephone(req.getTelephone());
+                    if (req.getFonction()  != null) user.setFonction(req.getFonction());
+                    user.setUpdatedAt(Instant.now());
+                    return User.toDTO(userRepository.save(user));
+                }).orElse(null);
     }
 
     // ── Suppression logique ──────────────────────────────────────────────────

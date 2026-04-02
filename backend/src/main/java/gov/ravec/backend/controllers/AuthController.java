@@ -1,6 +1,8 @@
 package gov.ravec.backend.controllers;
 
 import gov.ravec.backend.dto.ChangePasswordRequest;
+import gov.ravec.backend.dto.ProfileUpdateRequest;
+import gov.ravec.backend.dto.UserDTO;
 import gov.ravec.backend.entities.User;
 import gov.ravec.backend.repositories.UserRepository;
 import gov.ravec.backend.security.JwtProvider;
@@ -163,6 +165,44 @@ public class AuthController {
      * avant d'appliquer le nouveau. En cas de succès, le flag {@code mustChangePassword}
      * est remis à {@code false} en base et la réponse le confirme.</p>
      */
+    /**
+     * Retourne le profil complet de l'utilisateur authentifié.
+     */
+    @GetMapping("/me")
+    @Operation(summary = "Mon profil", description = "Retourne le profil de l'utilisateur connecté")
+    public ResponseEntity<Object> getMyProfile() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()
+                || "anonymousUser".equals(authentication.getName())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new Response<>(false, "Utilisateur non authentifié."));
+        }
+        return userRepository.findByUsernameAndIsDelete(authentication.getName(), Delete.No)
+                .map(u -> ResponseEntity.ok((Object) User.toDTO(u)))
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    /**
+     * Met à jour les informations personnelles de l'utilisateur authentifié.
+     * Seuls nom, prénom, email, téléphone et fonction sont modifiables.
+     */
+    @PatchMapping("/me")
+    @Operation(summary = "Modifier mon profil", description = "Modifie les informations personnelles de l'utilisateur connecté")
+    public ResponseEntity<Object> updateMyProfile(@RequestBody ProfileUpdateRequest req) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()
+                || "anonymousUser".equals(authentication.getName())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new Response<>(false, "Utilisateur non authentifié."));
+        }
+        UserDTO updated = userService.updateMyProfile(authentication.getName(), req);
+        if (updated != null) {
+            return ResponseEntity.ok((Object) updated);
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new Response<>(false, "Utilisateur introuvable."));
+    }
+
     @PostMapping("/change-first-password")
     @Operation(
         summary = "Changement de mot de passe obligatoire",

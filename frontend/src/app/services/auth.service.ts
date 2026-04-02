@@ -2,9 +2,10 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { tap, map } from 'rxjs/operators';
+import { tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { GeodataService } from './geodata.service';
+import { ActivityService } from './activity.service';
 
 interface LoginCredentials {
   username: string;
@@ -48,7 +49,8 @@ export class AuthService {
   constructor(
     private http: HttpClient,
     private router: Router,
-    private geodataService: GeodataService
+    private geodataService: GeodataService,
+    private activityService: ActivityService
   ) {}
 
   /**
@@ -60,7 +62,13 @@ export class AuthService {
         tap(response => {
           this.setSession(response);
           this.geodataService.clearCache();
-          // Si l'utilisateur doit changer son mot de passe, le bloquer sur cette page
+          // Tracer la connexion dans l'historique local
+          this.activityService.add(
+            response.username,
+            'login',
+            'Connexion réussie',
+            `Connexion au système le ${new Date().toLocaleString('fr-FR')}`
+          );
           if (response.mustChangePassword) {
             this.router.navigate(['/change-password']);
           } else {
@@ -195,6 +203,39 @@ export class AuthService {
   get prefectureNom(): string | null{ return this.getCurrentUser()?.prefectureNom?? null; }
   get communeId(): string | null   { return this.getCurrentUser()?.communeId   ?? null; }
   get communeNom(): string | null  { return this.getCurrentUser()?.communeNom  ?? null; }
+
+  // ── Profil (auto-modification) ────────────────────────────────────────────
+
+  /** Initiales de l'utilisateur (2 lettres max) pour l'avatar */
+  get initials(): string {
+    const name = this.getCurrentUser()?.name || '';
+    const parts = name.trim().split(/\s+/).filter((p: string) => p.length > 0);
+    if (parts.length === 0) return 'U';
+    if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+    return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+  }
+
+  /** Retourne le profil complet de l'utilisateur connecté (GET /auth/me) */
+  getMyProfile(): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/me`);
+  }
+
+  /** Met à jour les informations personnelles (PATCH /auth/me) et rafraîchit la session */
+  updateMyProfile(data: {
+    nom: string; prenom: string; email?: string; telephone?: string; fonction?: string;
+  }): Observable<any> {
+    return this.http.patch<any>(`${this.apiUrl}/me`, data).pipe(
+      tap((updated: any) => {
+        const user = this.getCurrentUser();
+        if (user && updated) {
+          // Rafraîchir le nom affiché dans la toolbar sans déconnexion
+          user.name = `${updated.prenom || ''} ${updated.nom || ''}`.trim();
+          sessionStorage.setItem(this.userKey, JSON.stringify(user));
+          this.currentUserSubject.next({ ...user });
+        }
+      })
+    );
+  }
 
   // ── Sécurité ─────────────────────────────────────────────────────────────
 

@@ -14,13 +14,11 @@
   <!-- Profil utilisateur -->
   <button [matMenuTriggerFor]="profileMenu" class="profile-trigger-btn">
     <div class="profile-avatar-circle">
-      <span class="profile-avatar-initials">
-        {{ authService.username.charAt(0).toUpperCase() || 'U' }}
-      </span>
+      <span class="profile-avatar-initials">{{ authService.initials }}</span>
     </div>
     <div class="profile-trigger-info">
       <span class="profile-trigger-name">{{ authService.username }}</span>
-      <span class="profile-trigger-role">Administrateur</span>
+      <span class="profile-trigger-role">{{ authService.profilLibelle || 'Utilisateur' }}</span>
     </div>
     <mat-icon class="profile-trigger-arrow">expand_more</mat-icon>
   </button>
@@ -29,13 +27,13 @@
     <!-- Header -->
     <div class="pm-header" (click)="$event.stopPropagation()">
       <div class="pm-avatar">
-        <span>{{ authService.username.charAt(0).toUpperCase() || 'U' }}</span>
+        <span>{{ authService.initials }}</span>
       </div>
       <div class="pm-user-info">
         <span class="pm-name">{{ authService.username }}</span>
         <span class="pm-role">
           <mat-icon style="font-size:12px;width:12px;height:12px;vertical-align:middle">verified</mat-icon>
-          Administrateur
+          {{ authService.profilLibelle || 'Utilisateur' }}
         </span>
       </div>
     </div>
