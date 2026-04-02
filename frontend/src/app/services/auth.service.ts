@@ -27,6 +27,8 @@ interface JwtResponse {
   prefectureNom?: string;
   communeId?: string;
   communeNom?: string;
+  // Sécurité
+  mustChangePassword?: boolean;
 }
 
 @Injectable({
@@ -58,8 +60,12 @@ export class AuthService {
         tap(response => {
           this.setSession(response);
           this.geodataService.clearCache();
-          // Navigation automatique vers le dashboard
-          this.router.navigate(['/admin/dashboard']);
+          // Si l'utilisateur doit changer son mot de passe, le bloquer sur cette page
+          if (response.mustChangePassword) {
+            this.router.navigate(['/change-password']);
+          } else {
+            this.router.navigate(['/admin/dashboard']);
+          }
         })
       );
   }
@@ -190,6 +196,33 @@ export class AuthService {
   get communeId(): string | null   { return this.getCurrentUser()?.communeId   ?? null; }
   get communeNom(): string | null  { return this.getCurrentUser()?.communeNom  ?? null; }
 
+  // ── Sécurité ─────────────────────────────────────────────────────────────
+
+  /** `true` si l'utilisateur doit obligatoirement changer son mot de passe. */
+  get mustChangePassword(): boolean {
+    return this.getCurrentUser()?.mustChangePassword ?? false;
+  }
+
+  /**
+   * Appelé après un changement de mot de passe réussi pour effacer le flag
+   * dans la session sans forcer une reconnexion complète.
+   */
+  clearMustChangePassword(): void {
+    const user = this.getCurrentUser();
+    if (user) {
+      user.mustChangePassword = false;
+      sessionStorage.setItem(this.userKey, JSON.stringify(user));
+      this.currentUserSubject.next(user);
+    }
+  }
+
+  /**
+   * Changement obligatoire du mot de passe (première connexion / réinitialisation admin).
+   */
+  changeFirstPassword(currentPassword: string, newPassword: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/change-first-password`, { currentPassword, newPassword });
+  }
+
   /**
    * Mettre à jour les informations de l'utilisateur connecté
    */
@@ -303,6 +336,8 @@ export class AuthService {
       prefectureNom:      authResult.prefectureNom,
       communeId:          authResult.communeId,
       communeNom:         authResult.communeNom,
+      // Sécurité
+      mustChangePassword: authResult.mustChangePassword ?? false,
     };
 
     sessionStorage.setItem(this.userKey, JSON.stringify(userData));

@@ -57,6 +57,15 @@ public class User extends BaseEntity {
 
     private String fonction = null;
 
+    /**
+     * Si {@code true}, l'utilisateur DOIT changer son mot de passe avant
+     * d'accéder à toute autre fonctionnalité du système.
+     * Positionné à {@code true} par l'admin lors de la création, ou
+     * automatiquement après une réinitialisation de mot de passe.
+     */
+    @Column(nullable = false, columnDefinition = "boolean default false")
+    private boolean mustChangePassword = false;
+
     /** Profil métier (ex: SUPER_ADMINISTRATEUR, COORDINATEUR_REGIONAL…) */
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id", nullable = false)
@@ -128,6 +137,7 @@ public class User extends BaseEntity {
                 .prefectureNom(user.getPrefecture() != null ? user.getPrefecture().getNom() : null)
                 .communeId(user.getCommune() != null ? user.getCommune().getId().toString() : null)
                 .communeNom(user.getCommune() != null ? user.getCommune().getNom() : null)
+                .mustChangePassword(user.isMustChangePassword())
                 .build();
     }
 

@@ -1,11 +1,13 @@
 package gov.ravec.backend.controllers;
 
+import gov.ravec.backend.dto.ChangePasswordRequest;
 import gov.ravec.backend.entities.User;
 import gov.ravec.backend.repositories.UserRepository;
 import gov.ravec.backend.security.JwtProvider;
 import gov.ravec.backend.security.JwtResponse;
 import gov.ravec.backend.services.SendMailService;
 import gov.ravec.backend.services.UserConnected;
+import gov.ravec.backend.services.UserService;
 import gov.ravec.backend.utils.Delete;
 import gov.ravec.backend.utils.LoginInfo;
 import gov.ravec.backend.utils.Response;
@@ -56,6 +58,9 @@ public class AuthController {
     private UserRepository userRepository;
 
     @Autowired
+    private UserService userService;
+
+    @Autowired
     private JwtProvider jwtProvider;
 
     @Value("${ravec.app.frontend.url}")
@@ -104,6 +109,7 @@ public class AuthController {
                     .prefectureNom(userPrincipal.getPrefectureNom())
                     .communeId(userPrincipal.getCommuneId())
                     .communeNom(userPrincipal.getCommuneNom())
+                    .mustChangePassword(user.get().isMustChangePassword())
                     .build();
 
             return ResponseEntity.ok(response);
@@ -146,6 +152,44 @@ public class AuthController {
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new Response<>(false, "l'email n'existe pas dans la base "));
+        }
+    }
+
+    /**
+     * Changement de mot de passe obligatoire lors de la première connexion
+     * (ou après une réinitialisation par un administrateur).
+     *
+     * <p>L'utilisateur doit être authentifié. Le mot de passe actuel est vérifié
+     * avant d'appliquer le nouveau. En cas de succès, le flag {@code mustChangePassword}
+     * est remis à {@code false} en base et la réponse le confirme.</p>
+     */
+    @PostMapping("/change-first-password")
+    @Operation(
+        summary = "Changement de mot de passe obligatoire",
+        description = "Permet à un utilisateur authentifié de changer son mot de passe " +
+                      "lorsque le système l'y oblige (première connexion / réinitialisation admin).")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Mot de passe changé avec succès"),
+            @ApiResponse(responseCode = "400", description = "Mot de passe actuel incorrect"),
+            @ApiResponse(responseCode = "401", description = "Utilisateur non authentifié")
+    })
+    public ResponseEntity<Object> changeFirstPassword(@RequestBody ChangePasswordRequest req) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new Response<>(false, "Utilisateur non authentifié."));
+        }
+
+        String username = authentication.getName();
+        boolean success = userService.changeFirstPassword(username, req);
+
+        if (success) {
+            logger.info("Mot de passe changé avec succès pour l'utilisateur : {}", username);
+            return ResponseEntity.ok(new Response<>(true, "Mot de passe changé avec succès."));
+        } else {
+            logger.warn("Échec du changement de mot de passe pour : {} (mot de passe actuel incorrect)", username);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new Response<>(false, "Le mot de passe actuel est incorrect."));
         }
     }
 }

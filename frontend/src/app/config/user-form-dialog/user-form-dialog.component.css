@@ -183,6 +183,33 @@
   margin-top: 1px;
 }
 
+/* ── Force password change option ─────────────────────────── */
+.force-pwd-option {
+  margin-top: 12px;
+  padding: 12px 14px;
+  background: #fff8e1;
+  border: 1px solid #ffe082;
+  border-radius: 8px;
+}
+
+.force-pwd-label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.force-pwd-title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #5f4200;
+}
+
+.force-pwd-hint {
+  font-size: 0.78rem;
+  color: #7c5e00;
+  line-height: 1.4;
+}
+
 /* ── Role select option ────────────────────────────────────── */
 .role-option {
   display: flex;

@@ -34,4 +34,12 @@ public class JwtResponse {
     private String prefectureNom;
     private String communeId;
     private String communeNom;
+
+    // ── Sécurité ─────────────────────────────────────────────────────────────
+    /**
+     * {@code true} si l'utilisateur doit changer son mot de passe avant
+     * d'accéder au système. Le frontend intercepte ce flag et redirige
+     * vers la page de changement de mot de passe obligatoire.
+     */
+    private boolean mustChangePassword;
 }

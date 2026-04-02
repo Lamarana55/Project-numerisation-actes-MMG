@@ -1,5 +1,6 @@
 package gov.ravec.backend.services;
 
+import gov.ravec.backend.dto.ChangePasswordRequest;
 import gov.ravec.backend.dto.ResetPasswordResponse;
 import gov.ravec.backend.dto.UserCreateRequest;
 import gov.ravec.backend.dto.UserDTO;
@@ -90,6 +91,7 @@ public class UserService {
         user.setRole(role);
         user.setStatut(Statut.Activated);
         user.setPassword(encoder.encode(defaultPassword));
+        user.setMustChangePassword(req.isMustChangePassword());
 
         // Affectation territoriale selon le niveau du profil
         applyTerritorialAssignment(user, role, req.getRegionId(), req.getPrefectureId(), req.getCommuneId());
@@ -118,6 +120,9 @@ public class UserService {
 
                     if (req.getStatut() != null) {
                         exist.setStatut(req.getStatut());
+                    }
+                    if (req.getMustChangePassword() != null) {
+                        exist.setMustChangePassword(req.getMustChangePassword());
                     }
 
                     // Réinitialise les territoires puis réapplique
@@ -148,10 +153,37 @@ public class UserService {
                 .filter(UserService::isNotDeleted)
                 .map(user -> {
                     user.setPassword(encoder.encode(defaultPassword));
+                    // Forcer le changement de mot de passe après réinitialisation par un admin
+                    user.setMustChangePassword(true);
                     user.setUpdatedAt(Instant.now());
                     userRepository.save(user);
                     return new ResetPasswordResponse("Mot de passe réinitialisé avec succès", defaultPassword);
                 }).orElse(null);
+    }
+
+    /**
+     * Permet à l'utilisateur de changer son mot de passe lors de la première
+     * connexion (ou après une réinitialisation admin). Vérifie le mot de passe
+     * actuel avant d'appliquer le nouveau.
+     *
+     * @param username        identifiant de l'utilisateur connecté
+     * @param req             contient {@code currentPassword} et {@code newPassword}
+     * @return {@code true} si le changement a réussi, {@code false} si le mot
+     *         de passe actuel est incorrect ou l'utilisateur introuvable
+     */
+    public boolean changeFirstPassword(String username, ChangePasswordRequest req) {
+        return userRepository.findByUsername(username)
+                .filter(UserService::isNotDeleted)
+                .map(user -> {
+                    if (!encoder.matches(req.getCurrentPassword(), user.getPassword())) {
+                        return false;
+                    }
+                    user.setPassword(encoder.encode(req.getNewPassword()));
+                    user.setMustChangePassword(false);
+                    user.setUpdatedAt(Instant.now());
+                    userRepository.save(user);
+                    return true;
+                }).orElse(false);
     }
 
     // ── Suppression logique ──────────────────────────────────────────────────

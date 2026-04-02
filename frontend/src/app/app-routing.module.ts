@@ -26,6 +26,7 @@ import { AboutComponent } from './config/about/about.component';
 import { NotificationsComponent } from './config/notifications/notifications.component';
 import { PrivacyPolicyComponent } from './config/about/privacy-policy/privacy-policy.component';
 import { NumerisationIndexationComponent } from './numerisation-indexation/numerisation-indexation.component';
+import { ForcePasswordChangeComponent } from './pages/force-password-change/force-password-change.component';
 
 const routes: Routes = [
   // Routes publiques
@@ -34,6 +35,9 @@ const routes: Routes = [
   { path: 'register', component: RegisterComponent },
   { path: 'reset-password', component: SendmailResetComponent },
   { path: 'update-password/:token', component: UpdatePasswordComponent },
+
+  // Changement de mot de passe obligatoire (utilisateur authentifié)
+  { path: 'change-password', component: ForcePasswordChangeComponent, canActivate: [AuthGuard] },
 
   // Routes protégées de l'administration
   {

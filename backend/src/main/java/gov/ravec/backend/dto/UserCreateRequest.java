@@ -29,4 +29,11 @@ public class UserCreateRequest {
     private String regionId;
     private String prefectureId;
     private String communeId;
+
+    // ── Sécurité ─────────────────────────────────────────────────────────────
+    /**
+     * Si {@code true}, l'utilisateur devra changer son mot de passe lors de
+     * sa première connexion. Activé par défaut : bonne pratique de sécurité.
+     */
+    private boolean mustChangePassword = true;
 }

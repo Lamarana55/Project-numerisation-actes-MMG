@@ -26,4 +26,8 @@ public class UserUpdateRequest {
     private String regionId;
     private String prefectureId;
     private String communeId;
+
+    // ── Sécurité ─────────────────────────────────────────────────────────────
+    /** Nullable : si null, la valeur existante n'est pas modifiée. */
+    private Boolean mustChangePassword;
 }

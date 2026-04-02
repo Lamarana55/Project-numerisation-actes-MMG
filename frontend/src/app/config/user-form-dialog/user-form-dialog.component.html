@@ -88,7 +88,21 @@
 
         <div class="default-password-note" *ngIf="!isEditMode">
           <mat-icon>info</mat-icon>
-          <span>Un mot de passe par défaut sera attribué automatiquement. L'utilisateur pourra le modifier à la première connexion.</span>
+          <span>Un mot de passe par défaut sera attribué automatiquement.</span>
+        </div>
+
+        <!-- Option : forcer le changement de mot de passe -->
+        <div class="force-pwd-option">
+          <mat-checkbox formControlName="mustChangePassword" color="primary">
+            <div class="force-pwd-label">
+              <span class="force-pwd-title">Obliger le changement de mot de passe à la première connexion</span>
+              <span class="force-pwd-hint">
+                {{ isEditMode
+                    ? "Si coché, l'utilisateur devra changer son mot de passe lors de sa prochaine connexion."
+                    : "Recommandé — l'utilisateur sera invité à choisir son propre mot de passe." }}
+              </span>
+            </div>
+          </mat-checkbox>
         </div>
       </div>
 

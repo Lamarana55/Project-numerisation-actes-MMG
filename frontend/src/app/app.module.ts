@@ -83,6 +83,7 @@ import { NumerisationIndexationComponent } from './numerisation-indexation/numer
 import { SumPermissionsPipe } from './pipes/sum-permissions.pipe';
 import { LocalitesComponent } from './config/localites/localites.component';
 import { HierarchyNodeComponent } from './config/localites/hierarchy-node.component';
+import { ForcePasswordChangeComponent } from './pages/force-password-change/force-password-change.component';
 
 
 registerLocaleData(localeFr);
@@ -119,6 +120,7 @@ registerLocaleData(localeFr);
     ToastComponent,
     NumerisationIndexationComponent,
     SumPermissionsPipe,
+    ForcePasswordChangeComponent,
   ],
   imports: [
     BrowserModule,

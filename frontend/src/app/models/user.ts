@@ -32,6 +32,13 @@ export interface User {
   communeId?: string;
   communeNom?: string;
 
+  // ── Sécurité ─────────────────────────────────────────────────────────────
+  /**
+   * `true` si l'utilisateur doit changer son mot de passe avant d'accéder
+   * au système. Le frontend redirige vers /change-password si ce flag est actif.
+   */
+  mustChangePassword?: boolean;
+
   // ── Champs utilisés uniquement pour l'envoi (création / mise à jour) ────
   role?: Role;
 }

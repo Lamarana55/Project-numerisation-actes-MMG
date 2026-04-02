@@ -22,6 +22,12 @@ export class AuthGuard implements CanActivate {
     console.log('IsAuthenticated:', this.authService.isAuthenticated);
 
     if (this.authService.isAuthenticated) {
+      // Bloquer l'accès à tout sauf /change-password si le flag est actif
+      if (this.authService.mustChangePassword && state.url !== '/change-password') {
+        console.log('AuthGuard - Changement de mot de passe obligatoire, redirection vers /change-password');
+        this.router.navigate(['/change-password']);
+        return false;
+      }
       console.log('AuthGuard - Utilisateur authentifié, accès autorisé');
       return true;
     } else {

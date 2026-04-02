@@ -79,28 +79,31 @@ export class UserFormDialogComponent implements OnInit, OnDestroy {
 
   private createForm(): FormGroup {
     return this.fb.group({
-      nom:          ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
-      prenom:       ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
-      email:        ['', [Validators.required, Validators.email]],
-      username:     ['', [Validators.required, Validators.minLength(3), Validators.maxLength(80)]],
-      telephone:    ['', [Validators.pattern('^[0-9+\\-\\s()]{8,20}$')]],
-      fonction:     [''],
-      roleId:       ['', Validators.required],
+      nom:                ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
+      prenom:             ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
+      email:              ['', [Validators.required, Validators.email]],
+      username:           ['', [Validators.required, Validators.minLength(3), Validators.maxLength(80)]],
+      telephone:          ['', [Validators.pattern('^[0-9+\\-\\s()]{8,20}$')]],
+      fonction:           [''],
+      roleId:             ['', Validators.required],
+      // Sécurité
+      mustChangePassword: [true],   // Par défaut : obliger le changement à la première connexion
       // Territoire (optionnels — la validation est appliquée dynamiquement)
-      regionId:     [''],
-      prefectureId: [''],
-      communeId:    ['']
+      regionId:           [''],
+      prefectureId:       [''],
+      communeId:          ['']
     });
   }
 
   private patchUserValues(user: User): void {
     this.userForm.patchValue({
-      nom:       user.nom,
-      prenom:    user.prenom,
-      email:     user.email,
-      username:  user.username,
-      telephone: user.telephone,
-      fonction:  user.fonction
+      nom:                user.nom,
+      prenom:             user.prenom,
+      email:              user.email,
+      username:           user.username,
+      telephone:          user.telephone,
+      fonction:           user.fonction,
+      mustChangePassword: user.mustChangePassword ?? false
     });
   }
 
@@ -310,13 +313,14 @@ export class UserFormDialogComponent implements OnInit, OnDestroy {
   private prepareFormData(): any {
     const v = this.userForm.value;
     const data: any = {
-      nom:      v.nom,
-      prenom:   v.prenom,
-      email:    v.email,
-      username: v.username,
-      telephone: v.telephone,
-      fonction: v.fonction,
-      roleId:   v.roleId,
+      nom:                v.nom,
+      prenom:             v.prenom,
+      email:              v.email,
+      username:           v.username,
+      telephone:          v.telephone,
+      fonction:           v.fonction,
+      roleId:             v.roleId,
+      mustChangePassword: v.mustChangePassword,
     };
     // N'inclure les territoires que s'ils ont une valeur
     if (v.regionId)     data.regionId     = v.regionId;

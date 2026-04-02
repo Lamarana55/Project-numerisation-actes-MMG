@@ -34,4 +34,8 @@ public class UserDTO {
     private String prefectureNom;
     private String communeId;
     private String communeNom;
+
+    // ── Sécurité ─────────────────────────────────────────────────────────────
+    /** Indique si l'utilisateur doit changer son mot de passe à la prochaine connexion. */
+    private boolean mustChangePassword;
 }

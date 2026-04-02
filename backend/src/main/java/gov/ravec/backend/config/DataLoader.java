@@ -337,6 +337,9 @@ public class DataLoader implements CommandLineRunner {
 
     /**
      * Sauvegarde l'utilisateur si son email n'existe pas encore.
+     * Force {@code mustChangePassword = true} sur tous les comptes seedés :
+     * chaque utilisateur devra changer son mot de passe à la première connexion.
+     *
      * @return 1 si créé, 0 si déjà présent
      */
     private int creer(User user) {
@@ -344,6 +347,7 @@ public class DataLoader implements CommandLineRunner {
             log.debug("  [skip] {}", user.getEmail());
             return 0;
         }
+        user.setMustChangePassword(true);
         userRepository.save(user);
         log.debug("  [+]    {}", user.getEmail());
         return 1;
