@@ -40,12 +40,22 @@ export class UserListComponent implements OnInit, OnDestroy {
   loading = false;
   error: string | null = null;
 
-  // Filtres
+  // Filtres de base
   searchTerm     = '';
   selectedStatus = '';
   selectedRole   = '';
-  selectedNiveau = '';    // filtre par niveau administratif
+  selectedNiveau = '';
   searchControl  = new FormControl();
+
+  // Filtres territoriaux (cascade : région → préfecture → commune)
+  selectedRegionId   = '';
+  selectedPrefId     = '';
+  selectedCommuneId  = '';
+
+  // Options dynamiques dérivées des utilisateurs chargés (sans appel API)
+  regionOptions:  { id: string; nom: string }[] = [];
+  prefOptions:    { id: string; nom: string }[] = [];
+  communeOptions: { id: string; nom: string }[] = [];
 
   readonly PROFIL_META   = PROFIL_META;
   readonly NIVEAU_LABELS = NIVEAU_LABELS;
@@ -121,6 +131,48 @@ export class UserListComponent implements OnInit, OnDestroy {
       });
   }
 
+  // ── Getters : visibilité des filtres territoriaux ────────────
+  get showRegionFilter(): boolean {
+    return ['REGIONAL', 'PREFECTORAL', 'COMMUNAL'].includes(this.selectedNiveau);
+  }
+
+  get showPrefFilter(): boolean {
+    return ['PREFECTORAL', 'COMMUNAL'].includes(this.selectedNiveau);
+  }
+
+  get showCommuneFilter(): boolean {
+    return this.selectedNiveau === 'COMMUNAL';
+  }
+
+  // ── Handlers de changement des filtres territoriaux ──────────
+
+  /** Appelé quand le niveau change : reconstruit les options région. */
+  onNiveauChange(): void {
+    this.selectedRegionId  = '';
+    this.selectedPrefId    = '';
+    this.selectedCommuneId = '';
+    this.prefOptions       = [];
+    this.communeOptions    = [];
+    this.regionOptions     = this.buildRegionOptions();
+    this.applyFilters();
+  }
+
+  /** Appelé quand la région change : reconstruit les options préfecture. */
+  onRegionChange(): void {
+    this.selectedPrefId    = '';
+    this.selectedCommuneId = '';
+    this.communeOptions    = [];
+    this.prefOptions       = this.buildPrefOptions();
+    this.applyFilters();
+  }
+
+  /** Appelé quand la préfecture change : reconstruit les options commune. */
+  onPrefChange(): void {
+    this.selectedCommuneId = '';
+    this.communeOptions    = this.buildCommuneOptions();
+    this.applyFilters();
+  }
+
   // ── Filtres & pagination ─────────────────────────────────────
   applyFilters(): void {
     let filtered = [...this.users];
@@ -146,12 +198,74 @@ export class UserListComponent implements OnInit, OnDestroy {
     if (this.selectedNiveau) {
       filtered = filtered.filter(u => u.niveauAdministratif === this.selectedNiveau);
     }
+    // Filtres territoriaux cascade
+    if (this.selectedRegionId) {
+      filtered = filtered.filter(u => u.regionId === this.selectedRegionId);
+    }
+    if (this.selectedPrefId) {
+      filtered = filtered.filter(u => u.prefectureId === this.selectedPrefId);
+    }
+    if (this.selectedCommuneId) {
+      filtered = filtered.filter(u => u.communeId === this.selectedCommuneId);
+    }
 
     this.filteredUsers = filtered;
     this.totalItems    = filtered.length;
     this.currentPage   = 0;
     this.selection.clear();
     this.updatePaginatedData();
+  }
+
+  // ── Construction des options territoriales ───────────────────
+
+  /** Régions distinctes parmi les utilisateurs du niveau sélectionné. */
+  private buildRegionOptions(): { id: string; nom: string }[] {
+    const base = this.selectedNiveau
+      ? this.users.filter(u => u.niveauAdministratif === this.selectedNiveau)
+      : this.users;
+    const seen = new Map<string, string>();
+    for (const u of base) {
+      if (u.regionId && u.regionNom && !seen.has(u.regionId)) {
+        seen.set(u.regionId, u.regionNom);
+      }
+    }
+    return Array.from(seen, ([id, nom]) => ({ id, nom }))
+                .sort((a, b) => a.nom.localeCompare(b.nom, 'fr'));
+  }
+
+  /** Préfectures distinctes filtrées par niveau + région sélectionnée. */
+  private buildPrefOptions(): { id: string; nom: string }[] {
+    let base = this.selectedNiveau
+      ? this.users.filter(u => u.niveauAdministratif === this.selectedNiveau)
+      : this.users;
+    if (this.selectedRegionId) {
+      base = base.filter(u => u.regionId === this.selectedRegionId);
+    }
+    const seen = new Map<string, string>();
+    for (const u of base) {
+      if (u.prefectureId && u.prefectureNom && !seen.has(u.prefectureId)) {
+        seen.set(u.prefectureId, u.prefectureNom);
+      }
+    }
+    return Array.from(seen, ([id, nom]) => ({ id, nom }))
+                .sort((a, b) => a.nom.localeCompare(b.nom, 'fr'));
+  }
+
+  /** Communes distinctes filtrées par niveau + région + préfecture sélectionnées. */
+  private buildCommuneOptions(): { id: string; nom: string }[] {
+    let base = this.selectedNiveau
+      ? this.users.filter(u => u.niveauAdministratif === this.selectedNiveau)
+      : this.users;
+    if (this.selectedRegionId) base = base.filter(u => u.regionId    === this.selectedRegionId);
+    if (this.selectedPrefId)   base = base.filter(u => u.prefectureId === this.selectedPrefId);
+    const seen = new Map<string, string>();
+    for (const u of base) {
+      if (u.communeId && u.communeNom && !seen.has(u.communeId)) {
+        seen.set(u.communeId, u.communeNom);
+      }
+    }
+    return Array.from(seen, ([id, nom]) => ({ id, nom }))
+                .sort((a, b) => a.nom.localeCompare(b.nom, 'fr'));
   }
 
   private updatePaginatedData(): void {
@@ -167,10 +281,16 @@ export class UserListComponent implements OnInit, OnDestroy {
   }
 
   clearFilters(): void {
-    this.searchTerm     = '';
-    this.selectedStatus = '';
-    this.selectedRole   = '';
-    this.selectedNiveau = '';
+    this.searchTerm        = '';
+    this.selectedStatus    = '';
+    this.selectedRole      = '';
+    this.selectedNiveau    = '';
+    this.selectedRegionId  = '';
+    this.selectedPrefId    = '';
+    this.selectedCommuneId = '';
+    this.regionOptions     = [];
+    this.prefOptions       = [];
+    this.communeOptions    = [];
     this.searchControl.setValue('', { emitEvent: false });
     this.applyFilters();
   }
@@ -389,6 +509,21 @@ export class UserListComponent implements OnInit, OnDestroy {
     return '';
   }
 
+  /** Retourne le nom d'une option territoriale par son id. */
+  getNomById(options: { id: string; nom: string }[], id: string): string {
+    return options.find(o => o.id === id)?.nom ?? '';
+  }
+
+  /** Efface uniquement les filtres territoriaux sans toucher aux autres. */
+  clearTerritoryFilters(): void {
+    this.selectedRegionId  = '';
+    this.selectedPrefId    = '';
+    this.selectedCommuneId = '';
+    this.prefOptions       = [];
+    this.communeOptions    = [];
+    this.applyFilters();
+  }
+
   isAdminUser(user: User): boolean {
     const role = (user.roleName ?? user.role?.nom ?? '').toUpperCase();
     return role.includes('SUPER_ADMIN');
@@ -396,7 +531,11 @@ export class UserListComponent implements OnInit, OnDestroy {
 
   get activeUsersCount(): number   { return this.users.filter(u => u.statut === 'Activated').length; }
   get inactiveUsersCount(): number { return this.users.filter(u => u.statut === 'Desactivated').length; }
-  get hasActiveFilters(): boolean  { return !!(this.searchTerm || this.selectedStatus || this.selectedRole || this.selectedNiveau); }
+  get hasActiveFilters(): boolean  {
+    return !!(this.searchTerm || this.selectedStatus || this.selectedRole ||
+              this.selectedNiveau || this.selectedRegionId || this.selectedPrefId ||
+              this.selectedCommuneId);
+  }
 
   private notify(message: string, type: 'success' | 'error'): void {
     this.snackBar.open(message, 'Fermer', {
