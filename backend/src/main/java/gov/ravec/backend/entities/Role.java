@@ -35,7 +35,7 @@ public class Role extends BaseEntity {
 
     /** Niveau administratif déterminant la portée territoriale du profil */
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "varchar(255) default 'COMMUNAL' check (niveau_administratif in ('CENTRAL','REGIONAL','PREFECTORAL','COMMUNAL'))")
     private NiveauAdministratif niveauAdministratif = NiveauAdministratif.COMMUNAL;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
