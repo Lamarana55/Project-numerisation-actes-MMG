@@ -128,7 +128,9 @@ public class DataLoader implements CommandLineRunner {
     private int creerUtilisateursCentrals(Map<String, Role> profils) {
         int count = 0;
 
-        // Super-Administrateur — accès total, aucune restriction territoriale
+        // ── NIVEAU CENTRAL — aucune restriction territoriale (pas de région/préfecture/commune) ──
+
+        // Super-Administrateur — accès total, niveau national
         count += creer(User.builder()
                 .id("USR-SA-001")
                 .code("SA-001")
@@ -138,23 +140,25 @@ public class DataLoader implements CommandLineRunner {
                 .fonction("Super-Administrateur National")
                 .password(passwordEncoder.encode(DEFAULT_PASSWORD))
                 .role(profils.get(PROFIL_SUPER_ADMIN))
+                // Pas de région/préfecture/commune : profil CENTRAL
                 .statut(Statut.Activated)
                 .build());
 
-        // Administrateur — gestion opérationnelle nationale, sans accès aux permissions
+        // Administrateur — gestion opérationnelle nationale (niveau CENTRAL)
         count += creer(User.builder()
                 .id("USR-ADM-001")
                 .code("ADM-001")
-                .nom("BARRY").prenom("Aissatou")
+                .nom("BARRY").prenom("Ibrahima")
                 .email("admin@ravec.gov.gn").username("admin@ravec.gov.gn")
                 .telephone("+224621000002")
                 .fonction("Administrateur National")
                 .password(passwordEncoder.encode(DEFAULT_PASSWORD))
                 .role(profils.get(PROFIL_ADMIN))
+                // Pas de région/préfecture/commune : profil CENTRAL
                 .statut(Statut.Activated)
                 .build());
 
-        // Analyste — lecture et analyse des données nationales, aucune écriture
+        // Analyste — lecture et analyse des données nationales (niveau CENTRAL)
         count += creer(User.builder()
                 .id("USR-ANL-001")
                 .code("ANL-001")
@@ -164,6 +168,7 @@ public class DataLoader implements CommandLineRunner {
                 .fonction("Analyste National des Données")
                 .password(passwordEncoder.encode(DEFAULT_PASSWORD))
                 .role(profils.get(PROFIL_ANALYSTE))
+                // Pas de région/préfecture/commune : profil CENTRAL
                 .statut(Statut.Activated)
                 .build());
 

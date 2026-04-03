@@ -499,7 +499,11 @@ export class UserListComponent implements OnInit, OnDestroy {
   }
 
   getNiveauLabel(user: User): string {
-    return user.niveauAdministratif ? NIVEAU_LABELS[user.niveauAdministratif] : '';
+    // Priorité : niveauAdministratif du UserDTO ;
+    // fallback : PROFIL_META (garantit que ADMINISTRATEUR affiche "National")
+    const niveau = user.niveauAdministratif
+      ?? (PROFIL_META[user.roleName ?? user.role?.nom ?? '']?.niveau ?? null);
+    return niveau ? NIVEAU_LABELS[niveau] : '';
   }
 
   getTerritoireLabel(user: User): string {

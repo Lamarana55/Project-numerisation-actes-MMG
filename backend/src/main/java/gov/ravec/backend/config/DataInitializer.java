@@ -477,22 +477,38 @@ public class DataInitializer implements CommandLineRunner {
     private void creerProfilSiAbsent(String nom, String libelle, String description,
                                       NiveauAdministratif niveau,
                                       Iterable<Permission> permissions) {
-        if (roleRepository.findByNom(nom).isPresent()) {
-            log.debug("  [profil] Déjà existant : {}", nom);
-            return;
-        }
-
-        log.info("  [profil] Création : {} [{}]", nom, niveau);
         Set<Permission> permSet = new HashSet<>();
         permissions.forEach(permSet::add);
 
-        Role role = new Role();
-        role.setId(nom);                        // ID stable = nom technique
-        role.setNom(nom);
-        role.setLibelle(libelle);
-        role.setDescription(description);
-        role.setNiveauAdministratif(niveau);
-        role.setPermissions(permSet);
-        roleRepository.save(role);
+        roleRepository.findByNom(nom).ifPresentOrElse(role -> {
+            // Profil existant : corriger le niveauAdministratif si nécessaire (migration)
+            boolean modifie = false;
+            if (!niveau.equals(role.getNiveauAdministratif())) {
+                log.warn("  [profil] Correction niveau : {} {} → {}",
+                         nom, role.getNiveauAdministratif(), niveau);
+                role.setNiveauAdministratif(niveau);
+                modifie = true;
+            }
+            if (libelle != null && !libelle.equals(role.getLibelle())) {
+                role.setLibelle(libelle);
+                modifie = true;
+            }
+            if (modifie) {
+                roleRepository.save(role);
+            } else {
+                log.debug("  [profil] Déjà existant et correct : {}", nom);
+            }
+        }, () -> {
+            // Profil absent : créer
+            log.info("  [profil] Création : {} [{}]", nom, niveau);
+            Role role = new Role();
+            role.setId(nom);                        // ID stable = nom technique
+            role.setNom(nom);
+            role.setLibelle(libelle);
+            role.setDescription(description);
+            role.setNiveauAdministratif(niveau);
+            role.setPermissions(permSet);
+            roleRepository.save(role);
+        });
     }
 }

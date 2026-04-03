@@ -127,11 +127,26 @@ export class UserFormDialogComponent implements OnInit, OnDestroy {
     const matched  = this.availableRoles.find(r => r.nom === roleName);
     if (matched) {
       this.userForm.patchValue({ roleId: matched.id });
-      this.selectedRole  = matched;
-      this.selectedNiveau = matched.niveauAdministratif ?? null;
-      this.applyTerritoryValidation(matched.niveauAdministratif ?? null);
+      this.selectedRole   = matched;
+      this.selectedNiveau = this.resolveNiveau(matched);
+      this.applyTerritoryValidation(this.selectedNiveau);
       this.restoreEditModeTerritory();
     }
+  }
+
+  /**
+   * Détermine le niveauAdministratif d'un rôle.
+   * Priorité : champ de l'API ; fallback : PROFIL_META (constante frontend).
+   * Garantit que SUPER_ADMINISTRATEUR, ADMINISTRATEUR et ANALYSTE
+   * sont toujours traités comme CENTRAL, même si la DB renvoie une valeur erronée.
+   */
+  private resolveNiveau(role: Role | null): NiveauAdministratif | null {
+    if (!role) return null;
+    // Vérification via PROFIL_META en priorité (source de vérité côté frontend)
+    const meta = PROFIL_META[role.nom];
+    if (meta) return meta.niveau;
+    // Fallback : niveauAdministratif retourné par l'API
+    return role.niveauAdministratif ?? null;
   }
 
   private loadRegions(): void {
@@ -149,7 +164,8 @@ export class UserFormDialogComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe(roleId => {
         this.selectedRole   = this.availableRoles.find(r => r.id === roleId) || null;
-        this.selectedNiveau = this.selectedRole?.niveauAdministratif ?? null;
+        // Priorité : niveauAdministratif du rôle ; fallback : PROFIL_META (robustesse)
+        this.selectedNiveau = this.resolveNiveau(this.selectedRole);
         this.resetTerritoryFields();
         this.applyTerritoryValidation(this.selectedNiveau);
       });
