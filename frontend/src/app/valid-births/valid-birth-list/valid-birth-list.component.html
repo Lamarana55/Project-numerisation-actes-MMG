@@ -149,11 +149,11 @@
           <th mat-header-cell *matHeaderCellDef>Statut</th>
           <td mat-cell *matCellDef="let acte">
             <span class="statut-badge"
-                  [style.background-color]="STATUT_COLORS[acte.statut] + '22'"
-                  [style.color]="STATUT_COLORS[acte.statut]"
-                  [style.border-color]="STATUT_COLORS[acte.statut] + '55'">
-              <mat-icon class="statut-icon">{{ STATUT_ICONS[acte.statut] }}</mat-icon>
-              {{ STATUT_LABELS[acte.statut] }}
+                  [style.background-color]="getStatutColor(acte.statut) + '22'"
+                  [style.color]="getStatutColor(acte.statut)"
+                  [style.border-color]="getStatutColor(acte.statut) + '55'">
+              <mat-icon class="statut-icon">{{ getStatutIcon(acte.statut) }}</mat-icon>
+              {{ getStatutLabel(acte.statut) }}
             </span>
           </td>
         </ng-container>

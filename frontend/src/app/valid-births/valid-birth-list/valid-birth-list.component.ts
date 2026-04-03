@@ -268,4 +268,9 @@ export class ValidBirthListComponent implements OnInit, OnDestroy {
   get statsEnAttente(): number { return this.actes.filter(a => a.statut === 'EN_ATTENTE').length; }
   get statsValide():    number { return this.actes.filter(a => a.statut === 'VALIDE').length; }
   get statsRejete():   number  { return this.actes.filter(a => a.statut === 'REJETE').length; }
+
+  // ── Helpers template (évite l'indexation directe du Record) ──────────────
+  getStatutLabel(statut: string): string { return STATUT_LABELS[statut] ?? statut; }
+  getStatutColor(statut: string): string { return STATUT_COLORS[statut] ?? '#6b7280'; }
+  getStatutIcon(statut: string): string  { return STATUT_ICONS[statut]  ?? 'help'; }
 }
