@@ -27,6 +27,7 @@ import { NotificationsComponent } from './config/notifications/notifications.com
 import { PrivacyPolicyComponent } from './config/about/privacy-policy/privacy-policy.component';
 import { NumerisationIndexationComponent } from './numerisation-indexation/numerisation-indexation.component';
 import { ForcePasswordChangeComponent } from './pages/force-password-change/force-password-change.component';
+import { ValidBirthListComponent } from './valid-births/valid-birth-list/valid-birth-list.component';
 
 const routes: Routes = [
   // Routes publiques
@@ -55,6 +56,14 @@ const routes: Routes = [
         path: 'dashboard',
         component: DashboardComponent,
       },
+      // === VALIDATION DES ACTES DE NAISSANCE ===
+      {
+        path: 'valid-births',
+        component: ValidBirthListComponent,
+        canActivate: [AuthorizationGuard],
+        data: { roles: ['CAN_VIEW_VALIDATED_ACTS'] },
+      },
+
       // Numérisation et Indexation
       {
         path: 'numerisation',

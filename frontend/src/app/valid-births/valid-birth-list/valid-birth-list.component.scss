@@ -1,0 +1,264 @@
+// ── Conteneur principal ─────────────────────────────────────────────────────
+.vb-container {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+// ── En-tête ─────────────────────────────────────────────────────────────────
+.vb-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.vb-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.vb-header-icon {
+  font-size: 36px;
+  width: 36px;
+  height: 36px;
+  color: #00853F;
+}
+
+.vb-title {
+  font-size: 22px;
+  font-weight: 600;
+  color: #1a1a2e;
+  margin: 0;
+}
+
+.vb-subtitle {
+  font-size: 13px;
+  color: #6b7280;
+  margin: 2px 0 0 0;
+}
+
+// ── Stats rapides ────────────────────────────────────────────────────────────
+.vb-stats-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.stat-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  border: 1px solid transparent;
+
+  mat-icon { font-size: 16px; width: 16px; height: 16px; }
+
+  &.chip-total    { background: #f0f4ff; color: #3b5bf0; border-color: #c7d2fe; }
+  &.chip-attente  { background: #fffbeb; color: #d97706; border-color: #fde68a; }
+  &.chip-valide   { background: #ecfdf5; color: #059669; border-color: #a7f3d0; }
+  &.chip-rejete   { background: #fef2f2; color: #dc2626; border-color: #fecaca; }
+}
+
+// ── Filtres ──────────────────────────────────────────────────────────────────
+.vb-filters-card {
+  margin-bottom: 20px;
+  border-radius: 12px !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08) !important;
+}
+
+.vb-filters-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  padding: 4px 0;
+}
+
+.filter-field {
+  min-width: 180px;
+  flex: 1;
+}
+
+.clear-btn {
+  height: 56px;
+  border-radius: 8px;
+  color: #ef4444;
+  border-color: #fca5a5;
+}
+
+// ── Barre de progression ─────────────────────────────────────────────────────
+.vb-progress {
+  margin-bottom: 8px;
+  border-radius: 4px;
+}
+
+// ── Erreur ───────────────────────────────────────────────────────────────────
+.vb-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 14px 18px;
+  color: #dc2626;
+  margin-bottom: 16px;
+
+  mat-icon { color: #dc2626; }
+}
+
+// ── Carte tableau ────────────────────────────────────────────────────────────
+.vb-table-card {
+  border-radius: 12px !important;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.08) !important;
+  overflow: hidden;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.vb-table {
+  width: 100%;
+  min-width: 900px;
+
+  th.mat-header-cell {
+    font-weight: 600;
+    font-size: 12px;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 12px 16px;
+    background: #f9fafb;
+    border-bottom: 1px solid #e5e7eb;
+    white-space: nowrap;
+  }
+
+  td.mat-cell {
+    padding: 12px 16px;
+    font-size: 13px;
+    border-bottom: 1px solid #f3f4f6;
+    vertical-align: middle;
+  }
+
+  // Coloration par statut
+  tr.row-attente:hover { background: #fffbeb !important; }
+  tr.row-valide:hover  { background: #f0fdf4 !important; }
+  tr.row-rejete:hover  { background: #fff5f5 !important; }
+}
+
+// ── Référence acte ────────────────────────────────────────────────────────────
+.act-ref {
+  display: flex;
+  flex-direction: column;
+}
+
+.act-num {
+  font-weight: 600;
+  color: #1d4ed8;
+  font-size: 14px;
+}
+
+.act-year {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+// ── Enfant ────────────────────────────────────────────────────────────────────
+.child-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.child-name {
+  font-weight: 500;
+  color: #111827;
+}
+
+.genre-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+
+  &.male   { color: #3b82f6; }
+  &.female { color: #ec4899; }
+}
+
+// ── Localisation ──────────────────────────────────────────────────────────────
+.localisation {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+// ── Agent ─────────────────────────────────────────────────────────────────────
+.agent-name {
+  font-size: 13px;
+  color: #374151;
+}
+
+// ── Badge statut ──────────────────────────────────────────────────────────────
+.statut-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid;
+  white-space: nowrap;
+}
+
+.statut-icon {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+}
+
+// ── Colonne actions ───────────────────────────────────────────────────────────
+.actions-header, .actions-cell {
+  text-align: right !important;
+  white-space: nowrap;
+}
+
+.btn-info {
+  color: #6b7280;
+}
+
+// ── Aucune donnée ─────────────────────────────────────────────────────────────
+.no-data-cell { border: none !important; }
+
+.no-data {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 40px;
+  color: #9ca3af;
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    opacity: 0.4;
+  }
+
+  span { font-size: 14px; }
+}
+
+.muted { color: #9ca3af; }
+
+// ── Responsive ────────────────────────────────────────────────────────────────
+@media (max-width: 768px) {
+  .vb-container { padding: 12px; }
+  .filter-field { min-width: 100%; }
+  .vb-stats-row { gap: 6px; }
+  .stat-chip { font-size: 12px; padding: 5px 10px; }
+}

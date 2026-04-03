@@ -4,9 +4,9 @@
     {
       "name": "Frontend (Angular)",
       "runtimeExecutable": "/Users/lamarana55/.nvm/versions/node/v21.4.0/bin/npm",
-      "runtimeArgs": ["start", "--", "--port=4201"],
-      "cwd": "/Users/lamarana55/Documents/PN-RAVEC/Projects/Projet-Numerisation/frontend",
-      "port": 4200
+      "runtimeArgs": ["start", "--", "--port=4201", "--host=0.0.0.0"],
+      "cwd": "frontend",
+      "port": 4201
     },
     {
       "name": "Backend (Spring Boot)",

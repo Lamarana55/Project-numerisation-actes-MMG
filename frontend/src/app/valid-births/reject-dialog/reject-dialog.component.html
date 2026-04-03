@@ -1,0 +1,43 @@
+<h2 mat-dialog-title class="dialog-title">
+  <mat-icon color="warn">cancel</mat-icon>
+  Rejeter l'acte de naissance
+</h2>
+
+<mat-dialog-content class="dialog-content">
+  <div class="acte-info">
+    <mat-icon>person</mat-icon>
+    <div>
+      <span class="acte-nom">{{ nomEnfant }}</span>
+      <span class="acte-ref" *ngIf="data.acte.numeroActe">Acte n° {{ data.acte.numeroActe }}</span>
+    </div>
+  </div>
+
+  <p class="dialog-instruction">
+    Veuillez indiquer le motif de rejet. Ce motif sera communiqué à l'agent pour correction.
+  </p>
+
+  <mat-form-field appearance="outline" class="motif-field">
+    <mat-label>Motif de rejet <span class="required">*</span></mat-label>
+    <textarea
+      matInput
+      [formControl]="motifControl"
+      rows="4"
+      placeholder="Ex : Informations manquantes sur le père, date de naissance incohérente…"
+      cdkTextareaAutosize
+      cdkAutosizeMinRows="4"
+      cdkAutosizeMaxRows="8">
+    </textarea>
+    <mat-hint align="end">{{ charCount }} / 500</mat-hint>
+    <mat-error *ngIf="motifControl.hasError('required')">Le motif est obligatoire</mat-error>
+    <mat-error *ngIf="motifControl.hasError('minlength')">Au minimum 10 caractères</mat-error>
+    <mat-error *ngIf="motifControl.hasError('maxlength')">Maximum 500 caractères</mat-error>
+  </mat-form-field>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="dialog-actions">
+  <button mat-stroked-button (click)="cancel()">Annuler</button>
+  <button mat-flat-button color="warn" (click)="confirm()" [disabled]="motifControl.invalid">
+    <mat-icon>cancel</mat-icon>
+    Rejeter l'acte
+  </button>
+</mat-dialog-actions>
