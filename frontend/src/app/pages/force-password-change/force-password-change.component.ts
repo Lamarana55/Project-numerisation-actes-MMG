@@ -10,6 +10,13 @@ function passwordsMatch(group: AbstractControl): { [key: string]: boolean } | nu
   return newPwd && confirm && newPwd !== confirm ? { passwordsMismatch: true } : null;
 }
 
+/** Validateur de groupe : newPassword ne doit PAS être identique à currentPassword */
+function passwordsDifferentFromCurrent(group: AbstractControl): { [key: string]: boolean } | null {
+  const current = group.get('currentPassword')?.value;
+  const newPwd  = group.get('newPassword')?.value;
+  return current && newPwd && current === newPwd ? { passwordsSame: true } : null;
+}
+
 @Component({
   selector: 'app-force-password-change',
   templateUrl: './force-password-change.component.html',
@@ -40,7 +47,7 @@ export class ForcePasswordChangeComponent {
         Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).+$/)
       ]],
       confirmPassword: ['', Validators.required]
-    }, { validators: passwordsMatch });
+    }, { validators: [passwordsMatch, passwordsDifferentFromCurrent] });
   }
 
   // ── Indicateur de force ──────────────────────────────────────────────────
@@ -78,6 +85,12 @@ export class ForcePasswordChangeComponent {
   get ruleDigit(): boolean     { return /\d/.test(this.pwd); }
   get ruleSpecial(): boolean   { return /[^a-zA-Z0-9]/.test(this.pwd); }
 
+  /** Vrai si newPassword === currentPassword (erreur de groupe) */
+  get passwordsSameError(): boolean {
+    return !!this.form.errors?.['passwordsSame'] &&
+           !!this.form.get('newPassword')?.dirty;
+  }
+
   // ── Soumission ───────────────────────────────────────────────────────────
 
   onSubmit(): void {
@@ -90,6 +103,13 @@ export class ForcePasswordChangeComponent {
     this.errorMessage = '';
 
     const { currentPassword, newPassword } = this.form.value;
+
+    // Vérification explicite : le nouveau mot de passe ne doit pas être identique à l'ancien
+    if (currentPassword === newPassword) {
+      this.loading      = false;
+      this.errorMessage = 'Le nouveau mot de passe doit être différent de l\'ancien.';
+      return;
+    }
 
     this.authService.changeFirstPassword(currentPassword, newPassword).subscribe({
       next: () => {

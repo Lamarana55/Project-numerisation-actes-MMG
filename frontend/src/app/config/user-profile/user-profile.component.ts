@@ -16,6 +16,13 @@ function passwordsMatch(group: AbstractControl): { [key: string]: boolean } | nu
   return np && cp && np !== cp ? { passwordsMismatch: true } : null;
 }
 
+/** Validateur de groupe : newPassword ne doit PAS être identique à currentPassword */
+function passwordsDifferentFromCurrent(group: AbstractControl): { [key: string]: boolean } | null {
+  const cp = group.get('currentPassword')?.value;
+  const np = group.get('newPassword')?.value;
+  return cp && np && cp === np ? { passwordsSame: true } : null;
+}
+
 @Component({
   selector: 'app-user-profile',
   templateUrl: './user-profile.component.html',
@@ -85,7 +92,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
         Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).+$/)
       ]],
       confirmPassword: ['', Validators.required]
-    }, { validators: passwordsMatch });
+    }, { validators: [passwordsMatch, passwordsDifferentFromCurrent] });
 
     this.preferencesForm = this.fb.group({
       language:             ['fr'],
@@ -187,6 +194,12 @@ export class UserProfileComponent implements OnInit, OnDestroy {
   get ruleUppercase(): boolean { return /[A-Z]/.test(this.pwd); }
   get ruleLowercase(): boolean { return /[a-z]/.test(this.pwd); }
   get ruleDigit(): boolean     { return /\d/.test(this.pwd); }
+
+  /** Vrai si newPassword === currentPassword (erreur de groupe) */
+  get passwordsSameError(): boolean {
+    return !!this.passwordForm.errors?.['passwordsSame'] &&
+           !!this.passwordForm.get('newPassword')?.dirty;
+  }
   get ruleSpecial(): boolean   { return /[^a-zA-Z0-9]/.test(this.pwd); }
 
   // ── Soumission profil ────────────────────────────────────────────────────
@@ -230,8 +243,15 @@ export class UserProfileComponent implements OnInit, OnDestroy {
 
   changePassword(): void {
     if (this.passwordForm.invalid) { this.passwordForm.markAllAsTouched(); return; }
-    this.savingPassword = true;
     const { currentPassword, newPassword } = this.passwordForm.value;
+
+    // Vérification explicite : le nouveau mot de passe ne doit pas être identique à l'ancien
+    if (currentPassword === newPassword) {
+      this.snack('Le nouveau mot de passe doit être différent de l\'ancien.', 'error');
+      return;
+    }
+
+    this.savingPassword = true;
 
     this.authService.changeFirstPassword(currentPassword, newPassword)
       .pipe(takeUntil(this.destroy$))

@@ -258,6 +258,12 @@
                     </mat-error>
                   </mat-form-field>
 
+                  <!-- Alerte : nouveau mot de passe identique à l'ancien -->
+                  <div class="pwd-same-warning" *ngIf="passwordsSameError">
+                    <mat-icon>warning_amber</mat-icon>
+                    <span>Le nouveau mot de passe doit être <strong>différent</strong> de l'ancien.</span>
+                  </div>
+
                   <!-- Indicateur de force -->
                   <div class="strength-wrapper" *ngIf="pwd">
                     <div class="strength-bars">

@@ -411,6 +411,28 @@
 .pwd-rules li.ok { color: var(--text-2); }
 .pwd-rules li.ok mat-icon { color: var(--primary); }
 
+/* Alerte : mots de passe identiques */
+.pwd-same-warning {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff8e1;
+  border: 1px solid #f9a825;
+  border-left: 4px solid #f9a825;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  font-size: 0.865rem;
+  color: #7a4f00;
+}
+.pwd-same-warning mat-icon {
+  color: #f9a825;
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
 /* ═══════════════════════════════════════════════════════════════════
    ONGLET ACTIVITÉ
    ═══════════════════════════════════════════════════════════════════ */
