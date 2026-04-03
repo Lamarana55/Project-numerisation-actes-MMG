@@ -6,6 +6,7 @@ import { tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { GeodataService } from './geodata.service';
 import { ActivityService } from './activity.service';
+import { PROFIL_META } from '../models/role';
 
 interface LoginCredentials {
   username: string;
