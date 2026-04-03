@@ -93,9 +93,15 @@
         <span matListItemTitle>Tableau de bord</span>
       </a>
       <!-- Numerisation(menu principal avec sous-menu) -->
-     <a mat-list-item routerLink="/admin/numerisation-indexation" routerLinkActive="active-link" class="menu-item">
+      <a mat-list-item routerLink="/admin/numerisation-indexation" routerLinkActive="active-link" class="menu-item">
         <mat-icon matListItemIcon>auto_fix_high</mat-icon>
         <span matListItemTitle>Numérisation & Indexation</span>
+      </a>
+
+      <!-- Validation des actes de naissance -->
+      <a mat-list-item *ngIf="canViewValidation()" routerLink="/admin/valid-births" routerLinkActive="active-link" class="menu-item">
+        <mat-icon matListItemIcon>verified</mat-icon>
+        <span matListItemTitle>Actes validés</span>
       </a>
 
       <!-- Paramétrages -->

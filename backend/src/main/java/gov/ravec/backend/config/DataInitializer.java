@@ -151,6 +151,16 @@ public class DataInitializer implements CommandLineRunner {
     /** Modifier ses informations personnelles */
     private static final String P_MODIFIER_PROFIL     = "CAN_EDIT_PROFILE";
 
+    // ═══════════════════════════════════════════════════════════
+    //  [10] VALIDATION DES ACTES DE NAISSANCE
+    // ═══════════════════════════════════════════════════════════
+    /** Consulter les actes de naissance (périmètre territorial de l'utilisateur) */
+    private static final String P_VOIR_ACTES_VALIDES  = "CAN_VIEW_VALIDATED_ACTS";
+    /** Valider un acte de naissance en attente */
+    private static final String P_VALIDER_ACTE        = "CAN_VALIDATE_BIRTH";
+    /** Rejeter un acte de naissance avec motif obligatoire */
+    private static final String P_REJETER_ACTE        = "CAN_REJECT_BIRTH";
+
     // ── Noms techniques des profils ──────────────────────────
     private static final String PROFIL_SUPER_ADMIN       = "SUPER_ADMINISTRATEUR";
     private static final String PROFIL_ADMIN             = "ADMINISTRATEUR";
@@ -232,6 +242,11 @@ public class DataInitializer implements CommandLineRunner {
         catalogue.put(P_VOIR_PROFIL,          "Consulter son propre profil utilisateur");
         catalogue.put(P_MODIFIER_PROFIL,      "Modifier ses informations personnelles");
 
+        // [10] Validation des actes de naissance
+        catalogue.put(P_VOIR_ACTES_VALIDES,   "Consulter les actes de naissance dans son périmètre territorial");
+        catalogue.put(P_VALIDER_ACTE,         "Valider un acte de naissance en attente de validation");
+        catalogue.put(P_REJETER_ACTE,         "Rejeter un acte de naissance avec motif obligatoire");
+
         Map<String, Permission> result = new LinkedHashMap<>();
         catalogue.forEach((nom, description) -> {
             Permission perm = permissionRepository.findByNom(nom).orElseGet(() -> {
@@ -298,6 +313,10 @@ public class DataInitializer implements CommandLineRunner {
                 // Supervision
                 p.get(P_SUPERVISER_AGENTS),
                 p.get(P_AFFECTER_TACHES),
+                // Validation actes (accès national)
+                p.get(P_VOIR_ACTES_VALIDES),
+                p.get(P_VALIDER_ACTE),
+                p.get(P_REJETER_ACTE),
                 // Profil
                 p.get(P_VOIR_PROFIL),
                 p.get(P_MODIFIER_PROFIL)
@@ -321,6 +340,8 @@ public class DataInitializer implements CommandLineRunner {
                 p.get(P_VOIR_REGIONS),
                 p.get(P_VOIR_PREFECTURES),
                 p.get(P_VOIR_COMMUNES),
+                // Validation actes (lecture seule — pas de valider/rejeter)
+                p.get(P_VOIR_ACTES_VALIDES),
                 // Profil
                 p.get(P_VOIR_PROFIL)
             )
@@ -348,6 +369,10 @@ public class DataInitializer implements CommandLineRunner {
                 // Numérisation régionale
                 p.get(P_PILOTER_NUMERISATION),
                 p.get(P_VALIDER_NUMERISATION),
+                // Validation actes (périmètre régional)
+                p.get(P_VOIR_ACTES_VALIDES),
+                p.get(P_VALIDER_ACTE),
+                p.get(P_REJETER_ACTE),
                 // Supervision régionale
                 p.get(P_SUPERVISER_AGENTS),
                 p.get(P_AFFECTER_TACHES),
@@ -379,6 +404,10 @@ public class DataInitializer implements CommandLineRunner {
                 // Numérisation préfectorale
                 p.get(P_PILOTER_NUMERISATION),
                 p.get(P_VALIDER_NUMERISATION),
+                // Validation actes (périmètre préfectoral)
+                p.get(P_VOIR_ACTES_VALIDES),
+                p.get(P_VALIDER_ACTE),
+                p.get(P_REJETER_ACTE),
                 // Supervision préfectorale
                 p.get(P_SUPERVISER_AGENTS),
                 p.get(P_AFFECTER_TACHES),
@@ -411,6 +440,10 @@ public class DataInitializer implements CommandLineRunner {
                 p.get(P_VALIDER_NUMERISATION),
                 p.get(P_NUMERISER),
                 p.get(P_INDEXER),
+                // Validation actes (périmètre communal)
+                p.get(P_VOIR_ACTES_VALIDES),
+                p.get(P_VALIDER_ACTE),
+                p.get(P_REJETER_ACTE),
                 // Supervision des agents de sa commune
                 p.get(P_SUPERVISER_AGENTS),
                 p.get(P_AFFECTER_TACHES),
@@ -438,6 +471,10 @@ public class DataInitializer implements CommandLineRunner {
                 p.get(P_SAISIR_DECES),
                 p.get(P_SAISIR_MARIAGE),
                 p.get(P_CORRIGER_ACTES),
+                // Validation actes (périmètre communal)
+                p.get(P_VOIR_ACTES_VALIDES),
+                p.get(P_VALIDER_ACTE),
+                p.get(P_REJETER_ACTE),
                 // Numérisation des actes anciens
                 p.get(P_NUMERISER),
                 p.get(P_INDEXER),
@@ -464,6 +501,10 @@ public class DataInitializer implements CommandLineRunner {
                 // Numérisation et indexation (tâches de base)
                 p.get(P_NUMERISER),
                 p.get(P_INDEXER),
+                // Validation actes (lecture de ses propres actes uniquement)
+                p.get(P_VOIR_ACTES_VALIDES),
+                // Saisie actes de naissance
+                p.get(P_SAISIR_NAISSANCE),
                 // Profil
                 p.get(P_VOIR_PROFIL)
             )

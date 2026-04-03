@@ -46,6 +46,7 @@ import { MatStepperModule } from '@angular/material/stepper';
 import { MatTreeModule } from '@angular/material/tree';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatBottomSheetModule } from '@angular/material/bottom-sheet';
+import { TextFieldModule } from '@angular/cdk/text-field';
 
 // Composants existants
 import { HomeComponent } from './home/home.component';
@@ -84,6 +85,8 @@ import { SumPermissionsPipe } from './pipes/sum-permissions.pipe';
 import { LocalitesComponent } from './config/localites/localites.component';
 import { HierarchyNodeComponent } from './config/localites/hierarchy-node.component';
 import { ForcePasswordChangeComponent } from './pages/force-password-change/force-password-change.component';
+import { ValidBirthListComponent } from './valid-births/valid-birth-list/valid-birth-list.component';
+import { RejectDialogComponent } from './valid-births/reject-dialog/reject-dialog.component';
 
 
 registerLocaleData(localeFr);
@@ -121,6 +124,8 @@ registerLocaleData(localeFr);
     NumerisationIndexationComponent,
     SumPermissionsPipe,
     ForcePasswordChangeComponent,
+    ValidBirthListComponent,
+    RejectDialogComponent,
   ],
   imports: [
     BrowserModule,
@@ -188,6 +193,7 @@ registerLocaleData(localeFr);
     MatTooltipModule,
 
     MatAutocompleteModule,
+    TextFieldModule,
     ServiceWorkerModule.register('ngsw-worker.js', {
       enabled: !isDevMode(),
       // Register the ServiceWorker as soon as the application is stable
