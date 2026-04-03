@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { forkJoin } from 'rxjs';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { ToastComponent } from '../shared/toast/toast.component';
+import { ToastService } from '../services/toast.service';
 import { GeodataService } from '../services/geodata.service';
 import { Profession, ProfessionService } from '../services/profession.service';
 import { ApiService } from '../services/api.service';
@@ -117,7 +116,7 @@ export class NumerisationIndexationComponent implements OnInit {
   Math = Math;
 
   constructor(
-    private snackBar: MatSnackBar,
+    private toast: ToastService,
     private geodataService: GeodataService,
     private professionService: ProfessionService,
     private apiService: ApiService,
@@ -489,17 +488,7 @@ export class NumerisationIndexationComponent implements OnInit {
   // TOASTS — ToastComponent (même pattern que le reste du projet)
   // ═══════════════════════════════════════════════════════════════════════════
 
-  private showSuccess(msg: string): void { this.toast('success', 'check_circle', msg); }
-  private showError(msg: string):   void { this.toast('error', 'error', msg); }
-  private showWarning(msg: string): void { this.toast('warning', 'warning', msg); }
-
-  private toast(type: string, icon: string, message: string): void {
-    this.snackBar.openFromComponent(ToastComponent, {
-      data: { message, icon, type },
-      panelClass: [`${type === 'warning' ? 'info' : type}-snackbar`],
-      duration: 4000,
-      horizontalPosition: 'end',
-      verticalPosition: 'top',
-    });
-  }
+  private showSuccess(msg: string): void { this.toast.success(msg); }
+  private showError(msg: string):   void { this.toast.error(msg); }
+  private showWarning(msg: string): void { this.toast.warning(msg); }
 }

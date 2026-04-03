@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Subject, Observable } from 'rxjs';
 import { takeUntil, finalize } from 'rxjs/operators';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { ToastService } from '../../services/toast.service';
 import { LocalitesService } from './localites.service';
 import { HierarchyLevel } from './localites.models';
 
@@ -53,7 +53,7 @@ export class LocalitesComponent implements OnInit, OnDestroy {
   constructor(
     private service: LocalitesService,
     private fb: FormBuilder,
-    private snackBar: MatSnackBar
+    private toast: ToastService
   ) {
     this.editForm = this.fb.group({
       code: ['', [Validators.required, Validators.minLength(2)]],
@@ -227,7 +227,7 @@ export class LocalitesComponent implements OnInit, OnDestroy {
     if (this.selectedNode?.type === 'prefecture') {
       this.openCreate(this.selectedNode);
     } else {
-      this.snackBar.open('Sélectionnez une préfecture dans l\'arborescence pour créer une commune.', 'OK', { duration: 3500 });
+      this.toast.info('Sélectionnez une préfecture dans l\'arborescence pour créer une commune.');
     }
   }
 
@@ -235,7 +235,7 @@ export class LocalitesComponent implements OnInit, OnDestroy {
     if (this.selectedNode?.type === 'pays') {
       this.openCreate(this.selectedNode);
     } else {
-      this.snackBar.open('Sélectionnez un pays dans l\'arborescence pour créer une ville.', 'OK', { duration: 3500 });
+      this.toast.info('Sélectionnez un pays dans l\'arborescence pour créer une ville.');
     }
   }
 
@@ -265,11 +265,11 @@ export class LocalitesComponent implements OnInit, OnDestroy {
     op.pipe(finalize(() => this.loading = false), takeUntil(this.destroy$))
       .subscribe({
         next: () => {
-          this.snackBar.open(`${label} supprimé(e) avec succès`, 'OK', { duration: 3000 });
+          this.toast.success(`${label} supprimé(e) avec succès`);
           if (this.selectedNode?.data.id === node.data.id) this.selectedNode = null;
           this.loadData();
         },
-        error: () => this.snackBar.open('Erreur lors de la suppression', 'OK', { duration: 4000 })
+        error: () => this.toast.error('Erreur lors de la suppression')
       });
   }
 
@@ -291,10 +291,10 @@ export class LocalitesComponent implements OnInit, OnDestroy {
     op.pipe(finalize(() => this.loading = false), takeUntil(this.destroy$))
       .subscribe({
         next: () => {
-          this.snackBar.open(`${this.formatLabel(type)} modifié(e) avec succès`, 'OK', { duration: 3000 });
+          this.toast.success(`${this.formatLabel(type)} modifié(e) avec succès`);
           this.closeEdit(); this.loadData();
         },
-        error: () => this.snackBar.open('Erreur lors de la modification', 'OK', { duration: 4000 })
+        error: () => this.toast.error('Erreur lors de la modification')
       });
   }
 
@@ -318,10 +318,10 @@ export class LocalitesComponent implements OnInit, OnDestroy {
     op.pipe(finalize(() => this.loading = false), takeUntil(this.destroy$))
       .subscribe({
         next: () => {
-          this.snackBar.open(`${this.formatLabel(createType)} créé(e) avec succès`, 'OK', { duration: 3000 });
+          this.toast.success(`${this.formatLabel(createType)} créé(e) avec succès`);
           this.closeEdit(); this.loadData();
         },
-        error: () => this.snackBar.open('Erreur lors de la création', 'OK', { duration: 4000 })
+        error: () => this.toast.error('Erreur lors de la création')
       });
   }
 

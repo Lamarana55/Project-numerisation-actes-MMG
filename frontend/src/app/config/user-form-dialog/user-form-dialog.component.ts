@@ -1,7 +1,7 @@
 import { Component, Inject, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { ToastService } from '../../services/toast.service';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
@@ -51,7 +51,7 @@ export class UserFormDialogComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private roleService: RoleService,
     private territoryService: TerritoryService,
-    private snackBar: MatSnackBar,
+    private toast: ToastService,
     public dialogRef: MatDialogRef<UserFormDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: UserDialogData
   ) {
@@ -352,9 +352,6 @@ export class UserFormDialogComponent implements OnInit, OnDestroy {
   }
 
   private showSnackBar(message: string, type: 'success' | 'error'): void {
-    this.snackBar.open(message, 'Fermer', {
-      duration: 5000,
-      panelClass: type === 'success' ? 'snackbar-success' : 'snackbar-error'
-    });
+    this.toast[type](message);
   }
 }

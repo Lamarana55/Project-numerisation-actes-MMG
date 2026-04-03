@@ -1,1 +1,34 @@
-<p>toast works!</p>
+<div class="toast-container" aria-live="polite" aria-label="Notifications">
+
+  <div *ngFor="let t of toasts$ | async; trackBy: trackById"
+       class="toast toast--{{ t.type }}"
+       role="alert">
+
+    <!-- Icône -->
+    <div class="toast-icon-col">
+      <div class="toast-icon-wrap toast-icon-wrap--{{ t.type }}">
+        <mat-icon>{{ getIcon(t.type) }}</mat-icon>
+      </div>
+    </div>
+
+    <!-- Corps -->
+    <div class="toast-body">
+      <span class="toast-title">{{ t.title }}</span>
+      <span class="toast-message">{{ t.message }}</span>
+    </div>
+
+    <!-- Fermer -->
+    <button class="toast-close" type="button" (click)="dismiss(t.id)" aria-label="Fermer">
+      <mat-icon>close</mat-icon>
+    </button>
+
+    <!-- Barre de progression auto -->
+    <div class="toast-progress">
+      <div class="toast-progress-bar toast-progress-bar--{{ t.type }}"
+           [style.animationDuration]="t.duration + 'ms'">
+      </div>
+    </div>
+
+  </div>
+
+</div>

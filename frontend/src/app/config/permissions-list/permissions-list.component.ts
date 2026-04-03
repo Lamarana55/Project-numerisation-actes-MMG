@@ -2,7 +2,7 @@ import {
   Component, OnInit, OnDestroy,
   ChangeDetectionStrategy, ChangeDetectorRef, inject
 } from '@angular/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { ToastService } from '../../services/toast.service';
 import { MatDialog } from '@angular/material/dialog';
 import { PageEvent } from '@angular/material/paginator';
 import { Subject, takeUntil } from 'rxjs';
@@ -22,7 +22,7 @@ import { ConfirmActionDialogComponent } from '../confirm-action-dialog/confirm-a
 export class PermissionsListComponent implements OnInit, OnDestroy {
 
   private readonly permService = inject(PermissionService);
-  private readonly snackBar    = inject(MatSnackBar);
+  private readonly toast       = inject(ToastService);
   private readonly dialog      = inject(MatDialog);
   private readonly cdr         = inject(ChangeDetectorRef);
   private readonly destroy$    = new Subject<void>();
@@ -181,12 +181,7 @@ export class PermissionsListComponent implements OnInit, OnDestroy {
   }
 
   private notify(msg: string, type: 'success' | 'error'): void {
-    this.snackBar.open(msg, 'Fermer', {
-      duration: 4000,
-      horizontalPosition: 'end',
-      verticalPosition: 'top',
-      panelClass: type === 'success' ? 'snackbar-success' : 'snackbar-error'
-    });
+    this.toast[type](msg);
   }
 
   trackById(_: number, p: Permission): string { return p.id ?? ''; }

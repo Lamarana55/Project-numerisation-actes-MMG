@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { ToastService } from '../../services/toast.service';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
@@ -53,7 +53,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private activitySvc: ActivityService,
     private prefSvc:     PreferencesService,
-    private snackBar:    MatSnackBar
+    private toast:       ToastService
   ) {}
 
   ngOnInit(): void {
@@ -331,9 +331,6 @@ export class UserProfileComponent implements OnInit, OnDestroy {
   }
 
   private snack(message: string, type: 'success' | 'error' | 'info' = 'success'): void {
-    this.snackBar.open(message, 'Fermer', {
-      duration: 5000,
-      panelClass: `snackbar-${type}`
-    });
+    this.toast[type](message);
   }
 }
