@@ -87,19 +87,19 @@ export interface ValidationActionRequest {
   motifRejet?: string;
 }
 
-export const STATUT_LABELS: Record<ValidationStatut, string> = {
+export const STATUT_LABELS: Record<string, string> = {
   EN_ATTENTE: 'En attente',
   VALIDE:     'Validé',
   REJETE:     'Rejeté',
 };
 
-export const STATUT_COLORS: Record<ValidationStatut, string> = {
+export const STATUT_COLORS: Record<string, string> = {
   EN_ATTENTE: '#f59e0b',
   VALIDE:     '#10b981',
   REJETE:     '#ef4444',
 };
 
-export const STATUT_ICONS: Record<ValidationStatut, string> = {
+export const STATUT_ICONS: Record<string, string> = {
   EN_ATTENTE: 'hourglass_empty',
   VALIDE:     'check_circle',
   REJETE:     'cancel',
