@@ -167,7 +167,7 @@ export class NumerisationIndexationComponent implements OnInit {
     }
     this.selectedFile = file;
     this.fileMediaType = file.type;
-    this.data = {};
+    this.data = this.getTestData();
     this.isEditing = true; // on passe directement en mode saisie
 
     const reader = new FileReader();
@@ -491,4 +491,45 @@ export class NumerisationIndexationComponent implements OnInit {
   private showSuccess(msg: string): void { this.toast.success(msg); }
   private showError(msg: string):   void { this.toast.error(msg); }
   private showWarning(msg: string): void { this.toast.warning(msg); }
+
+  /** Données de test pré-remplies au chargement d'une image. */
+  private getTestData(): ActeData {
+    return {
+      // Registre
+      numero_acte:             '0042',
+      numero_registre:         '001',
+      annee_registre:          '2010',
+      feuillet:                '12',
+      date_etablissement_acte: '2010-01-05',
+
+      // Zone de collecte — Conakry / Kaloum
+      region_collecte:    'Conakry',
+      prefecture_collecte:'Kaloum',
+      commune:            'Kaloum',
+      district:           'Almamya',
+
+      // Enfant
+      prenoms:             'Yaya',
+      nom_membre:          'Camara',
+      date_de_nais_membre: '2010-01-01',
+      genre_membre:        'M',
+      nationalite_du_membre: 'Guinéenne',
+      pays_de_naissance:   'Guinée',
+      commune_de_nais:     'Kaloum',
+
+      // Père
+      prenoms_pere:       'Ousmane',
+      nom_pere:           'Camara',
+      date_de_nais_pere:  '1980-01-01',
+      nationalite_pere:   'Guinéenne',
+
+      // Mère
+      prenoms_mere:       'Aissata',
+      nom_mere:           'Condé',
+      date_de_nais_mere:  '1988-01-01',
+      nationalite_mere:   'Guinéenne',
+      region_naissance:   'Kankan',
+      commune_de_nais:    'Kankan',
+    };
+  }
 }
