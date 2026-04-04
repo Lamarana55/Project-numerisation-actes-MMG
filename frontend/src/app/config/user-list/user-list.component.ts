@@ -493,7 +493,7 @@ export class UserListComponent implements OnInit, OnDestroy {
     return PROFIL_META[nom]?.libelle || user.roleLibelle || nom || 'Aucun profil';
   }
 
-  getProfilMeta(user: User) {
+  getProfilMeta(user: User): { libelle: string; niveau: NiveauAdministratif; couleur: string; icone: string } | null {
     const nom = user.roleName ?? user.role?.nom ?? '';
     return PROFIL_META[nom] ?? null;
   }

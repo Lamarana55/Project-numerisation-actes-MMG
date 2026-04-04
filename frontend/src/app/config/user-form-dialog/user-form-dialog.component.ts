@@ -291,7 +291,7 @@ export class UserFormDialogComponent implements OnInit, OnDestroy {
     return this.selectedNiveau === 'COMMUNAL';
   }
 
-  getProfilMeta(nom: string) {
+  getProfilMeta(nom: string): { libelle: string; niveau: NiveauAdministratif; couleur: string; icone: string } | null {
     return PROFIL_META[nom] ?? null;
   }
 
