@@ -56,8 +56,8 @@ export class ValidBirthListComponent implements OnInit, OnDestroy {
 
   // ── Colonnes ──────────────────────────────────────────────────────────────
   displayedColumns = [
-    'numeroActe', 'nomEnfant', 'dateNaissance',
-    'localisation', 'agent', 'statut', 'dateAction', 'actions'
+    'numeroActe', 'nomEnfant', 'localisation',
+    'agent', 'statut', 'validateur', 'actions'
   ];
 
   // ── Constantes affichage ──────────────────────────────────────────────────
@@ -240,6 +240,24 @@ export class ValidBirthListComponent implements OnInit, OnDestroy {
            this.authService.isPrefectoral;
   }
 
+  // ── Filtrage par statut (depuis les KPI cards) ────────────────────────────
+
+  filterByStatut(statut: ValidationStatut): void {
+    // Bascule : re-cliquer sur la même carte retire le filtre
+    this.selectedStatut = this.selectedStatut === statut ? '' : statut;
+    this.currentPage = 0;
+    this.loadActes();
+  }
+
+  get activeFilterCount(): number {
+    return [
+      this.selectedStatut,
+      this.filterRegion,
+      this.filterPrefecture,
+      this.filterCommune,
+    ].filter(Boolean).length;
+  }
+
   // ── Helpers affichage ─────────────────────────────────────────────────────
 
   getNomEnfant(acte: ValidBirth): string {
@@ -250,6 +268,23 @@ export class ValidBirthListComponent implements OnInit, OnDestroy {
   getLocalisation(acte: ValidBirth): string {
     return [acte.commune, acte.prefecture, acte.region]
       .filter(Boolean).join(', ') || '—';
+  }
+
+  /** Initiales de l'enfant pour l'avatar */
+  getInitials(acte: ValidBirth): string {
+    const prenom = (acte.prenoms || '').trim().charAt(0).toUpperCase();
+    const nom    = (acte.nom    || '').trim().charAt(0).toUpperCase();
+    return prenom && nom ? prenom + nom : prenom || nom || '?';
+  }
+
+  /** Initiales de l'agent saisisseur */
+  getAgentInitials(acte: ValidBirth): string {
+    const full = acte.agentNomComplet || acte.agentUsername || '';
+    const parts = full.trim().split(/\s+/);
+    if (parts.length >= 2) {
+      return (parts[0].charAt(0) + parts[1].charAt(0)).toUpperCase();
+    }
+    return full.charAt(0).toUpperCase() || '?';
   }
 
   trackById(_: number, acte: ValidBirth): string {
@@ -268,4 +303,9 @@ export class ValidBirthListComponent implements OnInit, OnDestroy {
   get statsEnAttente(): number { return this.actes.filter(a => a.statut === 'EN_ATTENTE').length; }
   get statsValide():    number { return this.actes.filter(a => a.statut === 'VALIDE').length; }
   get statsRejete():   number  { return this.actes.filter(a => a.statut === 'REJETE').length; }
+
+  // ── Helpers template (évite l'indexation directe du Record) ──────────────
+  getStatutLabel(statut: string): string { return STATUT_LABELS[statut] ?? statut; }
+  getStatutColor(statut: string): string { return STATUT_COLORS[statut] ?? '#6b7280'; }
+  getStatutIcon(statut: string): string  { return STATUT_ICONS[statut]  ?? 'help'; }
 }

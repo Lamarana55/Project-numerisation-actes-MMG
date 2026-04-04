@@ -1,43 +1,84 @@
-<h2 mat-dialog-title class="dialog-title">
-  <mat-icon color="warn">cancel</mat-icon>
-  Rejeter l'acte de naissance
-</h2>
+<!-- ══════════════════════════════════════════════════════════
+     HEADER DIALOG
+══════════════════════════════════════════════════════════ -->
+<div class="rd-header">
+  <div class="rd-header-icon">
+    <mat-icon>report_problem</mat-icon>
+  </div>
+  <div class="rd-header-text">
+    <h2 class="rd-title">Rejeter l'acte</h2>
+    <p class="rd-subtitle">Le motif sera transmis à l'agent pour correction</p>
+  </div>
+  <button mat-icon-button class="rd-close-btn" (click)="cancel()" matTooltip="Fermer">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
 
-<mat-dialog-content class="dialog-content">
-  <div class="acte-info">
-    <mat-icon>person</mat-icon>
-    <div>
-      <span class="acte-nom">{{ nomEnfant }}</span>
-      <span class="acte-ref" *ngIf="data.acte.numeroActe">Acte n° {{ data.acte.numeroActe }}</span>
+<!-- ══════════════════════════════════════════════════════════
+     CONTENU
+══════════════════════════════════════════════════════════ -->
+<mat-dialog-content class="rd-content">
+
+  <!-- Résumé de l'acte -->
+  <div class="rd-acte-card">
+    <div class="rd-acte-avatar">
+      {{ getInitials() }}
     </div>
+    <div class="rd-acte-info">
+      <span class="rd-acte-nom">{{ nomEnfant }}</span>
+      <span class="rd-acte-ref" *ngIf="data.acte.numeroActe">
+        <mat-icon>tag</mat-icon> Acte n°&nbsp;{{ data.acte.numeroActe }}
+      </span>
+    </div>
+    <span class="rd-statut-badge">
+      <span class="pill-dot"></span>
+      En attente
+    </span>
   </div>
 
-  <p class="dialog-instruction">
-    Veuillez indiquer le motif de rejet. Ce motif sera communiqué à l'agent pour correction.
-  </p>
+  <!-- Séparateur -->
+  <div class="rd-divider">
+    <span>Motif de rejet</span>
+  </div>
 
-  <mat-form-field appearance="outline" class="motif-field">
-    <mat-label>Motif de rejet <span class="required">*</span></mat-label>
+  <!-- Champ texte -->
+  <mat-form-field appearance="outline" class="rd-motif-field">
+    <mat-label>Expliquez le motif</mat-label>
     <textarea
       matInput
       [formControl]="motifControl"
-      rows="4"
-      placeholder="Ex : Informations manquantes sur le père, date de naissance incohérente…"
+      placeholder="Ex : Informations incomplètes sur le père, date de naissance incohérente avec le registre…"
       cdkTextareaAutosize
       cdkAutosizeMinRows="4"
       cdkAutosizeMaxRows="8">
     </textarea>
-    <mat-hint align="end">{{ charCount }} / 500</mat-hint>
+    <mat-hint align="end">
+      <span [class.hint-warn]="charCount > 450">{{ charCount }}</span> / 500
+    </mat-hint>
     <mat-error *ngIf="motifControl.hasError('required')">Le motif est obligatoire</mat-error>
-    <mat-error *ngIf="motifControl.hasError('minlength')">Au minimum 10 caractères</mat-error>
+    <mat-error *ngIf="motifControl.hasError('minlength')">Minimum 10 caractères requis</mat-error>
     <mat-error *ngIf="motifControl.hasError('maxlength')">Maximum 500 caractères</mat-error>
   </mat-form-field>
+
+  <!-- Tip -->
+  <div class="rd-tip">
+    <mat-icon>lightbulb_outline</mat-icon>
+    <span>Soyez précis pour aider l'agent à corriger rapidement l'acte.</span>
+  </div>
+
 </mat-dialog-content>
 
-<mat-dialog-actions align="end" class="dialog-actions">
-  <button mat-stroked-button (click)="cancel()">Annuler</button>
-  <button mat-flat-button color="warn" (click)="confirm()" [disabled]="motifControl.invalid">
-    <mat-icon>cancel</mat-icon>
+<!-- ══════════════════════════════════════════════════════════
+     ACTIONS
+══════════════════════════════════════════════════════════ -->
+<div class="rd-actions">
+  <button mat-stroked-button class="rd-btn-cancel" (click)="cancel()">
+    Annuler
+  </button>
+  <button mat-flat-button class="rd-btn-confirm"
+          (click)="confirm()"
+          [disabled]="motifControl.invalid">
+    <mat-icon>block</mat-icon>
     Rejeter l'acte
   </button>
-</mat-dialog-actions>
+</div>

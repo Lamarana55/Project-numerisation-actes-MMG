@@ -4,6 +4,7 @@ import gov.ravec.backend.entities.ValidBirth;
 import gov.ravec.backend.utils.ValidationStatut;
 import lombok.*;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 /**
@@ -92,8 +93,8 @@ public class ValidBirthDTO {
     private String motifRejet;
 
     // ── Dates d'audit ────────────────────────────────────────────
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private Instant createdAt;
+    private Instant updatedAt;
 
     // ── Conversion Entity → DTO ───────────────────────────────────
 

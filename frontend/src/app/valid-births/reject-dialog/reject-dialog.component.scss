@@ -1,0 +1,235 @@
+// ════════════════════════════════════════════════════
+//  Reject Dialog — Styles
+// ════════════════════════════════════════════════════
+
+$red-dot:   #f43f5e;
+$red-bg:    #fff1f2;
+$red-bord:  #fecdd3;
+$red-fg:    #9f1239;
+
+$attente-bg:  #fffbeb;
+$attente-dot: #f59e0b;
+$attente-bord:#fde68a;
+$attente-fg:  #b45309;
+
+$border:  #e5e7eb;
+$text:    #111827;
+$sub:     #6b7280;
+$muted:   #9ca3af;
+
+// ── Header ────────────────────────────────────────────
+.rd-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid $border;
+}
+
+.rd-header-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: $red-bg;
+  border: 1px solid $red-bord;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  mat-icon {
+    font-size: 22px;
+    width: 22px;
+    height: 22px;
+    color: $red-dot;
+  }
+}
+
+.rd-header-text { flex: 1; }
+
+.rd-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: $text;
+}
+
+.rd-subtitle {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: $sub;
+}
+
+.rd-close-btn {
+  color: $muted !important;
+  flex-shrink: 0;
+  &:hover { color: $text !important; background: #f3f4f6 !important; }
+}
+
+// ── Contenu ───────────────────────────────────────────
+.rd-content {
+  padding: 16px 20px !important;
+  max-height: 70vh !important;
+  display: flex !important;
+  flex-direction: column;
+  gap: 14px;
+}
+
+// ── Carte acte ────────────────────────────────────────
+.rd-acte-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #fafafa;
+  border: 1px solid $border;
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+
+.rd-acte-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  letter-spacing: -.5px;
+}
+
+.rd-acte-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.rd-acte-nom {
+  font-weight: 600;
+  color: $text;
+  font-size: 14px;
+}
+
+.rd-acte-ref {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  color: $sub;
+
+  mat-icon { font-size: 11px; width: 11px; height: 11px; }
+}
+
+.rd-statut-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  background: $attente-bg;
+  color: $attente-fg;
+  border: 1px solid $attente-bord;
+  white-space: nowrap;
+
+  .pill-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: $attente-dot;
+    flex-shrink: 0;
+  }
+}
+
+// ── Séparateur ────────────────────────────────────────
+.rd-divider {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .6px;
+  color: $muted;
+
+  &::before, &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: $border;
+  }
+}
+
+// ── Champ motif ───────────────────────────────────────
+.rd-motif-field {
+  width: 100%;
+}
+
+.hint-warn { color: #f59e0b; font-weight: 700; }
+
+// ── Tip ───────────────────────────────────────────────
+.rd-tip {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 12px;
+  color: #0369a1;
+
+  mat-icon {
+    font-size: 15px;
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
+    margin-top: 1px;
+    color: #0ea5e9;
+  }
+}
+
+// ── Actions ───────────────────────────────────────────
+.rd-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 14px 20px;
+  border-top: 1px solid $border;
+  background: #fafafa;
+}
+
+.rd-btn-cancel {
+  font-size: 13px;
+  font-weight: 600;
+  border-color: $border !important;
+  color: $sub !important;
+  border-radius: 8px !important;
+
+  &:hover { background: #f3f4f6 !important; }
+}
+
+.rd-btn-confirm {
+  font-size: 13px;
+  font-weight: 600;
+  background: $red-dot !important;
+  color: #fff !important;
+  border-radius: 8px !important;
+
+  mat-icon { font-size: 16px; width: 16px; height: 16px; margin-right: 4px; }
+
+  &:hover { background: #e11d48 !important; }
+
+  &[disabled] {
+    background: $border !important;
+    color: $muted !important;
+  }
+}

@@ -10,6 +10,7 @@ export interface RejectDialogData {
 @Component({
   selector: 'app-reject-dialog',
   templateUrl: './reject-dialog.component.html',
+  styleUrls: ['./reject-dialog.component.scss'],
 })
 export class RejectDialogComponent {
 
@@ -27,6 +28,13 @@ export class RejectDialogComponent {
   get nomEnfant(): string {
     const { acte } = this.data;
     return [acte.prenoms, acte.nom].filter(Boolean).join(' ') || `Acte n°${acte.numeroActe}`;
+  }
+
+  getInitials(): string {
+    const { acte } = this.data;
+    const p = (acte.prenoms || '').trim().charAt(0).toUpperCase();
+    const n = (acte.nom    || '').trim().charAt(0).toUpperCase();
+    return p && n ? p + n : p || n || '?';
   }
 
   get charCount(): number {
