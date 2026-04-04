@@ -529,7 +529,6 @@ export class NumerisationIndexationComponent implements OnInit {
       date_de_nais_mere:  '1988-01-01',
       nationalite_mere:   'Guinéenne',
       region_naissance:   'Kankan',
-      commune_de_nais:    'Kankan',
     };
   }
 }
