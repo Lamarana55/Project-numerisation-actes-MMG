@@ -1,23 +1,36 @@
 <div class="vb-page">
 
   <!-- ══════════════════════════════════════════════════════════════
-       EN-TÊTE DE PAGE
+       EN-TÊTE DE PAGE  (carte arrondie)
   ══════════════════════════════════════════════════════════════ -->
   <div class="vb-page-header">
-    <div class="vb-page-header-inner">
-      <div class="vb-breadcrumb">
-        <mat-icon class="breadcrumb-home">home</mat-icon>
-        <span class="breadcrumb-sep">/</span>
-        <span class="breadcrumb-current">Actes de naissance</span>
+    <!-- Cercles déco -->
+    <div class="header-deco header-deco--1"></div>
+    <div class="header-deco header-deco--2"></div>
+
+    <div class="vb-breadcrumb">
+      <mat-icon class="breadcrumb-home">home</mat-icon>
+      <span class="breadcrumb-sep">/</span>
+      <span class="breadcrumb-current">Actes de naissance</span>
+    </div>
+
+    <div class="vb-title-row">
+      <div class="vb-title-icon-wrap">
+        <mat-icon>verified</mat-icon>
       </div>
-      <div class="vb-title-row">
-        <div class="vb-title-icon-wrap">
-          <mat-icon>verified</mat-icon>
-        </div>
-        <div>
-          <h1 class="vb-page-title">Validation des actes de naissance</h1>
-          <p class="vb-page-desc">Suivi du cycle de validation · périmètre territorial appliqué automatiquement</p>
-        </div>
+      <div class="vb-title-text">
+        <h1 class="vb-page-title">Validation des actes de naissance</h1>
+        <p class="vb-page-desc">Suivi du cycle de validation · périmètre territorial appliqué automatiquement</p>
+      </div>
+      <div class="header-stats">
+        <span class="header-stat-pill">
+          <mat-icon>pending_actions</mat-icon>
+          {{ statsEnAttente }} en attente
+        </span>
+        <span class="header-stat-pill header-stat-pill--green">
+          <mat-icon>task_alt</mat-icon>
+          {{ statsValide }} validés
+        </span>
       </div>
     </div>
   </div>
@@ -140,55 +153,129 @@
             <mat-icon class="fsel-ico">flag_circle</mat-icon>
             <select class="vb-sel" [(ngModel)]="selectedStatut" (ngModelChange)="onFilterChange()">
               <option value="">Tous les statuts</option>
-              <option value="EN_ATTENTE">En attente</option>
-              <option value="VALIDE">Validé</option>
-              <option value="REJETE">Rejeté</option>
+              <option value="EN_ATTENTE">⏳ En attente</option>
+              <option value="VALIDE">✅ Validé</option>
+              <option value="REJETE">❌ Rejeté</option>
             </select>
             <mat-icon class="fsel-chevron">expand_more</mat-icon>
           </div>
         </div>
 
-        <!-- ③ Région -->
-        <div class="vb-filter-seg vb-filter-seg--sm" *ngIf="showRegionFilter">
-          <span class="vb-filter-seg-label"><mat-icon>public</mat-icon>Région</span>
-          <div class="vb-search-wrap">
-            <mat-icon>public</mat-icon>
-            <input [(ngModel)]="filterRegion" (ngModelChange)="onFilterChange()"
-                   placeholder="ex : Conakry" autocomplete="off">
-            <button class="vb-search-clear" *ngIf="filterRegion"
-                    (click)="filterRegion=''; onFilterChange()" type="button">
-              <mat-icon>close</mat-icon>
-            </button>
+        <!-- ③ Pays ──────────────────────────────────────────── -->
+        <div class="vb-filter-seg vb-filter-seg--md">
+          <span class="vb-filter-seg-label">
+            <mat-icon>public</mat-icon>Pays de naissance
+          </span>
+          <div class="vb-select-wrap" [class.loading-geo]="loadingGeo">
+            <mat-icon class="fsel-ico">flag</mat-icon>
+            <select class="vb-sel" [(ngModel)]="filterPays" (ngModelChange)="onPaysChange()">
+              <option value="">— Tous les pays —</option>
+              <option *ngFor="let p of pays" [value]="p.code">
+                {{ p.nom }}
+              </option>
+            </select>
+            <mat-icon class="fsel-chevron">expand_more</mat-icon>
           </div>
         </div>
 
-        <!-- ④ Préfecture -->
-        <div class="vb-filter-seg vb-filter-seg--sm" *ngIf="showPrefectureFilter">
-          <span class="vb-filter-seg-label"><mat-icon>location_city</mat-icon>Préfecture</span>
-          <div class="vb-search-wrap">
-            <mat-icon>location_city</mat-icon>
-            <input [(ngModel)]="filterPrefecture" (ngModelChange)="onFilterChange()"
-                   placeholder="ex : Kaloum" autocomplete="off">
-            <button class="vb-search-clear" *ngIf="filterPrefecture"
-                    (click)="filterPrefecture=''; onFilterChange()" type="button">
-              <mat-icon>close</mat-icon>
-            </button>
-          </div>
-        </div>
+        <!-- ══════════ CAS GUINÉE : cascade Région → Préfecture → Commune ══════════ -->
+        <ng-container *ngIf="isGuinea">
 
-        <!-- ⑤ Commune -->
-        <div class="vb-filter-seg vb-filter-seg--sm" *ngIf="showCommuneFilter">
-          <span class="vb-filter-seg-label"><mat-icon>location_on</mat-icon>Commune</span>
-          <div class="vb-search-wrap">
-            <mat-icon>location_on</mat-icon>
-            <input [(ngModel)]="filterCommune" (ngModelChange)="onFilterChange()"
-                   placeholder="ex : Dixinn" autocomplete="off">
-            <button class="vb-search-clear" *ngIf="filterCommune"
-                    (click)="filterCommune=''; onFilterChange()" type="button">
-              <mat-icon>close</mat-icon>
-            </button>
+          <!-- ④ Région (CENTRAL seulement) -->
+          <div class="vb-filter-seg vb-filter-seg--sm" *ngIf="showRegionFilter">
+            <span class="vb-filter-seg-label">
+              <mat-icon>map</mat-icon>Région
+              <span class="cascade-arrow" *ngIf="selectedRegionCode">›</span>
+            </span>
+            <div class="vb-select-wrap" [class.sel-active]="selectedRegionCode">
+              <mat-icon class="fsel-ico">map</mat-icon>
+              <select class="vb-sel" [(ngModel)]="selectedRegionCode" (ngModelChange)="onRegionChange()">
+                <option value="">Toutes les régions</option>
+                <option *ngFor="let r of regions" [value]="r.code">{{ r.nom }}</option>
+              </select>
+              <mat-icon class="fsel-chevron">expand_more</mat-icon>
+            </div>
           </div>
-        </div>
+
+          <!-- ⑤ Préfecture (CENTRAL + REGIONAL) -->
+          <div class="vb-filter-seg vb-filter-seg--sm" *ngIf="showPrefectureFilter">
+            <span class="vb-filter-seg-label">
+              <mat-icon>location_city</mat-icon>Préfecture
+              <span class="cascade-arrow" *ngIf="selectedPrefCode">›</span>
+            </span>
+            <div class="vb-select-wrap"
+                 [class.sel-active]="selectedPrefCode"
+                 [class.sel-disabled]="showRegionFilter && !selectedRegionCode">
+              <mat-icon class="fsel-ico">location_city</mat-icon>
+              <select class="vb-sel" [(ngModel)]="selectedPrefCode" (ngModelChange)="onPrefectureChange()"
+                      [disabled]="showRegionFilter && !selectedRegionCode">
+                <option value="">Toutes les préfectures</option>
+                <option *ngFor="let p of prefectures" [value]="p.code">{{ p.nom }}</option>
+              </select>
+              <mat-icon class="fsel-chevron">expand_more</mat-icon>
+            </div>
+            <span class="seg-hint" *ngIf="showRegionFilter && !selectedRegionCode">
+              Sélectionnez d'abord une région
+            </span>
+          </div>
+
+          <!-- ⑥ Commune (CENTRAL + REGIONAL + PREFECTORAL) -->
+          <div class="vb-filter-seg vb-filter-seg--sm" *ngIf="showCommuneFilter">
+            <span class="vb-filter-seg-label">
+              <mat-icon>location_on</mat-icon>Commune
+            </span>
+            <div class="vb-select-wrap"
+                 [class.sel-active]="selectedCommuneCode"
+                 [class.sel-disabled]="showPrefectureFilter && !selectedPrefCode">
+              <mat-icon class="fsel-ico">location_on</mat-icon>
+              <select class="vb-sel" [(ngModel)]="selectedCommuneCode" (ngModelChange)="onCommuneChange()"
+                      [disabled]="showPrefectureFilter && !selectedPrefCode">
+                <option value="">Toutes les communes</option>
+                <option *ngFor="let c of communes" [value]="c.code">{{ c.nom }}</option>
+              </select>
+              <mat-icon class="fsel-chevron">expand_more</mat-icon>
+            </div>
+            <span class="seg-hint" *ngIf="showPrefectureFilter && !selectedPrefCode">
+              Sélectionnez d'abord une préfecture
+            </span>
+          </div>
+
+        </ng-container>
+        <!-- /isGuinea -->
+
+        <!-- ══════════ CAS PAYS ÉTRANGER : sélection de ville ══════════ -->
+        <ng-container *ngIf="!isGuinea && filterPays">
+
+          <div class="vb-filter-seg vb-filter-seg--md">
+            <span class="vb-filter-seg-label"><mat-icon>apartment</mat-icon>Ville</span>
+
+            <!-- Si des villes sont disponibles via l'API : select -->
+            <ng-container *ngIf="villes.length > 0; else villeLibre">
+              <div class="vb-select-wrap" [class.sel-active]="filterVille">
+                <mat-icon class="fsel-ico">apartment</mat-icon>
+                <select class="vb-sel" [(ngModel)]="filterVille" (ngModelChange)="onVilleChange()">
+                  <option value="">Toutes les villes</option>
+                  <option *ngFor="let v of villes" [value]="v.nom">{{ v.nom }}</option>
+                </select>
+                <mat-icon class="fsel-chevron">expand_more</mat-icon>
+              </div>
+            </ng-container>
+
+            <!-- Sinon : saisie libre -->
+            <ng-template #villeLibre>
+              <div class="vb-search-wrap" [class.sel-active]="filterVille">
+                <mat-icon>apartment</mat-icon>
+                <input [(ngModel)]="filterVille" (ngModelChange)="onVilleChange()"
+                       placeholder="ex : Paris, Dakar…" autocomplete="off">
+                <button class="vb-search-clear" *ngIf="filterVille"
+                        (click)="filterVille=''; onVilleChange()" type="button">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+            </ng-template>
+
+          </div>
+        </ng-container>
 
       </div>
       <!-- /vb-filter-body -->

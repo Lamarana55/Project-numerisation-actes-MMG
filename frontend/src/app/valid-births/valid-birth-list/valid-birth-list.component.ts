@@ -7,9 +7,10 @@ import { MatDialog } from '@angular/material/dialog';
 import { PageEvent } from '@angular/material/paginator';
 import { Subject, takeUntil, debounceTime } from 'rxjs';
 
-import { AuthService } from '../../services/auth.service';
-import { ToastService } from '../../services/toast.service';
+import { AuthService }       from '../../services/auth.service';
+import { ToastService }      from '../../services/toast.service';
 import { ValidBirthService } from '../../services/valid-birth.service';
+import { GeodataService }    from '../../services/geodata.service';
 import {
   ValidBirth,
   ValidationStatut,
@@ -17,7 +18,13 @@ import {
   STATUT_COLORS,
   STATUT_ICONS,
 } from '../../models/valid-birth.model';
+import {
+  PaysDTO, RegionDTO, PrefectureDTO, CommuneDTO, VilleDTO
+} from '../../models/geodata';
 import { RejectDialogComponent } from '../reject-dialog/reject-dialog.component';
+
+/** Code ISO-3 de la Guinée — seul pays pour lequel on affiche la cascade Région/Préfecture/Commune */
+const CODE_GUINEE = 'GIN';
 
 @Component({
   selector: 'app-valid-birth-list',
@@ -31,21 +38,37 @@ export class ValidBirthListComponent implements OnInit, OnDestroy {
   private readonly toast    = inject(ToastService);
   private readonly dialog   = inject(MatDialog);
   private readonly cdr      = inject(ChangeDetectorRef);
+  private readonly geodata  = inject(GeodataService);
   readonly authService      = inject(AuthService);
 
   private readonly destroy$ = new Subject<void>();
 
-  // ── Données ─────────────────────────────────────────────────────────────
+  // ── Données actes ────────────────────────────────────────────────────────
   actes: ValidBirth[] = [];
   loading = false;
   error: string | null = null;
 
-  // ── Filtres ──────────────────────────────────────────────────────────────
+  // ── Filtres texte (envoyés à l'API) ─────────────────────────────────────
   selectedStatut: ValidationStatut | '' = '';
   filterRegion     = '';
   filterPrefecture = '';
   filterCommune    = '';
   searchControl    = new FormControl('');
+
+  // ── Filtres géographiques cascade ────────────────────────────────────────
+  filterPays           = CODE_GUINEE;   // code ISO-3 du pays sélectionné
+  filterVille          = '';            // ville saisie (pays étranger)
+  selectedRegionCode   = '';            // code région → charge préfectures
+  selectedPrefCode     = '';            // code préfecture → charge communes
+  selectedCommuneCode  = '';            // code commune sélectionnée
+
+  // ── Listes géographiques ─────────────────────────────────────────────────
+  pays:        PaysDTO[]        = [];
+  regions:     RegionDTO[]      = [];
+  prefectures: PrefectureDTO[]  = [];
+  communes:    CommuneDTO[]     = [];
+  villes:      VilleDTO[]       = [];
+  loadingGeo   = false;
 
   // ── Pagination ────────────────────────────────────────────────────────────
   totalElements   = 0;
@@ -64,16 +87,13 @@ export class ValidBirthListComponent implements OnInit, OnDestroy {
   readonly STATUT_LABELS = STATUT_LABELS;
   readonly STATUT_COLORS = STATUT_COLORS;
   readonly STATUT_ICONS  = STATUT_ICONS;
-  readonly STATUTS: { value: ValidationStatut | ''; label: string }[] = [
-    { value: '',           label: 'Tous les statuts' },
-    { value: 'EN_ATTENTE', label: 'En attente' },
-    { value: 'VALIDE',     label: 'Validé' },
-    { value: 'REJETE',     label: 'Rejeté' },
-  ];
 
-  // ── Lifecycle ─────────────────────────────────────────────────────────────
+  // ═══════════════════════════════════════════════════════════════════════════
+  //  LIFECYCLE
+  // ═══════════════════════════════════════════════════════════════════════════
 
   ngOnInit(): void {
+    this.loadGeodata();
     this.setupSearch();
     this.loadActes();
   }
@@ -83,7 +103,138 @@ export class ValidBirthListComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  // ── Chargement ────────────────────────────────────────────────────────────
+  // ═══════════════════════════════════════════════════════════════════════════
+  //  GÉOGRAPHIE — cascade Pays → Région → Préfecture → Commune
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  private loadGeodata(): void {
+    this.loadingGeo = true;
+    this.cdr.markForCheck();
+
+    // Pays : Guinée en tête, puis tri alphabétique
+    this.geodata.getAllPays()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(list => {
+        const guinea = list.find(p => p.code === CODE_GUINEE);
+        const others = list
+          .filter(p => p.code !== CODE_GUINEE)
+          .sort((a, b) => a.nom.localeCompare(b.nom, 'fr'));
+        this.pays = guinea ? [guinea, ...others] : others;
+        this.cdr.markForCheck();
+      });
+
+    // Régions Guinée
+    this.geodata.getAllRegions()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(list => {
+        this.regions    = list.sort((a, b) => a.nom.localeCompare(b.nom, 'fr'));
+        this.loadingGeo = false;
+        this.cdr.markForCheck();
+      });
+  }
+
+  /** Pays sélectionné = Guinée ? */
+  get isGuinea(): boolean { return this.filterPays === CODE_GUINEE; }
+
+  /** Nom du pays sélectionné (pour l'affichage dans les chips actifs) */
+  get paysNom(): string {
+    return this.pays.find(p => p.code === this.filterPays)?.nom ?? this.filterPays;
+  }
+
+  onPaysChange(): void {
+    // Réinitialise toute la cascade downstream
+    this.selectedRegionCode  = '';
+    this.filterRegion        = '';
+    this.selectedPrefCode    = '';
+    this.filterPrefecture    = '';
+    this.selectedCommuneCode = '';
+    this.filterCommune       = '';
+    this.filterVille         = '';
+    this.prefectures         = [];
+    this.communes            = [];
+    this.villes              = [];
+
+    if (!this.isGuinea && this.filterPays) {
+      // Charge les villes du pays étranger
+      this.geodata.getVillesByPays(this.filterPays)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe(v => {
+          this.villes = v.sort((a, b) => a.nom.localeCompare(b.nom, 'fr'));
+          this.cdr.markForCheck();
+        });
+    }
+    this.currentPage = 0;
+    this.loadActes();
+  }
+
+  onRegionChange(): void {
+    // Réinitialise préfecture + commune
+    this.selectedPrefCode    = '';
+    this.filterPrefecture    = '';
+    this.selectedCommuneCode = '';
+    this.filterCommune       = '';
+    this.prefectures         = [];
+    this.communes            = [];
+
+    if (this.selectedRegionCode) {
+      const r = this.regions.find(x => x.code === this.selectedRegionCode);
+      this.filterRegion = r?.nom ?? '';
+      this.geodata.getPrefecturesByRegion(this.selectedRegionCode)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe(list => {
+          this.prefectures = list.sort((a, b) => a.nom.localeCompare(b.nom, 'fr'));
+          this.cdr.markForCheck();
+        });
+    } else {
+      this.filterRegion = '';
+    }
+    this.currentPage = 0;
+    this.loadActes();
+  }
+
+  onPrefectureChange(): void {
+    // Réinitialise commune
+    this.selectedCommuneCode = '';
+    this.filterCommune       = '';
+    this.communes            = [];
+
+    if (this.selectedPrefCode) {
+      const p = this.prefectures.find(x => x.code === this.selectedPrefCode);
+      this.filterPrefecture = p?.nom ?? '';
+      this.geodata.getCommunesByPrefecture(this.selectedPrefCode)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe(list => {
+          this.communes = list.sort((a, b) => a.nom.localeCompare(b.nom, 'fr'));
+          this.cdr.markForCheck();
+        });
+    } else {
+      this.filterPrefecture = '';
+    }
+    this.currentPage = 0;
+    this.loadActes();
+  }
+
+  onCommuneChange(): void {
+    if (this.selectedCommuneCode) {
+      const c = this.communes.find(x => x.code === this.selectedCommuneCode);
+      this.filterCommune = c?.nom ?? '';
+    } else {
+      this.filterCommune = '';
+    }
+    this.currentPage = 0;
+    this.loadActes();
+  }
+
+  onVilleChange(): void {
+    // Pour les pays étrangers : ville saisie → passe comme filterRegion (champ le plus large)
+    this.filterRegion = this.filterVille;
+    this.currentPage  = 0;
+    this.loadActes();
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  //  CHARGEMENT ACTES
+  // ═══════════════════════════════════════════════════════════════════════════
 
   private setupSearch(): void {
     this.searchControl.valueChanges
@@ -100,7 +251,7 @@ export class ValidBirthListComponent implements OnInit, OnDestroy {
     this.cdr.markForCheck();
 
     this.service.getAll({
-      statut:     this.selectedStatut || undefined,
+      statut:     this.selectedStatut   || undefined,
       region:     this.filterRegion     || undefined,
       prefecture: this.filterPrefecture || undefined,
       commune:    this.filterCommune    || undefined,
@@ -124,7 +275,9 @@ export class ValidBirthListComponent implements OnInit, OnDestroy {
       });
   }
 
-  // ── Filtres ───────────────────────────────────────────────────────────────
+  // ═══════════════════════════════════════════════════════════════════════════
+  //  FILTRES
+  // ═══════════════════════════════════════════════════════════════════════════
 
   onFilterChange(): void {
     this.currentPage = 0;
@@ -132,18 +285,33 @@ export class ValidBirthListComponent implements OnInit, OnDestroy {
   }
 
   clearFilters(): void {
-    this.selectedStatut   = '';
-    this.filterRegion     = '';
-    this.filterPrefecture = '';
-    this.filterCommune    = '';
+    this.selectedStatut      = '';
+    // Cascade geo
+    this.filterPays          = CODE_GUINEE;
+    this.selectedRegionCode  = '';
+    this.filterRegion        = '';
+    this.selectedPrefCode    = '';
+    this.filterPrefecture    = '';
+    this.selectedCommuneCode = '';
+    this.filterCommune       = '';
+    this.filterVille         = '';
+    this.prefectures         = [];
+    this.communes            = [];
+    this.villes              = [];
     this.searchControl.setValue('', { emitEvent: false });
-    this.currentPage = 0;
+    this.currentPage         = 0;
     this.loadActes();
   }
 
   get hasActiveFilters(): boolean {
-    return !!(this.selectedStatut || this.filterRegion ||
-              this.filterPrefecture || this.filterCommune);
+    return !!(
+      this.selectedStatut  ||
+      this.filterRegion    ||
+      this.filterPrefecture||
+      this.filterCommune   ||
+      this.filterVille     ||
+      this.searchControl.value
+    );
   }
 
   // ── Pagination ────────────────────────────────────────────────────────────
@@ -154,11 +322,12 @@ export class ValidBirthListComponent implements OnInit, OnDestroy {
     this.loadActes();
   }
 
-  // ── Actions ───────────────────────────────────────────────────────────────
+  // ═══════════════════════════════════════════════════════════════════════════
+  //  ACTIONS VALIDATION
+  // ═══════════════════════════════════════════════════════════════════════════
 
   valider(acte: ValidBirth): void {
     if (acte.statut !== 'EN_ATTENTE') return;
-
     this.service.valider(acte.id)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
@@ -172,14 +341,12 @@ export class ValidBirthListComponent implements OnInit, OnDestroy {
 
   openRejectDialog(acte: ValidBirth): void {
     if (acte.statut !== 'EN_ATTENTE') return;
-
     const ref = this.dialog.open(RejectDialogComponent, {
-      width: '520px',
+      width: '480px',
       maxWidth: '95vw',
       data: { acte },
       disableClose: true,
     });
-
     ref.afterClosed().subscribe((motif: string | undefined) => {
       if (!motif) return;
       this.rejeter(acte, motif);
@@ -200,7 +367,6 @@ export class ValidBirthListComponent implements OnInit, OnDestroy {
 
   corriger(acte: ValidBirth): void {
     if (acte.statut !== 'REJETE') return;
-
     this.service.corriger(acte.id)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
@@ -212,40 +378,38 @@ export class ValidBirthListComponent implements OnInit, OnDestroy {
       });
   }
 
-  // ── Permissions ───────────────────────────────────────────────────────────
+  // ═══════════════════════════════════════════════════════════════════════════
+  //  PERMISSIONS RBAC
+  // ═══════════════════════════════════════════════════════════════════════════
 
   get canValidate(): boolean {
     return this.authService.roles?.includes('CAN_VALIDATE_BIRTH') ?? false;
   }
-
   get canReject(): boolean {
     return this.authService.roles?.includes('CAN_REJECT_BIRTH') ?? false;
   }
-
   get canCorrect(): boolean {
     return this.authService.roles?.includes('CAN_SAISIR_NAISSANCE') ?? false;
   }
-
   get showRegionFilter(): boolean {
     return this.authService.isCentral;
   }
-
   get showPrefectureFilter(): boolean {
     return this.authService.isCentral || this.authService.isRegional;
   }
-
   get showCommuneFilter(): boolean {
     return this.authService.isCentral ||
            this.authService.isRegional ||
            this.authService.isPrefectoral;
   }
 
-  // ── Filtrage par statut (depuis les KPI cards) ────────────────────────────
+  // ═══════════════════════════════════════════════════════════════════════════
+  //  FILTRAGE KPI (click sur carte)
+  // ═══════════════════════════════════════════════════════════════════════════
 
   filterByStatut(statut: ValidationStatut): void {
-    // Bascule : re-cliquer sur la même carte retire le filtre
     this.selectedStatut = this.selectedStatut === statut ? '' : statut;
-    this.currentPage = 0;
+    this.currentPage    = 0;
     this.loadActes();
   }
 
@@ -255,41 +419,37 @@ export class ValidBirthListComponent implements OnInit, OnDestroy {
       this.filterRegion,
       this.filterPrefecture,
       this.filterCommune,
+      this.filterVille,
+      this.searchControl.value,
     ].filter(Boolean).length;
   }
 
-  // ── Helpers affichage ─────────────────────────────────────────────────────
+  // ═══════════════════════════════════════════════════════════════════════════
+  //  HELPERS AFFICHAGE
+  // ═══════════════════════════════════════════════════════════════════════════
 
   getNomEnfant(acte: ValidBirth): string {
-    const parts = [acte.prenoms, acte.nom].filter(Boolean);
-    return parts.join(' ') || '—';
+    return [acte.prenoms, acte.nom].filter(Boolean).join(' ') || '—';
   }
 
   getLocalisation(acte: ValidBirth): string {
-    return [acte.commune, acte.prefecture, acte.region]
-      .filter(Boolean).join(', ') || '—';
+    return [acte.commune, acte.prefecture, acte.region].filter(Boolean).join(', ') || '—';
   }
 
-  /** Initiales de l'enfant pour l'avatar */
   getInitials(acte: ValidBirth): string {
-    const prenom = (acte.prenoms || '').trim().charAt(0).toUpperCase();
-    const nom    = (acte.nom    || '').trim().charAt(0).toUpperCase();
-    return prenom && nom ? prenom + nom : prenom || nom || '?';
+    const p = (acte.prenoms || '').trim().charAt(0).toUpperCase();
+    const n = (acte.nom    || '').trim().charAt(0).toUpperCase();
+    return p && n ? p + n : p || n || '?';
   }
 
-  /** Initiales de l'agent saisisseur */
   getAgentInitials(acte: ValidBirth): string {
-    const full = acte.agentNomComplet || acte.agentUsername || '';
+    const full  = acte.agentNomComplet || acte.agentUsername || '';
     const parts = full.trim().split(/\s+/);
-    if (parts.length >= 2) {
-      return (parts[0].charAt(0) + parts[1].charAt(0)).toUpperCase();
-    }
+    if (parts.length >= 2) return (parts[0].charAt(0) + parts[1].charAt(0)).toUpperCase();
     return full.charAt(0).toUpperCase() || '?';
   }
 
-  trackById(_: number, acte: ValidBirth): string {
-    return acte.id;
-  }
+  trackById(_: number, acte: ValidBirth): string { return acte.id; }
 
   private replaceActe(updated: ValidBirth): void {
     const idx = this.actes.findIndex(a => a.id === updated.id);
@@ -304,7 +464,6 @@ export class ValidBirthListComponent implements OnInit, OnDestroy {
   get statsValide():    number { return this.actes.filter(a => a.statut === 'VALIDE').length; }
   get statsRejete():   number  { return this.actes.filter(a => a.statut === 'REJETE').length; }
 
-  // ── Helpers template (évite l'indexation directe du Record) ──────────────
   getStatutLabel(statut: string): string { return STATUT_LABELS[statut] ?? statut; }
   getStatutColor(statut: string): string { return STATUT_COLORS[statut] ?? '#6b7280'; }
   getStatutIcon(statut: string): string  { return STATUT_ICONS[statut]  ?? 'help'; }

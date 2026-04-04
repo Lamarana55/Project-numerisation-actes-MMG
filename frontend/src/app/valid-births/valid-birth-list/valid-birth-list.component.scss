@@ -49,58 +49,63 @@ $radius-sm: 8px;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-//  PAGE HEADER (bandeau supérieur)
+//  PAGE HEADER  (carte arrondie — même style que page-header de user-list)
 // ═══════════════════════════════════════════════════════════════════════════════
 .vb-page-header {
   background: linear-gradient(135deg, #004d26 0%, #006633 55%, #00853F 100%);
-  padding: 0 32px;
-  box-shadow: 0 2px 8px rgba(0,0,0,.18);
+  border-radius: 18px;
+  padding: 24px 28px;
+  box-shadow: 0 8px 28px rgba(0,133,63,.28);
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 4px;  // vb-content a déjà son gap
 }
 
-.vb-page-header-inner {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 18px 0;
+// Cercles décoratifs
+.header-deco {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255,255,255,.07);
+  pointer-events: none;
 }
+.header-deco--1 { width: 260px; height: 260px; top: -80px;  right: -60px; }
+.header-deco--2 { width: 140px; height: 140px; bottom: -50px; left: 40px; }
 
 .vb-breadcrumb {
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
   font-size: 12px;
-  color: rgba(255,255,255,.65);
+  color: rgba(255,255,255,.6);
 
   .breadcrumb-home {
-    font-size: 15px;
-    width: 15px;
-    height: 15px;
-    color: rgba(255,255,255,.65);
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+    color: rgba(255,255,255,.6);
   }
-
-  .breadcrumb-sep { opacity: .5; }
-
-  .breadcrumb-current {
-    color: rgba(255,255,255,.9);
-    font-weight: 500;
-  }
+  .breadcrumb-sep    { opacity: .4; }
+  .breadcrumb-current { color: rgba(255,255,255,.85); font-weight: 500; }
 }
 
 .vb-title-row {
   display: flex;
   align-items: center;
   gap: 16px;
+  flex-wrap: wrap;
 }
 
 .vb-title-icon-wrap {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
-  background: rgba(255,255,255,.15);
+  width: 52px;
+  height: 52px;
+  border-radius: 13px;
+  background: rgba(255,255,255,.16);
+  border: 1.5px solid rgba(255,255,255,.25);
+  backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
-  backdrop-filter: blur(4px);
   flex-shrink: 0;
 
   mat-icon {
@@ -111,37 +116,71 @@ $radius-sm: 8px;
   }
 }
 
+.vb-title-text { flex: 1; min-width: 0; }
+
 .vb-page-title {
   margin: 0;
   font-size: 20px;
-  font-weight: 700;
+  font-weight: 800;
   color: #fff;
   line-height: 1.2;
+  letter-spacing: -.2px;
 }
 
 .vb-page-desc {
-  margin: 3px 0 0;
+  margin: 4px 0 0;
   font-size: 12px;
   color: rgba(255,255,255,.65);
 }
 
-.vb-refresh-btn {
-  margin-left: auto;
-  color: rgba(255,255,255,.8) !important;
+// Stat pills dans le header
+.header-stats {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
 
-  &:hover { color: #fff !important; background: rgba(255,255,255,.1) !important; }
+.header-stat-pill {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255,255,255,.14);
+  border: 1px solid rgba(255,255,255,.22);
+  border-radius: 20px;
+  padding: 5px 13px;
+  font-size: .78rem;
+  font-weight: 600;
+  color: rgba(255,255,255,.9);
+  backdrop-filter: blur(4px);
+  white-space: nowrap;
+
+  mat-icon { font-size: .9rem; width: .9rem; height: .9rem; }
+
+  &--green {
+    background: rgba(0,0,0,.15);
+    border-color: rgba(255,255,255,.15);
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-//  ZONE CONTENU
+//  ZONE CONTENU  (header + cards dans le même flux)
 // ═══════════════════════════════════════════════════════════════════════════════
 .vb-content {
   flex: 1;
   max-width: 1400px;
   width: 100%;
   margin: 0 auto;
-  padding: 24px 32px 40px;
+  padding: 20px 24px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
+
+// Supprime les margin-bottom inline sur kpi-grid et filter-panel
+// (géré par le gap du flex parent)
+.vb-kpi-grid    { margin-bottom: 0; }
+.vb-filter-panel { margin-bottom: 0; }
 
 // ═══════════════════════════════════════════════════════════════════════════════
 //  GRILLE KPI  (taille réduite)
@@ -529,6 +568,50 @@ $radius-sm: 8px;
   flex-shrink: 0;
   pointer-events: none;
   transition: transform .2s, color .2s;
+}
+
+// ── Segment taille medium (pays, ville) ────────────────────────────────────────
+.vb-filter-seg--md { min-width: 190px; }
+
+// ── État actif du select (valeur sélectionnée) ────────────────────────────────
+.vb-select-wrap.sel-active,
+.vb-search-wrap.sel-active {
+  border-color: $green !important;
+  background: #f0fdf4;
+
+  .fsel-ico, mat-icon { color: $green; }
+}
+
+// ── État désactivé (parent non sélectionné) ───────────────────────────────────
+.vb-select-wrap.sel-disabled {
+  opacity: .45;
+  cursor: not-allowed;
+
+  select { cursor: not-allowed; }
+}
+
+// ── État chargement géo ────────────────────────────────────────────────────────
+.vb-select-wrap.loading-geo {
+  opacity: .6;
+  pointer-events: none;
+}
+
+// ── Flèche cascade entre segments ─────────────────────────────────────────────
+.cascade-arrow {
+  font-size: 1rem;
+  font-weight: 700;
+  color: $green;
+  margin-left: 2px;
+  opacity: .7;
+}
+
+// ── Indice sous un select désactivé ───────────────────────────────────────────
+.seg-hint {
+  font-size: .67rem;
+  color: $text-muted;
+  font-style: italic;
+  margin-top: 1px;
+  display: block;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -1046,8 +1129,10 @@ $radius-sm: 8px;
 }
 
 @media (max-width: 768px) {
-  .vb-page-header { padding: 0 16px; }
-  .vb-content     { padding: 16px 16px 32px; }
+  .vb-page-header { padding: 18px 18px; border-radius: 12px; }
+  .vb-content     { padding: 14px 14px 32px; gap: 14px; }
+  .vb-page-title  { font-size: 16px; }
+  .header-stats   { display: none; }
 
   .vb-kpi-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
   .kpi-value   { font-size: 18px; }
