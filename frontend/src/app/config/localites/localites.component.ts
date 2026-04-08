@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Subject, Observable } from 'rxjs';
 import { takeUntil, finalize } from 'rxjs/operators';
 import { ToastService } from '../../services/toast.service';
+import { GeodataService } from '../../services/geodata.service';
 import { LocalitesService } from './localites.service';
 import { HierarchyLevel } from './localites.models';
 
@@ -52,6 +53,7 @@ export class LocalitesComponent implements OnInit, OnDestroy {
 
   constructor(
     private service: LocalitesService,
+    private geodataService: GeodataService,
     private fb: FormBuilder,
     private toast: ToastService
   ) {
@@ -116,6 +118,7 @@ export class LocalitesComponent implements OnInit, OnDestroy {
   /* ══ CHARGEMENT ════════════════════════ */
 
   loadData(): void {
+    this.geodataService.clearCache();
     this.loading = true;
     this.error = null;
     this.service.loadAdminHierarchy()
@@ -127,6 +130,7 @@ export class LocalitesComponent implements OnInit, OnDestroy {
   }
 
   private loadWorldData(): void {
+    this.geodataService.clearCache();
     this.loading = true;
     this.error = null;
     this.service.loadWorldHierarchy()
