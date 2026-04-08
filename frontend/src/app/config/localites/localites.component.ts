@@ -285,7 +285,14 @@ export class LocalitesComponent implements OnInit, OnDestroy {
 
   private performUpdate(data: any): void {
     const { type, data: nd } = this.selectedNode!;
-    const op = this.getUpdateOp(type, nd.id, data);
+    const payload = { ...data };
+    switch (type) {
+      case 'prefecture': payload.regionCode    = nd.codeRegion;     break;
+      case 'commune':    payload.prefectureCode = nd.codePrefecture; break;
+      case 'quartier':   payload.communeCode    = nd.codeCommune;    break;
+      case 'ville':      payload.paysCode       = nd.codePays;       break;
+    }
+    const op = this.getUpdateOp(type, nd.id, payload);
     if (!op) return;
     this.loading = true;
     op.pipe(finalize(() => this.loading = false), takeUntil(this.destroy$))

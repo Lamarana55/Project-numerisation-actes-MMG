@@ -95,6 +95,57 @@ public class GeoDataController {
         return ResponseEntity.ok(geoDataService.getVillesByPaysCode(codePays));
     }
 
+    // ─── Régions ────────────────────────────────────────────────────────────
+
+    @PutMapping("/regions/{id}")
+    @Operation(summary = "Modifier une région")
+    public ResponseEntity<RegionDTO> updateRegion(
+            @PathVariable UUID id,
+            @Valid @RequestBody CreateRegionRequest request) {
+        return ResponseEntity.ok(geoDataService.updateRegion(id, request));
+    }
+
+    @DeleteMapping("/regions/{id}")
+    @Operation(summary = "Supprimer une région")
+    public ResponseEntity<Void> deleteRegion(@PathVariable UUID id) {
+        geoDataService.deleteRegion(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    // ─── Préfectures ────────────────────────────────────────────────────────
+
+    @PutMapping("/prefectures/{id}")
+    @Operation(summary = "Modifier une préfecture")
+    public ResponseEntity<PrefectureDTO> updatePrefecture(
+            @PathVariable UUID id,
+            @Valid @RequestBody CreatePrefectureRequest request) {
+        return ResponseEntity.ok(geoDataService.updatePrefecture(id, request));
+    }
+
+    @DeleteMapping("/prefectures/{id}")
+    @Operation(summary = "Supprimer une préfecture")
+    public ResponseEntity<Void> deletePrefecture(@PathVariable UUID id) {
+        geoDataService.deletePrefecture(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    // ─── Pays ───────────────────────────────────────────────────────────────
+
+    @PutMapping("/pays/{id}")
+    @Operation(summary = "Modifier un pays")
+    public ResponseEntity<PaysDTO> updatePays(
+            @PathVariable UUID id,
+            @Valid @RequestBody CreateRegionRequest request) {
+        return ResponseEntity.ok(geoDataService.updatePays(id, request));
+    }
+
+    @DeleteMapping("/pays/{id}")
+    @Operation(summary = "Supprimer un pays")
+    public ResponseEntity<Void> deletePays(@PathVariable UUID id) {
+        geoDataService.deletePays(id);
+        return ResponseEntity.noContent().build();
+    }
+
     // ─── Communes ───────────────────────────────────────────────────────────
 
     @PostMapping("/communes")

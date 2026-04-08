@@ -104,6 +104,65 @@ public class GeoDataService {
                 .collect(Collectors.toList());
     }
 
+    // ========== Opérations CRUD Région ==========
+
+    @Transactional
+    public RegionDTO updateRegion(UUID id, CreateRegionRequest request) {
+        log.info("Mise à jour de la région: {}", id);
+        Region region = regionRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Région non trouvée: " + id));
+        region.setCode(request.getCode());
+        region.setNom(request.getNom());
+        return toRegionDTO(regionRepository.save(region));
+    }
+
+    @Transactional
+    public void deleteRegion(UUID id) {
+        log.info("Suppression de la région: {}", id);
+        regionRepository.deleteById(id);
+    }
+
+    // ========== Opérations CRUD Préfecture ==========
+
+    @Transactional
+    public PrefectureDTO updatePrefecture(UUID id, CreatePrefectureRequest request) {
+        log.info("Mise à jour de la préfecture: {}", id);
+        Prefecture prefecture = prefectureRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Préfecture non trouvée: " + id));
+        prefecture.setCode(request.getCode());
+        prefecture.setNom(request.getNom());
+        if (request.getRegionCode() != null && !request.getRegionCode().isBlank()) {
+            Region region = regionRepository.findByCode(request.getRegionCode())
+                    .orElseThrow(() -> new RuntimeException("Région non trouvée: " + request.getRegionCode()));
+            prefecture.setRegion(region);
+        }
+        return toPrefectureDTO(prefectureRepository.save(prefecture));
+    }
+
+    @Transactional
+    public void deletePrefecture(UUID id) {
+        log.info("Suppression de la préfecture: {}", id);
+        prefectureRepository.deleteById(id);
+    }
+
+    // ========== Opérations CRUD Pays ==========
+
+    @Transactional
+    public PaysDTO updatePays(UUID id, CreateRegionRequest request) {
+        log.info("Mise à jour du pays: {}", id);
+        Pays pays = paysRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Pays non trouvé: " + id));
+        pays.setCode(request.getCode());
+        pays.setNom(request.getNom());
+        return toPaysDTO(paysRepository.save(pays));
+    }
+
+    @Transactional
+    public void deletePays(UUID id) {
+        log.info("Suppression du pays: {}", id);
+        paysRepository.deleteById(id);
+    }
+
     // ========== Opérations CRUD Commune ==========
 
     @Transactional

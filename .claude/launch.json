@@ -5,6 +5,7 @@
       "name": "Frontend (Angular)",
       "runtimeExecutable": "/Users/lamarana55/.nvm/versions/node/v21.4.0/bin/npm",
       "runtimeArgs": ["start", "--", "--port=4201", "--host=0.0.0.0"],
+      "env": { "PATH": "/Users/lamarana55/.nvm/versions/node/v21.4.0/bin:/usr/local/bin:/usr/bin:/bin" },
       "cwd": "frontend",
       "port": 4201
     },
