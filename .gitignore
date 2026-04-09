@@ -58,3 +58,4 @@ Thumbs.db
 *.pem
 *.crt
 application-secret.properties
+.claude/
