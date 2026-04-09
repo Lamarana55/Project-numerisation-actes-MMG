@@ -6,6 +6,7 @@
 *.nar
 hs_err_pid*
 *.sh
+!scripts/*.sh
 
 # Project-level ignores
 /target/
