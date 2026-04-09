@@ -6,6 +6,7 @@
 *.nar
 hs_err_pid*
 *.sh
+!scripts/*.sh
 
 # Project-level ignores
 /target/
@@ -58,3 +59,5 @@ Thumbs.db
 *.pem
 *.crt
 application-secret.properties
+.claude/
+.claude/*
