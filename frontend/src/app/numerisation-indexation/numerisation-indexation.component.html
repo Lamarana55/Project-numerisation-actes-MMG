@@ -32,14 +32,19 @@
         <!-- ── Colonne formulaire ─────────────────────────────────────────── -->
         <div class="col-md-6 data-column">
           <div class="data-sections-container">
+            <mat-accordion multi class="form-accordion">
 
-            <!-- ── Section Personne Concernée ── -->
-            <div class="data-section">
-              <div class="section-title">👤 Personne Concernée</div>
-              <div class="section-body">
+              <!-- ═══════════════════════════════════════════════════════════════
+                   SECTION 1 — PERSONNE CONCERNÉE
+                   ═══════════════════════════════════════════════════════════════ -->
+              <mat-expansion-panel expanded class="panel-person">
+                <mat-expansion-panel-header>
+                  <mat-panel-title>
+                    <mat-icon class="panel-icon person">person</mat-icon>
+                    Personne Concernée
+                  </mat-panel-title>
+                </mat-expansion-panel-header>
 
-                <!-- ▸ Sous-partie 1 : Informations sur la personne -->
-                <div class="subsection-header blue">🪪 Informations sur la personne</div>
                 <div class="row">
                   <div class="col-md-6">
                     <div class="data-item">
@@ -54,13 +59,15 @@
                     </div>
                     <div class="data-item">
                       <span class="data-label">Date naissance :</span>
-                      <input *ngIf="isEditing" type="text" [ngModel]="data.date_de_nais_membre"
-                        (ngModelChange)="data.date_de_nais_membre = $event"
-                        (input)="formatDateOnInput($event, 'date_de_nais_membre')"
-                        (keydown)="handleDateKeydown($event, 'date_de_nais_membre')"
-                        placeholder="JJ/MM/AAAA" maxlength="10" class="form-control"
-                        (blur)="validateMemberDate()">
                       <span class="data-value" *ngIf="!isEditing">{{ data.date_de_nais_membre || 'Non renseignée' }}</span>
+                      <mat-form-field *ngIf="isEditing" appearance="outline" class="date-field">
+                        <input matInput [matDatepicker]="pickerNaisMembre"
+                               [value]="stringToDate(data.date_de_nais_membre)"
+                               (dateChange)="onDateChange($event, 'date_de_nais_membre')"
+                               placeholder="JJ/MM/AAAA">
+                        <mat-datepicker-toggle matIconSuffix [for]="pickerNaisMembre"></mat-datepicker-toggle>
+                        <mat-datepicker #pickerNaisMembre></mat-datepicker>
+                      </mat-form-field>
                     </div>
                     <div class="data-item">
                       <span class="data-label">Heure naissance :</span>
@@ -105,11 +112,19 @@
                     </div>
                   </div>
                 </div>
+              </mat-expansion-panel>
 
-                <div class="subsection-divider"></div>
+              <!-- ═══════════════════════════════════════════════════════════════
+                   SECTION 2 — INFORMATIONS SUR L'ACTE
+                   ═══════════════════════════════════════════════════════════════ -->
+              <mat-expansion-panel expanded class="panel-acte">
+                <mat-expansion-panel-header>
+                  <mat-panel-title>
+                    <mat-icon class="panel-icon acte">description</mat-icon>
+                    Informations sur l'Acte
+                  </mat-panel-title>
+                </mat-expansion-panel-header>
 
-                <!-- ▸ Sous-partie 2 : Informations sur l'acte -->
-                <div class="subsection-header green">📄 Informations sur l'acte</div>
                 <div class="row">
                   <div class="col-md-6">
                     <div class="data-item">
@@ -136,21 +151,31 @@
                     </div>
                     <div class="data-item">
                       <span class="data-label">Date des faits :</span>
-                      <input *ngIf="isEditing" type="text" [ngModel]="data.date_etablissement_acte"
-                        (ngModelChange)="data.date_etablissement_acte = $event"
-                        (input)="formatDateOnInput($event, 'date_etablissement_acte')"
-                        (keydown)="handleDateKeydown($event, 'date_etablissement_acte')"
-                        placeholder="JJ/MM/AAAA" maxlength="10" class="form-control"
-                        (blur)="validateFactDate()">
                       <span class="data-value" *ngIf="!isEditing">{{ data.date_etablissement_acte || 'Non renseignée' }}</span>
+                      <mat-form-field *ngIf="isEditing" appearance="outline" class="date-field">
+                        <input matInput [matDatepicker]="pickerFaits"
+                               [value]="stringToDate(data.date_etablissement_acte)"
+                               (dateChange)="onDateChange($event, 'date_etablissement_acte')"
+                               placeholder="JJ/MM/AAAA">
+                        <mat-datepicker-toggle matIconSuffix [for]="pickerFaits"></mat-datepicker-toggle>
+                        <mat-datepicker #pickerFaits></mat-datepicker>
+                      </mat-form-field>
                     </div>
                   </div>
                 </div>
+              </mat-expansion-panel>
 
-                <div class="subsection-divider"></div>
+              <!-- ═══════════════════════════════════════════════════════════════
+                   SECTION 3 — LIEU DE NAISSANCE (Enfant)
+                   ═══════════════════════════════════════════════════════════════ -->
+              <mat-expansion-panel expanded class="panel-lieu">
+                <mat-expansion-panel-header>
+                  <mat-panel-title>
+                    <mat-icon class="panel-icon lieu">place</mat-icon>
+                    Lieu de Naissance
+                  </mat-panel-title>
+                </mat-expansion-panel-header>
 
-                <!-- ▸ Sous-partie 3 : Lieu de naissance -->
-                <div class="subsection-header amber">📍 Lieu de naissance</div>
                 <div class="row">
                   <div class="col-md-6">
                     <div class="data-item">
@@ -162,6 +187,8 @@
                         <option *ngFor="let p of allPays" [value]="p.code">{{ p.nom }}</option>
                       </select>
                     </div>
+
+                    <!-- Guinée → Région / Préfecture -->
                     <div class="data-item" *ngIf="isGuinee()">
                       <span class="data-label">Région :</span>
                       <span class="data-value" *ngIf="!isEditing">{{ getNomRegion(data.region_naissance!) }}</span>
@@ -177,27 +204,36 @@
                       <select *ngIf="isEditing" [(ngModel)]="data.prefecture_naissance" class="form-control"
                         [disabled]="!data.region_naissance || isLoadingPrefecturesNaissance"
                         (change)="onPrefectureNaissanceChange(data.prefecture_naissance!)">
-                        <option value="">{{ isLoadingPrefecturesNaissance ? '⏳ Chargement...' : '-- Sélectionner --' }}</option>
+                        <option value="">{{ isLoadingPrefecturesNaissance ? 'Chargement...' : '-- Sélectionner --' }}</option>
                         <option *ngFor="let p of prefecturesNaissance" [value]="p.code">{{ p.nom }}</option>
                       </select>
                     </div>
+
+                    <!-- Étranger → Ville -->
+                    <div class="data-item" *ngIf="!isGuinee()">
+                      <span class="data-label">Ville :</span>
+                      <span class="data-value" *ngIf="!isEditing">{{ data.ville_naissance || '—' }}</span>
+                      <input *ngIf="isEditing" [(ngModel)]="data.ville_naissance" class="form-control"
+                        placeholder="Saisir la ville de naissance">
+                    </div>
                   </div>
                   <div class="col-md-6">
+                    <!-- Guinée → Commune / Quartier -->
                     <div class="data-item" *ngIf="isGuinee()">
                       <span class="data-label">Commune :</span>
                       <span class="data-value" *ngIf="!isEditing">{{ getNomCommune(data.commune_de_nais!, communesNaissance) }}</span>
                       <select *ngIf="isEditing" [(ngModel)]="data.commune_de_nais" class="form-control"
                         [disabled]="!data.prefecture_naissance || isLoadingCommunesNaissance"
                         (change)="onCommuneNaissanceChange(data.commune_de_nais!)">
-                        <option value="">{{ isLoadingCommunesNaissance ? '⏳ Chargement...' : '-- Sélectionner --' }}</option>
+                        <option value="">{{ isLoadingCommunesNaissance ? 'Chargement...' : '-- Sélectionner --' }}</option>
                         <option *ngFor="let c of communesNaissance" [value]="c.code">{{ c.nom }}</option>
                       </select>
                     </div>
                     <div class="data-item" *ngIf="isGuinee()">
                       <span class="data-label">Quartier :</span>
                       <span class="data-value" *ngIf="!isEditing">{{ getNomQuartier(data.district_de_nais!, quartiersNaissance) }}</span>
-                      <div *ngIf="isEditing && isLoadingQuartiersNaissance" class="form-control">
-                        <span style="color:#4a8a4e;font-size:0.82rem">⏳ Chargement...</span>
+                      <div *ngIf="isEditing && isLoadingQuartiersNaissance" class="form-control loading-indicator">
+                        Chargement...
                       </div>
                       <select *ngIf="isEditing && !isLoadingQuartiersNaissance"
                         [(ngModel)]="data.district_de_nais" class="form-control"
@@ -205,25 +241,26 @@
                         <option value="">-- Sélectionner --</option>
                         <option *ngFor="let q of quartiersNaissance" [value]="q.code">{{ q.nom }}</option>
                       </select>
-                      <small *ngIf="isEditing && !isLoadingQuartiersNaissance && !data.commune_de_nais"
-                        class="text-muted" style="display:block;margin-top:3px">
-                        Sélectionnez d'abord une commune
-                      </small>
                     </div>
                   </div>
                 </div>
+              </mat-expansion-panel>
 
-              </div>
-            </div>
+              <!-- ═══════════════════════════════════════════════════════════════
+                   SECTION 4 — PÈRE
+                   ═══════════════════════════════════════════════════════════════ -->
+              <mat-expansion-panel class="panel-pere">
+                <mat-expansion-panel-header>
+                  <mat-panel-title>
+                    <mat-icon class="panel-icon pere">face</mat-icon>
+                    Informations du Père
+                  </mat-panel-title>
+                </mat-expansion-panel-header>
 
-            <!-- ── Section Parents ── -->
-            <div class="data-section">
-              <div class="section-title">👨‍👩‍👧‍👦 Informations des Parents</div>
-              <div class="section-body">
+                <!-- Identité père -->
+                <div class="subsection-header blue">Identité</div>
                 <div class="row">
-                  <!-- Père -->
                   <div class="col-md-6">
-                    <div class="subsection-header blue">👨 Père</div>
                     <div class="data-item">
                       <span class="data-label">Prénom :</span>
                       <span class="data-value" *ngIf="!isEditing">{{ data.prenoms_pere }}</span>
@@ -236,14 +273,18 @@
                     </div>
                     <div class="data-item">
                       <span class="data-label">Date naissance :</span>
-                      <input *ngIf="isEditing" type="text" [ngModel]="data.date_de_nais_pere"
-                        (ngModelChange)="data.date_de_nais_pere = $event"
-                        (input)="formatDateOnInput($event, 'date_de_nais_pere')"
-                        (keydown)="handleDateKeydown($event, 'date_de_nais_pere')"
-                        placeholder="JJ/MM/AAAA" maxlength="10" class="form-control"
-                        (blur)="validateParentDate('date_de_nais_pere')">
                       <span class="data-value" *ngIf="!isEditing">{{ data.date_de_nais_pere || 'Non renseignée' }}</span>
+                      <mat-form-field *ngIf="isEditing" appearance="outline" class="date-field">
+                        <input matInput [matDatepicker]="pickerNaisPere"
+                               [value]="stringToDate(data.date_de_nais_pere)"
+                               (dateChange)="onDateChange($event, 'date_de_nais_pere')"
+                               placeholder="JJ/MM/AAAA">
+                        <mat-datepicker-toggle matIconSuffix [for]="pickerNaisPere"></mat-datepicker-toggle>
+                        <mat-datepicker #pickerNaisPere></mat-datepicker>
+                      </mat-form-field>
                     </div>
+                  </div>
+                  <div class="col-md-6">
                     <div class="data-item">
                       <span class="data-label">Nationalité :</span>
                       <span class="data-value" *ngIf="!isEditing">{{ getNationalite(data.nationalite_pere!) }}</span>
@@ -260,10 +301,89 @@
                       </select>
                     </div>
                   </div>
+                </div>
 
-                  <!-- Mère -->
+                <div class="subsection-divider"></div>
+
+                <!-- Lieu de naissance père -->
+                <div class="subsection-header amber">Lieu de naissance</div>
+                <div class="row">
                   <div class="col-md-6">
-                    <div class="subsection-header blue">👩 Mère</div>
+                    <div class="data-item">
+                      <span class="data-label">Pays :</span>
+                      <span class="data-value" *ngIf="!isEditing">{{ getNomPays(data.pays_naissance_pere!) }}</span>
+                      <select *ngIf="isEditing" [(ngModel)]="data.pays_naissance_pere" class="form-control"
+                        (change)="onPaysNaissancePereChange(data.pays_naissance_pere!)">
+                        <option value="GN">Guinée</option>
+                        <option *ngFor="let p of allPays" [value]="p.code">{{ p.nom }}</option>
+                      </select>
+                    </div>
+                    <div class="data-item" *ngIf="isGuineePere()">
+                      <span class="data-label">Région :</span>
+                      <span class="data-value" *ngIf="!isEditing">{{ getNomRegion(data.region_naissance_pere!) }}</span>
+                      <select *ngIf="isEditing" [(ngModel)]="data.region_naissance_pere" class="form-control"
+                        (change)="onRegionNaissancePereChange(data.region_naissance_pere!)">
+                        <option value="">-- Sélectionner --</option>
+                        <option *ngFor="let r of allRegions" [value]="r.code">{{ r.nom }}</option>
+                      </select>
+                    </div>
+                    <div class="data-item" *ngIf="isGuineePere()">
+                      <span class="data-label">Préfecture :</span>
+                      <span class="data-value" *ngIf="!isEditing">{{ getNomPrefecture(data.prefecture_naissance_pere!, prefecturesNaissancePere) }}</span>
+                      <select *ngIf="isEditing" [(ngModel)]="data.prefecture_naissance_pere" class="form-control"
+                        [disabled]="!data.region_naissance_pere || isLoadingPrefecturesNaissancePere"
+                        (change)="onPrefectureNaissancePereChange(data.prefecture_naissance_pere!)">
+                        <option value="">{{ isLoadingPrefecturesNaissancePere ? 'Chargement...' : '-- Sélectionner --' }}</option>
+                        <option *ngFor="let p of prefecturesNaissancePere" [value]="p.code">{{ p.nom }}</option>
+                      </select>
+                    </div>
+                    <!-- Étranger → Ville -->
+                    <div class="data-item" *ngIf="!isGuineePere()">
+                      <span class="data-label">Ville :</span>
+                      <span class="data-value" *ngIf="!isEditing">{{ data.ville_naissance_pere || '—' }}</span>
+                      <input *ngIf="isEditing" [(ngModel)]="data.ville_naissance_pere" class="form-control"
+                        placeholder="Saisir la ville">
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="data-item" *ngIf="isGuineePere()">
+                      <span class="data-label">Commune :</span>
+                      <span class="data-value" *ngIf="!isEditing">{{ getNomCommune(data.commune_naissance_pere!, communesNaissancePere) }}</span>
+                      <select *ngIf="isEditing" [(ngModel)]="data.commune_naissance_pere" class="form-control"
+                        [disabled]="!data.prefecture_naissance_pere || isLoadingCommunesNaissancePere"
+                        (change)="onCommuneNaissancePereChange(data.commune_naissance_pere!)">
+                        <option value="">{{ isLoadingCommunesNaissancePere ? 'Chargement...' : '-- Sélectionner --' }}</option>
+                        <option *ngFor="let c of communesNaissancePere" [value]="c.code">{{ c.nom }}</option>
+                      </select>
+                    </div>
+                    <div class="data-item" *ngIf="isGuineePere()">
+                      <span class="data-label">Quartier :</span>
+                      <span class="data-value" *ngIf="!isEditing">{{ getNomQuartier(data.district_naissance_pere!, quartiersNaissancePere) }}</span>
+                      <select *ngIf="isEditing" [(ngModel)]="data.district_naissance_pere" class="form-control"
+                        [disabled]="!data.commune_naissance_pere || isLoadingQuartiersNaissancePere">
+                        <option value="">{{ isLoadingQuartiersNaissancePere ? 'Chargement...' : '-- Sélectionner --' }}</option>
+                        <option *ngFor="let q of quartiersNaissancePere" [value]="q.code">{{ q.nom }}</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </mat-expansion-panel>
+
+              <!-- ═══════════════════════════════════════════════════════════════
+                   SECTION 5 — MÈRE
+                   ═══════════════════════════════════════════════════════════════ -->
+              <mat-expansion-panel class="panel-mere">
+                <mat-expansion-panel-header>
+                  <mat-panel-title>
+                    <mat-icon class="panel-icon mere">face_3</mat-icon>
+                    Informations de la Mère
+                  </mat-panel-title>
+                </mat-expansion-panel-header>
+
+                <!-- Identité mère -->
+                <div class="subsection-header blue">Identité</div>
+                <div class="row">
+                  <div class="col-md-6">
                     <div class="data-item">
                       <span class="data-label">Prénom :</span>
                       <span class="data-value" *ngIf="!isEditing">{{ data.prenoms_mere }}</span>
@@ -276,14 +396,18 @@
                     </div>
                     <div class="data-item">
                       <span class="data-label">Date naissance :</span>
-                      <input *ngIf="isEditing" type="text" [ngModel]="data.date_de_nais_mere"
-                        (ngModelChange)="data.date_de_nais_mere = $event"
-                        (input)="formatDateOnInput($event, 'date_de_nais_mere')"
-                        (keydown)="handleDateKeydown($event, 'date_de_nais_mere')"
-                        placeholder="JJ/MM/AAAA" maxlength="10" class="form-control"
-                        (blur)="validateParentDate('date_de_nais_mere')">
                       <span class="data-value" *ngIf="!isEditing">{{ data.date_de_nais_mere || 'Non renseignée' }}</span>
+                      <mat-form-field *ngIf="isEditing" appearance="outline" class="date-field">
+                        <input matInput [matDatepicker]="pickerNaisMere"
+                               [value]="stringToDate(data.date_de_nais_mere)"
+                               (dateChange)="onDateChange($event, 'date_de_nais_mere')"
+                               placeholder="JJ/MM/AAAA">
+                        <mat-datepicker-toggle matIconSuffix [for]="pickerNaisMere"></mat-datepicker-toggle>
+                        <mat-datepicker #pickerNaisMere></mat-datepicker>
+                      </mat-form-field>
                     </div>
+                  </div>
+                  <div class="col-md-6">
                     <div class="data-item">
                       <span class="data-label">Nationalité :</span>
                       <span class="data-value" *ngIf="!isEditing">{{ getNationalite(data.nationalite_mere!) }}</span>
@@ -300,10 +424,78 @@
                       </select>
                     </div>
                   </div>
+                </div>
 
-                  <!-- Domicile pleine largeur -->
+                <div class="subsection-divider"></div>
+
+                <!-- Lieu de naissance mère -->
+                <div class="subsection-header amber">Lieu de naissance</div>
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="data-item">
+                      <span class="data-label">Pays :</span>
+                      <span class="data-value" *ngIf="!isEditing">{{ getNomPays(data.pays_naissance_mere!) }}</span>
+                      <select *ngIf="isEditing" [(ngModel)]="data.pays_naissance_mere" class="form-control"
+                        (change)="onPaysNaissanceMereChange(data.pays_naissance_mere!)">
+                        <option value="GN">Guinée</option>
+                        <option *ngFor="let p of allPays" [value]="p.code">{{ p.nom }}</option>
+                      </select>
+                    </div>
+                    <div class="data-item" *ngIf="isGuineeMere()">
+                      <span class="data-label">Région :</span>
+                      <span class="data-value" *ngIf="!isEditing">{{ getNomRegion(data.region_naissance_mere!) }}</span>
+                      <select *ngIf="isEditing" [(ngModel)]="data.region_naissance_mere" class="form-control"
+                        (change)="onRegionNaissanceMereChange(data.region_naissance_mere!)">
+                        <option value="">-- Sélectionner --</option>
+                        <option *ngFor="let r of allRegions" [value]="r.code">{{ r.nom }}</option>
+                      </select>
+                    </div>
+                    <div class="data-item" *ngIf="isGuineeMere()">
+                      <span class="data-label">Préfecture :</span>
+                      <span class="data-value" *ngIf="!isEditing">{{ getNomPrefecture(data.prefecture_naissance_mere!, prefecturesNaissanceMere) }}</span>
+                      <select *ngIf="isEditing" [(ngModel)]="data.prefecture_naissance_mere" class="form-control"
+                        [disabled]="!data.region_naissance_mere || isLoadingPrefecturesNaissanceMere"
+                        (change)="onPrefectureNaissanceMereChange(data.prefecture_naissance_mere!)">
+                        <option value="">{{ isLoadingPrefecturesNaissanceMere ? 'Chargement...' : '-- Sélectionner --' }}</option>
+                        <option *ngFor="let p of prefecturesNaissanceMere" [value]="p.code">{{ p.nom }}</option>
+                      </select>
+                    </div>
+                    <!-- Étranger → Ville -->
+                    <div class="data-item" *ngIf="!isGuineeMere()">
+                      <span class="data-label">Ville :</span>
+                      <span class="data-value" *ngIf="!isEditing">{{ data.ville_naissance_mere || '—' }}</span>
+                      <input *ngIf="isEditing" [(ngModel)]="data.ville_naissance_mere" class="form-control"
+                        placeholder="Saisir la ville">
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="data-item" *ngIf="isGuineeMere()">
+                      <span class="data-label">Commune :</span>
+                      <span class="data-value" *ngIf="!isEditing">{{ getNomCommune(data.commune_naissance_mere!, communesNaissanceMere) }}</span>
+                      <select *ngIf="isEditing" [(ngModel)]="data.commune_naissance_mere" class="form-control"
+                        [disabled]="!data.prefecture_naissance_mere || isLoadingCommunesNaissanceMere"
+                        (change)="onCommuneNaissanceMereChange(data.commune_naissance_mere!)">
+                        <option value="">{{ isLoadingCommunesNaissanceMere ? 'Chargement...' : '-- Sélectionner --' }}</option>
+                        <option *ngFor="let c of communesNaissanceMere" [value]="c.code">{{ c.nom }}</option>
+                      </select>
+                    </div>
+                    <div class="data-item" *ngIf="isGuineeMere()">
+                      <span class="data-label">Quartier :</span>
+                      <span class="data-value" *ngIf="!isEditing">{{ getNomQuartier(data.district_naissance_mere!, quartiersNaissanceMere) }}</span>
+                      <select *ngIf="isEditing" [(ngModel)]="data.district_naissance_mere" class="form-control"
+                        [disabled]="!data.commune_naissance_mere || isLoadingQuartiersNaissanceMere">
+                        <option value="">{{ isLoadingQuartiersNaissanceMere ? 'Chargement...' : '-- Sélectionner --' }}</option>
+                        <option *ngFor="let q of quartiersNaissanceMere" [value]="q.code">{{ q.nom }}</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Domicile pleine largeur -->
+                <div class="subsection-divider"></div>
+                <div class="row">
                   <div class="col-md-12">
-                    <div class="data-item" style="margin-top:6px">
+                    <div class="data-item">
                       <span class="data-label">Domicile des parents :</span>
                       <span class="data-value" *ngIf="!isEditing">{{ data.domicileParent }}</span>
                       <input *ngIf="isEditing" [(ngModel)]="data.domicileParent" class="form-control"
@@ -311,17 +503,23 @@
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
+              </mat-expansion-panel>
 
-            <!-- ── Section Déclarant & Officier ── -->
-            <div class="data-section">
-              <div class="section-title">📝 Déclarant & Officier</div>
-              <div class="section-body">
+              <!-- ═══════════════════════════════════════════════════════════════
+                   SECTION 6 — DÉCLARANT & OFFICIER
+                   ═══════════════════════════════════════════════════════════════ -->
+              <mat-expansion-panel class="panel-declarant">
+                <mat-expansion-panel-header>
+                  <mat-panel-title>
+                    <mat-icon class="panel-icon declarant">assignment_ind</mat-icon>
+                    Déclarant & Officier d'État Civil
+                  </mat-panel-title>
+                </mat-expansion-panel-header>
+
                 <div class="row">
                   <!-- Déclarant -->
                   <div class="col-md-6">
-                    <div class="subsection-header green">📋 Déclarant</div>
+                    <div class="subsection-header green">Déclarant</div>
                     <div class="data-item">
                       <span class="data-label">Prénom :</span>
                       <span class="data-value" *ngIf="!isEditing">{{ data.prenom_1_declarant }}</span>
@@ -333,14 +531,19 @@
                       <input *ngIf="isEditing" [(ngModel)]="data.nom_declarant" class="form-control">
                     </div>
                     <div class="data-item">
-                      <span class="data-label">Lien parenté :</span>
-                      <span class="data-value" *ngIf="!isEditing">{{ data.lien_de_prarente_avec_le_declarant }}</span>
-                      <input *ngIf="isEditing" [(ngModel)]="data.lien_de_prarente_avec_le_declarant" class="form-control">
+                      <span class="data-label">Lien de parenté :</span>
+                      <span class="data-value" *ngIf="!isEditing">{{ data.lien_de_prarente_avec_le_declarant || '—' }}</span>
+                      <select *ngIf="isEditing" [(ngModel)]="data.lien_de_prarente_avec_le_declarant" class="form-control lien-select">
+                        <option value="">-- Sélectionner --</option>
+                        <optgroup *ngFor="let g of LIENS_PARENTE" [label]="g.groupe">
+                          <option *ngFor="let l of g.liens" [value]="l">{{ l }}</option>
+                        </optgroup>
+                      </select>
                     </div>
                   </div>
                   <!-- OEC -->
                   <div class="col-md-6">
-                    <div class="subsection-header amber">⚖️ Officier OEC</div>
+                    <div class="subsection-header amber">Officier OEC</div>
                     <div class="data-item">
                       <span class="data-label">Prénom :</span>
                       <span class="data-value" *ngIf="!isEditing">{{ data.prenom_1_officier }}</span>
@@ -358,9 +561,9 @@
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
+              </mat-expansion-panel>
 
+            </mat-accordion>
           </div>
         </div>
 
@@ -410,17 +613,17 @@
       <!-- ── Actions ────────────────────────────────────────────────────────── -->
       <div class="actions">
         <button *ngIf="!isEditing" mat-raised-button class="btn-edit" (click)="startEditing()">
-          ✏️ Modifier
+          Modifier
         </button>
         <button *ngIf="isEditing" mat-raised-button class="btn-cancel" (click)="cancelEditing()">
           Fermer
         </button>
         <button mat-raised-button class="btn-action" (click)="saveActe()" [disabled]="isSaving">
-          <span *ngIf="!isSaving">💾 Sauvegarder</span>
-          <span *ngIf="isSaving">⏳ Sauvegarde en cours...</span>
+          <span *ngIf="!isSaving">Sauvegarder</span>
+          <span *ngIf="isSaving">Sauvegarde en cours...</span>
         </button>
         <button mat-raised-button class="btn-reset" (click)="resetForm()">
-          🔄 Réinitialiser
+          Réinitialiser
         </button>
       </div>
 

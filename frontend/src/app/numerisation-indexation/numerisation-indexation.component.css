@@ -83,36 +83,88 @@
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
-   SECTIONS — Design amélioré
+   ACCORDION — mat-expansion-panel
    ══════════════════════════════════════════════════════════════════════════ */
-.data-section {
-  background: #ffffff;
-  border-radius: 10px;
-  padding: 0;
-  margin-bottom: 12px;
+.form-accordion .mat-expansion-panel {
+  border-radius: 10px !important;
+  margin-bottom: 10px !important;
   border: 1px solid var(--gray-border);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04) !important;
   overflow: hidden;
 }
 
-/* En-tête de section */
-.section-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 14px;
-  background: linear-gradient(135deg, var(--green-light), rgba(74, 138, 78, 0.04));
-  border-bottom: 1px solid var(--gray-border);
-  color: var(--green-dark);
-  font-size: 0.82rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
+.form-accordion .mat-expansion-panel::before {
+  display: none !important;
 }
 
-/* Corps de la section */
-.section-body {
-  padding: 6px 14px 10px;
+.form-accordion .mat-expansion-panel-header {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  padding: 0 16px;
+  height: 44px !important;
+  border-radius: 10px 10px 0 0;
+}
+
+.form-accordion .mat-expansion-panel-body {
+  padding: 8px 14px 12px !important;
+}
+
+/* ── Icônes dans les headers ─────────────────────────────────────────── */
+.panel-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.panel-icon.person    { color: #1a78b4; }
+.panel-icon.acte      { color: var(--green-dark); }
+.panel-icon.lieu      { color: #d97706; }
+.panel-icon.pere      { color: #2563eb; }
+.panel-icon.mere      { color: #db2777; }
+.panel-icon.declarant { color: #7c3aed; }
+
+/* ── Couleurs des panels (header background) ─────────────────────────── */
+.panel-person .mat-expansion-panel-header {
+  background: linear-gradient(135deg, rgba(36, 160, 237, 0.08), rgba(36, 160, 237, 0.02));
+  color: #1a78b4;
+}
+
+.panel-acte .mat-expansion-panel-header {
+  background: linear-gradient(135deg, var(--green-light), rgba(74, 138, 78, 0.02));
+  color: var(--green-dark);
+}
+
+.panel-lieu .mat-expansion-panel-header {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.02));
+  color: #92600a;
+}
+
+.panel-pere .mat-expansion-panel-header {
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.08), rgba(37, 99, 235, 0.02));
+  color: #1e40af;
+}
+
+.panel-mere .mat-expansion-panel-header {
+  background: linear-gradient(135deg, rgba(219, 39, 119, 0.08), rgba(219, 39, 119, 0.02));
+  color: #9d174d;
+}
+
+.panel-declarant .mat-expansion-panel-header {
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.08), rgba(124, 58, 237, 0.02));
+  color: #5b21b6;
+}
+
+/* ── Hover & expanded states ─────────────────────────────────────────── */
+.form-accordion .mat-expansion-panel:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+}
+
+.form-accordion .mat-expansion-panel.mat-expanded {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1) !important;
 }
 
 /* ── Item de données ──────────────────────────────────────────────────────── */
@@ -202,6 +254,85 @@ select.form-control:disabled {
 }
 
 input[type="time"].form-control { padding: 4px 8px; }
+
+/* ── Datepicker Material — intégré dans data-item ────────────────────── */
+.date-field {
+  flex: 1;
+  width: 100%;
+}
+
+.date-field .mat-mdc-form-field-subscript-wrapper {
+  display: none;
+}
+
+::ng-deep .date-field .mat-mdc-text-field-wrapper {
+  padding: 0 8px !important;
+  height: 34px !important;
+  border-radius: 6px;
+  background: #fafafa;
+}
+
+::ng-deep .date-field .mat-mdc-form-field-infix {
+  padding-top: 6px !important;
+  padding-bottom: 4px !important;
+  min-height: unset !important;
+}
+
+::ng-deep .date-field input.mat-mdc-input-element {
+  font-size: 0.85rem;
+  color: #1e293b;
+}
+
+::ng-deep .date-field .mat-mdc-form-field-flex {
+  height: 34px;
+  align-items: center;
+}
+
+::ng-deep .date-field .mat-datepicker-toggle button {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+}
+
+::ng-deep .date-field .mat-datepicker-toggle .mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  color: var(--green);
+}
+
+::ng-deep .date-field .mdc-notched-outline__leading,
+::ng-deep .date-field .mdc-notched-outline__notch,
+::ng-deep .date-field .mdc-notched-outline__trailing {
+  border-color: #cbd5e1 !important;
+}
+
+::ng-deep .date-field.mat-focused .mdc-notched-outline__leading,
+::ng-deep .date-field.mat-focused .mdc-notched-outline__notch,
+::ng-deep .date-field.mat-focused .mdc-notched-outline__trailing {
+  border-color: var(--green) !important;
+}
+
+/* ── Lien de parenté select avec optgroup ────────────────────────────── */
+.lien-select optgroup {
+  font-weight: 700;
+  color: var(--green-dark);
+  font-size: 0.82rem;
+  padding: 4px 0;
+}
+
+.lien-select option {
+  font-weight: 400;
+  color: #1e293b;
+  padding: 3px 8px;
+}
+
+/* ── Loading indicator ───────────────────────────────────────────────── */
+.loading-indicator {
+  color: var(--green) !important;
+  font-size: 0.82rem;
+  font-style: italic;
+}
 
 .text-muted {
   color: var(--gray-text);

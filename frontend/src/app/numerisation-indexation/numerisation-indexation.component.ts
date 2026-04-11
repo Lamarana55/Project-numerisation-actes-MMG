@@ -4,7 +4,8 @@ import { ToastService } from '../services/toast.service';
 import { GeodataService } from '../services/geodata.service';
 import { Profession, ProfessionService } from '../services/profession.service';
 import { ApiService } from '../services/api.service';
-import { RegionDTO, PrefectureDTO, CommuneDTO, QuartierDTO, PaysDTO } from '../models/geodata';
+import { RegionDTO, PrefectureDTO, CommuneDTO, QuartierDTO, PaysDTO, VilleDTO } from '../models/geodata';
+import { MatDatepickerInputEvent } from '@angular/material/datepicker';
 
 export interface ActeData {
   // Identification
@@ -36,6 +37,7 @@ export interface ActeData {
   prefecture_naissance?: string;
   commune_de_nais?: string;
   district_de_nais?: string;
+  ville_naissance?: string;
 
   // Père
   prenoms_pere?: string;
@@ -44,6 +46,14 @@ export interface ActeData {
   nationalite_pere?: string;
   code_profession_pere?: number | string;
 
+  // Lieu de naissance père
+  pays_naissance_pere?: string;
+  region_naissance_pere?: string;
+  prefecture_naissance_pere?: string;
+  commune_naissance_pere?: string;
+  district_naissance_pere?: string;
+  ville_naissance_pere?: string;
+
   // Mère
   prenoms_mere?: string;
   nom_mere?: string;
@@ -51,6 +61,14 @@ export interface ActeData {
   nationalite_mere?: string;
   code_profession_mere?: number | string;
   domicileParent?: string;
+
+  // Lieu de naissance mère
+  pays_naissance_mere?: string;
+  region_naissance_mere?: string;
+  prefecture_naissance_mere?: string;
+  commune_naissance_mere?: string;
+  district_naissance_mere?: string;
+  ville_naissance_mere?: string;
 
   // Déclarant
   prenom_1_declarant?: string;
@@ -100,8 +118,68 @@ export class NumerisationIndexationComponent implements OnInit {
   isLoadingCommunesNaissance = false;
   isLoadingQuartiersNaissance = false;
 
+  // Lieu de naissance — villes (pays étranger)
+  villesNaissance: VilleDTO[] = [];
+  isLoadingVillesNaissance = false;
+
+  // Lieu de naissance père
+  prefecturesNaissancePere: PrefectureDTO[] = [];
+  communesNaissancePere: CommuneDTO[] = [];
+  quartiersNaissancePere: QuartierDTO[] = [];
+  villesNaissancePere: VilleDTO[] = [];
+  isLoadingPrefecturesNaissancePere = false;
+  isLoadingCommunesNaissancePere = false;
+  isLoadingQuartiersNaissancePere = false;
+  isLoadingVillesNaissancePere = false;
+
+  // Lieu de naissance mère
+  prefecturesNaissanceMere: PrefectureDTO[] = [];
+  communesNaissanceMere: CommuneDTO[] = [];
+  quartiersNaissanceMere: QuartierDTO[] = [];
+  villesNaissanceMere: VilleDTO[] = [];
+  isLoadingPrefecturesNaissanceMere = false;
+  isLoadingCommunesNaissanceMere = false;
+  isLoadingQuartiersNaissanceMere = false;
+  isLoadingVillesNaissanceMere = false;
+
   // ── Professions / nationalités ────────────────────────────────────────────
   professions: Profession[] = [];
+
+  // ── Liens de parenté (déclarant) ──────────────────────────────────────────
+  readonly LIENS_PARENTE = [
+    {
+      groupe: 'Famille directe',
+      liens: ['Père', 'Mère', 'Fils', 'Fille', 'Frère', 'Soeur', 'Grand frère', 'Grande soeur', 'Mari'],
+    },
+    {
+      groupe: 'Grands-parents',
+      liens: ['Grand-père paternel', 'Grand-père maternel', 'Grand-mère paternelle', 'Grand-mère maternelle'],
+    },
+    {
+      groupe: 'Oncles & Tantes',
+      liens: ['Oncle paternel', 'Oncle maternel', 'Tante paternelle', 'Tante maternelle'],
+    },
+    {
+      groupe: 'Cousins & Petits-enfants',
+      liens: ['Cousin', 'Cousine', 'Neveu', 'Nièce', 'Petit-fils', 'Petite-fille'],
+    },
+    {
+      groupe: 'Tuteurs & Substituts',
+      liens: ['Parâtre', 'Marâtre', 'Homonyme'],
+    },
+    {
+      groupe: 'Entourage',
+      liens: ['Ami du père', 'Amie du père', 'Ami de la mère', 'Amie de la mère', 'Voisin', 'Voisine'],
+    },
+    {
+      groupe: 'Professionnels',
+      liens: ['Employeur du père', 'Employeur de la mère', 'Animateur', 'Animatrice'],
+    },
+    {
+      groupe: 'Autre',
+      liens: ['Inconnu'],
+    },
+  ];
 
   // ── Zoom image ────────────────────────────────────────────────────────────
   zoomLevel = 1;
@@ -242,9 +320,19 @@ export class NumerisationIndexationComponent implements OnInit {
     this.data.prefecture_naissance = '';
     this.data.commune_de_nais = '';
     this.data.district_de_nais = '';
+    this.data.ville_naissance = '';
     this.prefecturesNaissance = [];
     this.communesNaissance = [];
     this.quartiersNaissance = [];
+    this.villesNaissance = [];
+    // Si pays étranger, charger les villes
+    if (code && code !== 'GN') {
+      this.isLoadingVillesNaissance = true;
+      this.geodataService.getVillesByPays(code).subscribe({
+        next: d => { this.villesNaissance = d; this.isLoadingVillesNaissance = false; },
+        error: () => (this.isLoadingVillesNaissance = false),
+      });
+    }
   }
 
   onRegionNaissanceChange(code: string): void {
@@ -284,6 +372,172 @@ export class NumerisationIndexationComponent implements OnInit {
       next: d => { this.quartiersNaissance = d; this.isLoadingQuartiersNaissance = false; },
       error: () => (this.isLoadingQuartiersNaissance = false),
     });
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // CASCADE GÉOGRAPHIQUE — Lieu de naissance PÈRE
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  isGuineePere(): boolean {
+    return !this.data.pays_naissance_pere || this.data.pays_naissance_pere === 'GN';
+  }
+
+  onPaysNaissancePereChange(code: string): void {
+    this.data.region_naissance_pere = '';
+    this.data.prefecture_naissance_pere = '';
+    this.data.commune_naissance_pere = '';
+    this.data.district_naissance_pere = '';
+    this.data.ville_naissance_pere = '';
+    this.prefecturesNaissancePere = [];
+    this.communesNaissancePere = [];
+    this.quartiersNaissancePere = [];
+    this.villesNaissancePere = [];
+    if (code && code !== 'GN') {
+      this.isLoadingVillesNaissancePere = true;
+      this.geodataService.getVillesByPays(code).subscribe({
+        next: d => { this.villesNaissancePere = d; this.isLoadingVillesNaissancePere = false; },
+        error: () => (this.isLoadingVillesNaissancePere = false),
+      });
+    }
+  }
+
+  onRegionNaissancePereChange(code: string): void {
+    this.data.prefecture_naissance_pere = '';
+    this.data.commune_naissance_pere = '';
+    this.data.district_naissance_pere = '';
+    this.prefecturesNaissancePere = [];
+    this.communesNaissancePere = [];
+    this.quartiersNaissancePere = [];
+    if (!code) return;
+    this.isLoadingPrefecturesNaissancePere = true;
+    this.geodataService.getPrefecturesByRegion(code).subscribe({
+      next: d => { this.prefecturesNaissancePere = d; this.isLoadingPrefecturesNaissancePere = false; },
+      error: () => (this.isLoadingPrefecturesNaissancePere = false),
+    });
+  }
+
+  onPrefectureNaissancePereChange(code: string): void {
+    this.data.commune_naissance_pere = '';
+    this.data.district_naissance_pere = '';
+    this.communesNaissancePere = [];
+    this.quartiersNaissancePere = [];
+    if (!code) return;
+    this.isLoadingCommunesNaissancePere = true;
+    this.geodataService.getCommunesByPrefecture(code).subscribe({
+      next: d => { this.communesNaissancePere = d; this.isLoadingCommunesNaissancePere = false; },
+      error: () => (this.isLoadingCommunesNaissancePere = false),
+    });
+  }
+
+  onCommuneNaissancePereChange(code: string): void {
+    this.data.district_naissance_pere = '';
+    this.quartiersNaissancePere = [];
+    if (!code) return;
+    this.isLoadingQuartiersNaissancePere = true;
+    this.geodataService.getQuartiersByCommune(code).subscribe({
+      next: d => { this.quartiersNaissancePere = d; this.isLoadingQuartiersNaissancePere = false; },
+      error: () => (this.isLoadingQuartiersNaissancePere = false),
+    });
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // CASCADE GÉOGRAPHIQUE — Lieu de naissance MÈRE
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  isGuineeMere(): boolean {
+    return !this.data.pays_naissance_mere || this.data.pays_naissance_mere === 'GN';
+  }
+
+  onPaysNaissanceMereChange(code: string): void {
+    this.data.region_naissance_mere = '';
+    this.data.prefecture_naissance_mere = '';
+    this.data.commune_naissance_mere = '';
+    this.data.district_naissance_mere = '';
+    this.data.ville_naissance_mere = '';
+    this.prefecturesNaissanceMere = [];
+    this.communesNaissanceMere = [];
+    this.quartiersNaissanceMere = [];
+    this.villesNaissanceMere = [];
+    if (code && code !== 'GN') {
+      this.isLoadingVillesNaissanceMere = true;
+      this.geodataService.getVillesByPays(code).subscribe({
+        next: d => { this.villesNaissanceMere = d; this.isLoadingVillesNaissanceMere = false; },
+        error: () => (this.isLoadingVillesNaissanceMere = false),
+      });
+    }
+  }
+
+  onRegionNaissanceMereChange(code: string): void {
+    this.data.prefecture_naissance_mere = '';
+    this.data.commune_naissance_mere = '';
+    this.data.district_naissance_mere = '';
+    this.prefecturesNaissanceMere = [];
+    this.communesNaissanceMere = [];
+    this.quartiersNaissanceMere = [];
+    if (!code) return;
+    this.isLoadingPrefecturesNaissanceMere = true;
+    this.geodataService.getPrefecturesByRegion(code).subscribe({
+      next: d => { this.prefecturesNaissanceMere = d; this.isLoadingPrefecturesNaissanceMere = false; },
+      error: () => (this.isLoadingPrefecturesNaissanceMere = false),
+    });
+  }
+
+  onPrefectureNaissanceMereChange(code: string): void {
+    this.data.commune_naissance_mere = '';
+    this.data.district_naissance_mere = '';
+    this.communesNaissanceMere = [];
+    this.quartiersNaissanceMere = [];
+    if (!code) return;
+    this.isLoadingCommunesNaissanceMere = true;
+    this.geodataService.getCommunesByPrefecture(code).subscribe({
+      next: d => { this.communesNaissanceMere = d; this.isLoadingCommunesNaissanceMere = false; },
+      error: () => (this.isLoadingCommunesNaissanceMere = false),
+    });
+  }
+
+  onCommuneNaissanceMereChange(code: string): void {
+    this.data.district_naissance_mere = '';
+    this.quartiersNaissanceMere = [];
+    if (!code) return;
+    this.isLoadingQuartiersNaissanceMere = true;
+    this.geodataService.getQuartiersByCommune(code).subscribe({
+      next: d => { this.quartiersNaissanceMere = d; this.isLoadingQuartiersNaissanceMere = false; },
+      error: () => (this.isLoadingQuartiersNaissanceMere = false),
+    });
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // CONVERSION DATES — String ↔ Date (pour le datepicker Material)
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  stringToDate(dateStr?: string): Date | null {
+    if (!dateStr) return null;
+    if (dateStr.includes('/')) {
+      const [d, m, y] = dateStr.split('/').map(Number);
+      if (y && m && d) return new Date(y, m - 1, d);
+    }
+    if (dateStr.includes('-')) {
+      const parts = dateStr.split('-').map(Number);
+      if (parts.length === 3 && parts[0] > 31) {
+        // YYYY-MM-DD
+        return new Date(parts[0], parts[1] - 1, parts[2]);
+      }
+      // DD-MM-YYYY
+      return new Date(parts[2], parts[1] - 1, parts[0]);
+    }
+    return null;
+  }
+
+  dateToString(date: Date | null): string {
+    if (!date || isNaN(date.getTime())) return '';
+    const d = date.getDate().toString().padStart(2, '0');
+    const m = (date.getMonth() + 1).toString().padStart(2, '0');
+    const y = date.getFullYear().toString();
+    return `${d}/${m}/${y}`;
+  }
+
+  onDateChange(event: MatDatepickerInputEvent<Date>, fieldName: keyof ActeData): void {
+    (this.data as any)[fieldName] = this.dateToString(event.value);
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -481,6 +735,15 @@ export class NumerisationIndexationComponent implements OnInit {
     this.prefecturesNaissance = [];
     this.communesNaissance = [];
     this.quartiersNaissance = [];
+    this.villesNaissance = [];
+    this.prefecturesNaissancePere = [];
+    this.communesNaissancePere = [];
+    this.quartiersNaissancePere = [];
+    this.villesNaissancePere = [];
+    this.prefecturesNaissanceMere = [];
+    this.communesNaissanceMere = [];
+    this.quartiersNaissanceMere = [];
+    this.villesNaissanceMere = [];
     this.resetZoom();
   }
 
@@ -500,7 +763,7 @@ export class NumerisationIndexationComponent implements OnInit {
       numero_registre:         '001',
       annee_registre:          '2010',
       feuillet:                '12',
-      date_etablissement_acte: '2010-01-05',
+      date_etablissement_acte: '05/01/2010',
 
       // Zone de collecte — Conakry / Kaloum
       region_collecte:    'Conakry',
@@ -511,23 +774,25 @@ export class NumerisationIndexationComponent implements OnInit {
       // Enfant
       prenoms:             'Yaya',
       nom_membre:          'Camara',
-      date_de_nais_membre: '2010-01-01',
+      date_de_nais_membre: '01/01/2010',
       genre_membre:        'M',
-      nationalite_du_membre: 'Guinéenne',
-      pays_de_naissance:   'Guinée',
+      nationalite_du_membre: 'GN',
+      pays_de_naissance:   'GN',
       commune_de_nais:     'Kaloum',
 
       // Père
       prenoms_pere:       'Ousmane',
       nom_pere:           'Camara',
-      date_de_nais_pere:  '1980-01-01',
-      nationalite_pere:   'Guinéenne',
+      date_de_nais_pere:  '01/01/1980',
+      nationalite_pere:   'GN',
+      pays_naissance_pere: 'GN',
 
       // Mère
       prenoms_mere:       'Aissata',
       nom_mere:           'Condé',
-      date_de_nais_mere:  '1988-01-01',
-      nationalite_mere:   'Guinéenne',
+      date_de_nais_mere:  '01/01/1988',
+      nationalite_mere:   'GN',
+      pays_naissance_mere: 'GN',
       region_naissance:   'Kankan',
     };
   }
