@@ -60,3 +60,7 @@ Thumbs.db
 application-secret.properties
 .claude/
 .claude/*
+.claude/worktrees/crazy-goldberg
+.claude/worktrees/condescending-feistel
+.claude/worktrees/tender-antonelli
+
