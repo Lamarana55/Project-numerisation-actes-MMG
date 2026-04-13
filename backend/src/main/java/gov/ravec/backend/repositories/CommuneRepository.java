@@ -12,5 +12,6 @@ import gov.ravec.backend.entities.Prefecture;
 public interface CommuneRepository extends JpaRepository<Commune, UUID>{
     boolean existsByCode( String code);
     Optional<Commune> findByCode(String code);
+    Optional<Commune> findByNom(String nom);
     List<Commune> findByPrefecture(Prefecture prefecture);
 }

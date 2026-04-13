@@ -30,16 +30,20 @@ public class BirthCertificatePdfService {
 
     private final ValidBirthRepository validBirthRepository;
 
+    // ── Couleurs Guinée ─────────────────────────────────────────
+    private static final BaseColor ROUGE_GN = new BaseColor(0xCE, 0x11, 0x26);
+    private static final BaseColor JAUNE_GN = new BaseColor(0xFC, 0xD1, 0x16);
+    private static final BaseColor VERT_GN  = new BaseColor(0x00, 0x85, 0x3F);
+
     // ── Polices ─────────────────────────────────────────────────
-    private static final Font FONT_TITLE = new Font(Font.FontFamily.HELVETICA, 18, Font.BOLD);
-    private static final Font FONT_SUBTITLE = new Font(Font.FontFamily.HELVETICA, 13, Font.BOLD);
+    private static final Font FONT_TITLE = new Font(Font.FontFamily.HELVETICA, 20, Font.BOLD);
+    private static final Font FONT_SUBTITLE = new Font(Font.FontFamily.HELVETICA, 14, Font.BOLD);
+    private static final Font FONT_REPUBLIQUE = new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD);
     private static final Font FONT_HEADER = new Font(Font.FontFamily.HELVETICA, 9, Font.NORMAL);
     private static final Font FONT_LABEL = new Font(Font.FontFamily.HELVETICA, 9, Font.BOLD | Font.ITALIC);
     private static final Font FONT_VALUE = new Font(Font.FontFamily.HELVETICA, 9, Font.NORMAL);
     private static final Font FONT_SECTION = new Font(Font.FontFamily.HELVETICA, 11, Font.BOLD | Font.UNDERLINE);
-    private static final Font FONT_SMALL = new Font(Font.FontFamily.HELVETICA, 8, Font.NORMAL);
     private static final Font FONT_SMALL_BOLD = new Font(Font.FontFamily.HELVETICA, 8, Font.BOLD);
-    private static final Font FONT_ITALIC = new Font(Font.FontFamily.HELVETICA, 9, Font.ITALIC);
     private static final Font FONT_MENTION = new Font(Font.FontFamily.HELVETICA, 10, Font.BOLD | Font.ITALIC);
 
     private static final BaseColor LIGHT_GRAY = new BaseColor(245, 245, 245);
@@ -50,9 +54,6 @@ public class BirthCertificatePdfService {
 
     /**
      * Génère le PDF de copie intégrale pour un acte validé.
-     *
-     * @param id identifiant de l'acte
-     * @return bytes du PDF
      */
     public byte[] generate(String id) throws Exception {
         ValidBirth acte = validBirthRepository.findByIdAndIsDeleted(id, Delete.No)
@@ -68,11 +69,11 @@ public class BirthCertificatePdfService {
         PdfWriter writer = PdfWriter.getInstance(document, baos);
         document.open();
 
-        // ── Filigrane armoiries en fond ──────────────────────────
+        // ── Filigrane armoiries en fond (grande taille) ─────────
         addWatermark(writer);
 
         // ── EN-TÊTE ─────────────────────────────────────────────
-        addHeader(document, acte);
+        addHeader(document, acte, writer);
 
         document.add(Chunk.NEWLINE);
 
@@ -85,7 +86,7 @@ public class BirthCertificatePdfService {
         addField(document, "Date et heure de naissance",
                 formatDateNaissanceComplete(acte));
         addField(document, "Lieu de naissance", buildLieuNaissance(acte));
-        addField(document, "Rang de naissance chez la mère", safe(acte.getRangNaissance()));
+        addField(document, "Rang de naissance chez la\nmère", safe(acte.getRangNaissance()));
 
         document.add(Chunk.NEWLINE);
 
@@ -112,7 +113,7 @@ public class BirthCertificatePdfService {
         document.add(Chunk.NEWLINE);
 
         // ── PIED DE PAGE : QR Code + date + signature ───────────
-        addFooter(document, acte, writer);
+        addFooter(document, acte);
 
         document.close();
         return baos.toByteArray();
@@ -126,17 +127,19 @@ public class BirthCertificatePdfService {
         try {
             InputStream is = new ClassPathResource("static/images/armoiries_guinee.png").getInputStream();
             Image armoiries = Image.getInstance(is.readAllBytes());
+
+            // Grande taille centrée sur la page
+            float imgSize = 420;
             armoiries.setAbsolutePosition(
-                    (PageSize.A4.getWidth() - 300) / 2,
-                    (PageSize.A4.getHeight() - 300) / 2
+                    (PageSize.A4.getWidth() - imgSize) / 2,
+                    (PageSize.A4.getHeight() - imgSize) / 2 - 30
             );
-            armoiries.scaleToFit(300, 300);
-            armoiries.setTransparency(new int[]{200, 200});
+            armoiries.scaleToFit(imgSize, imgSize);
 
             PdfContentByte canvas = writer.getDirectContentUnder();
             PdfGState gs = new PdfGState();
-            gs.setFillOpacity(0.08f);
-            gs.setStrokeOpacity(0.08f);
+            gs.setFillOpacity(0.06f);
+            gs.setStrokeOpacity(0.06f);
             canvas.saveState();
             canvas.setGState(gs);
             canvas.addImage(armoiries);
@@ -146,23 +149,38 @@ public class BirthCertificatePdfService {
         }
     }
 
-    private void addHeader(Document document, ValidBirth acte) throws DocumentException {
-        // Ligne 1 : RÉPUBLIQUE DE GUINÉE + COPIE INTÉGRALE
+    private void addHeader(Document document, ValidBirth acte, PdfWriter writer) throws DocumentException {
         PdfPTable headerTable = new PdfPTable(2);
         headerTable.setWidthPercentage(100);
         headerTable.setWidths(new float[]{50, 50});
 
-        // Colonne gauche
+        // ── Colonne gauche ──────────────────────────────────────
         PdfPCell leftCell = new PdfPCell();
         leftCell.setBorder(Rectangle.NO_BORDER);
-        leftCell.addElement(new Paragraph("RÉPUBLIQUE DE GUINÉE", new Font(Font.FontFamily.HELVETICA, 11, Font.BOLD)));
-        leftCell.addElement(new Paragraph("Travail – Justice – Solidarité", new Font(Font.FontFamily.HELVETICA, 8, Font.ITALIC)));
+
+        // RÉPUBLIQUE DE GUINÉE
+        leftCell.addElement(new Paragraph("RÉPUBLIQUE DE GUINÉE", FONT_REPUBLIQUE));
+
+        // Travail – Justice – Solidarité (rouge – jaune – vert)
+        Phrase devisePhrase = new Phrase();
+        Chunk travail = new Chunk("Travail", new Font(Font.FontFamily.HELVETICA, 9, Font.BOLD | Font.ITALIC, ROUGE_GN));
+        Chunk sep1 = new Chunk(" – ", new Font(Font.FontFamily.HELVETICA, 9, Font.ITALIC));
+        Chunk justice = new Chunk("Justice", new Font(Font.FontFamily.HELVETICA, 9, Font.BOLD | Font.ITALIC, JAUNE_GN));
+        Chunk sep2 = new Chunk(" – ", new Font(Font.FontFamily.HELVETICA, 9, Font.ITALIC));
+        Chunk solidarite = new Chunk("Solidarité", new Font(Font.FontFamily.HELVETICA, 9, Font.BOLD | Font.ITALIC, VERT_GN));
+        devisePhrase.add(travail);
+        devisePhrase.add(sep1);
+        devisePhrase.add(justice);
+        devisePhrase.add(sep2);
+        devisePhrase.add(solidarite);
+        leftCell.addElement(new Paragraph(devisePhrase));
+
         leftCell.addElement(Chunk.NEWLINE);
         leftCell.addElement(new Paragraph("Région de " + safe(acte.getRegion()), FONT_HEADER));
         leftCell.addElement(new Paragraph("Commune de " + safe(acte.getCommune()) + " " + safe(acte.getPrefecture()), FONT_HEADER));
         leftCell.addElement(new Paragraph("Centre d'état civil de " + safe(acte.getCommune()), FONT_HEADER));
 
-        // Colonne droite
+        // ── Colonne droite ──────────────────────────────────────
         PdfPCell rightCell = new PdfPCell();
         rightCell.setBorder(Rectangle.NO_BORDER);
         rightCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
@@ -185,7 +203,38 @@ public class BirthCertificatePdfService {
 
         headerTable.addCell(leftCell);
         headerTable.addCell(rightCell);
+
+        // ── Ligne de séparation tricolore ───────────────────────
         document.add(headerTable);
+        addTricolorLine(document, writer);
+    }
+
+    /**
+     * Dessine une fine ligne tricolore rouge-jaune-vert sous l'en-tête.
+     */
+    private void addTricolorLine(Document document, PdfWriter writer) {
+        PdfContentByte canvas = writer.getDirectContent();
+        float y = writer.getVerticalPosition(true) - 2;
+        float leftMargin = document.leftMargin();
+        float rightMargin = PageSize.A4.getWidth() - document.rightMargin();
+        float totalWidth = rightMargin - leftMargin;
+        float third = totalWidth / 3;
+        float lineHeight = 2.5f;
+
+        // Rouge
+        canvas.setColorFill(ROUGE_GN);
+        canvas.rectangle(leftMargin, y, third, lineHeight);
+        canvas.fill();
+
+        // Jaune
+        canvas.setColorFill(JAUNE_GN);
+        canvas.rectangle(leftMargin + third, y, third, lineHeight);
+        canvas.fill();
+
+        // Vert
+        canvas.setColorFill(VERT_GN);
+        canvas.rectangle(leftMargin + 2 * third, y, third, lineHeight);
+        canvas.fill();
     }
 
     private void addSectionTitle(Document document, String title) throws DocumentException {
@@ -214,7 +263,6 @@ public class BirthCertificatePdfService {
     }
 
     private void addParentsTable(Document document, ValidBirth acte) throws DocumentException {
-        // Tableau à 3 colonnes : label | père | mère
         PdfPTable table = new PdfPTable(3);
         table.setWidthPercentage(100);
         table.setWidths(new float[]{30, 35, 35});
@@ -224,7 +272,7 @@ public class BirthCertificatePdfService {
         addParentHeaderRow(table);
 
         // Lignes de données
-        addParentRow(table, "NPI", safe(acte.getRavecId()), "");
+        addParentRow(table, "NPI", "", "");
         addParentRow(table, "Prénoms et Nom",
                 safe(acte.getPrenomPere()) + " " + safe(acte.getNomPere()),
                 safe(acte.getPrenomMere()) + " " + safe(acte.getNomMere()));
@@ -246,7 +294,7 @@ public class BirthCertificatePdfService {
     }
 
     private void addParentHeaderRow(PdfPTable table) {
-        PdfPCell emptyCell = new PdfPCell(new Phrase("", FONT_SMALL));
+        PdfPCell emptyCell = new PdfPCell(new Phrase("", FONT_SMALL_BOLD));
         emptyCell.setBorder(Rectangle.NO_BORDER);
         emptyCell.setPaddingBottom(4);
         table.addCell(emptyCell);
@@ -284,17 +332,17 @@ public class BirthCertificatePdfService {
         table.addCell(mereCell);
     }
 
-    private void addFooter(Document document, ValidBirth acte, PdfWriter writer) throws Exception {
+    private void addFooter(Document document, ValidBirth acte) throws Exception {
         PdfPTable footerTable = new PdfPTable(2);
         footerTable.setWidthPercentage(100);
         footerTable.setWidths(new float[]{30, 70});
 
         // ── QR Code (colonne gauche) ────────────────────────────
         String qrData = buildQrData(acte);
-        Image qrImage = generateQrCodeImage(qrData, 100, 100);
+        Image qrImage = generateQrCodeImage(qrData, 120, 120);
         PdfPCell qrCell = new PdfPCell(qrImage, true);
         qrCell.setBorder(Rectangle.NO_BORDER);
-        qrCell.setFixedHeight(110);
+        qrCell.setFixedHeight(120);
         qrCell.setPadding(5);
         qrCell.setHorizontalAlignment(Element.ALIGN_LEFT);
         footerTable.addCell(qrCell);
@@ -346,14 +394,12 @@ public class BirthCertificatePdfService {
     private String formatDateNaissanceComplete(ValidBirth acte) {
         StringBuilder sb = new StringBuilder();
 
-        // Date en toutes lettres
         String dateLettre = convertDateToWords(
                 acte.getJours_des_faits(),
                 acte.getMois_des_faits(),
                 acte.getAnnee_des_faits());
         sb.append(dateLettre);
 
-        // Heure
         String heure = safe(acte.getHeureNaissance());
         String minute = safe(acte.getMinuteNaissance());
         if (!heure.isEmpty()) {
@@ -365,13 +411,21 @@ public class BirthCertificatePdfService {
             }
         }
 
-        // Date numérique entre parenthèses
         String dateNum = formatDateNumerique(
                 acte.getJours_des_faits(),
                 acte.getMois_des_faits(),
                 acte.getAnnee_des_faits());
         if (!dateNum.isEmpty()) {
-            sb.append(" (").append(dateNum).append(")");
+            sb.append("\n(").append(dateNum);
+            if (!heure.isEmpty()) {
+                sb.append(" à ").append(String.format("%02sh", Integer.parseInt(heure)));
+                if (!minute.isEmpty() && !"0".equals(minute)) {
+                    sb.append(minute);
+                } else {
+                    sb.append("ZÉRO");
+                }
+            }
+            sb.append(")");
         }
 
         return sb.toString();
@@ -407,7 +461,6 @@ public class BirthCertificatePdfService {
         String dateEtab = safe(acte.getDate_etablissement_acte());
         if (dateEtab.isEmpty()) return "";
 
-        // Essayer de parser la date au format dd/MM/yyyy ou yyyy-MM-dd
         try {
             LocalDate date;
             if (dateEtab.contains("/")) {
@@ -449,12 +502,12 @@ public class BirthCertificatePdfService {
 
     private String buildQrData(ValidBirth acte) {
         return "ACTE_NAISSANCE|" +
-                "ID:" + safe(acte.getId()) + "|" +
                 "NPI:" + safe(acte.getRavecId()) + "|" +
                 "NOM:" + safe(acte.getPrenoms()) + " " + safe(acte.getNom()) + "|" +
                 "DN:" + safe(acte.getDateNaissance()) + "|" +
                 "ACTE:" + safe(acte.getNumeroActe()) + "|" +
-                "REG:" + safe(acte.getAnneeRegistre());
+                "REG:" + safe(acte.getAnneeRegistre()) + "|" +
+                "COMMUNE:" + safe(acte.getCommune());
     }
 
     private Image generateQrCodeImage(String data, int width, int height) throws Exception {
@@ -515,28 +568,8 @@ public class BirthCertificatePdfService {
 
         String[] units = {"", "un", "deux", "trois", "quatre", "cinq", "six", "sept", "huit", "neuf"};
 
-        int thousands = year / 1000;
-        int remainder = year % 1000;
-        int hundreds = remainder / 100;
-        int lastTwo = remainder % 100;
+        StringBuilder sb;
 
-        StringBuilder sb = new StringBuilder();
-
-        // Milliers
-        if (thousands == 1) {
-            sb.append("mille ");
-        } else if (thousands > 1) {
-            sb.append(units[thousands]).append(" mille ");
-        }
-
-        // Centaines
-        if (hundreds == 1) {
-            sb.append("neuf cent ");
-        } else if (hundreds > 1) {
-            sb.append(units[hundreds]).append(" cent ");
-        }
-
-        // Vérification spéciale pour les années 1900, 2000, etc.
         if (year >= 1900 && year < 2000) {
             int h = (year - 1000) / 100;
             int lt = year % 100;
@@ -558,6 +591,26 @@ public class BirthCertificatePdfService {
                     else sb.append(units[h2]).append(" cent ");
                     if (u2 > 0) sb.append(numberToFrenchWord(u2));
                 }
+            }
+        } else {
+            int thousands = year / 1000;
+            int remainder = year % 1000;
+            int hundreds = remainder / 100;
+            int lastTwo = remainder % 100;
+
+            sb = new StringBuilder();
+            if (thousands == 1) {
+                sb.append("mille ");
+            } else if (thousands > 1) {
+                sb.append(units[thousands]).append(" mille ");
+            }
+            if (hundreds == 1) {
+                sb.append("cent ");
+            } else if (hundreds > 1) {
+                sb.append(units[hundreds]).append(" cent ");
+            }
+            if (lastTwo > 0) {
+                sb.append(numberToFrenchWord(lastTwo));
             }
         }
 

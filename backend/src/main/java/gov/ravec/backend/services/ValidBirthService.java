@@ -37,11 +37,14 @@ public class ValidBirthService {
 
     private final ValidBirthRepository validBirthRepository;
     private final UserConnected userConnected;
+    private final NpiGeneratorService npiGenerator;
 
     public ValidBirthService(ValidBirthRepository validBirthRepository,
-                             UserConnected userConnected) {
+                             UserConnected userConnected,
+                             NpiGeneratorService npiGenerator) {
         this.validBirthRepository = validBirthRepository;
         this.userConnected = userConnected;
+        this.npiGenerator = npiGenerator;
     }
 
     // ── Lecture : liste paginée avec filtres ─────────────────────────────────
@@ -139,6 +142,11 @@ public class ValidBirthService {
         acte.setDateAction(LocalDateTime.now());
         acte.setValidateur(currentUser);
         acte.setMotifRejet(null);
+
+        // Générer le NPI si pas encore attribué
+        if (acte.getRavecId() == null || acte.getRavecId().isBlank()) {
+            acte.setRavecId(npiGenerator.generate(acte));
+        }
 
         return ValidBirthDTO.fromEntity(validBirthRepository.save(acte));
     }
