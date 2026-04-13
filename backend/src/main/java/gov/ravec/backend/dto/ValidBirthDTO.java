@@ -62,12 +62,14 @@ public class ValidBirthDTO {
     // ── Père ────────────────────────────────────────────────────
     private String prenomPere;
     private String nomPere;
+    private String dateNaissancePere;
     private String nationalitePere;
     private String professionPere;
 
     // ── Mère ────────────────────────────────────────────────────
     private String prenomMere;
     private String nomMere;
+    private String dateNaissanceMere;
     private String nationaliteMere;
     private String professionMere;
 
@@ -137,10 +139,12 @@ public class ValidBirthDTO {
                 .domicileParent(v.getDomicileParent())
                 .prenomPere(v.getPrenomPere())
                 .nomPere(v.getNomPere())
+                .dateNaissancePere(v.getDateNaissancePere())
                 .nationalitePere(v.getNationalitePere())
                 .professionPere(v.getProfessionPere())
                 .prenomMere(v.getPrenomMere())
                 .nomMere(v.getNomMere())
+                .dateNaissanceMere(v.getDateNaissanceMere())
                 .nationaliteMere(v.getNationaliteMere())
                 .professionMere(v.getProfessionMere())
                 .prenomOffichier(v.getPrenomOffichier())

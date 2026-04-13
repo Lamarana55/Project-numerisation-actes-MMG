@@ -378,6 +378,29 @@ export class ValidBirthListComponent implements OnInit, OnDestroy {
       });
   }
 
+  downloadPdf(acte: ValidBirth): void {
+    if (acte.statut !== 'VALIDE' || acte._pdfLoading) return;
+    acte._pdfLoading = true;
+    this.cdr.markForCheck();
+
+    this.service.getPdf(acte.id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (blob) => {
+          const url = window.URL.createObjectURL(blob);
+          window.open(url, '_blank');
+          setTimeout(() => window.URL.revokeObjectURL(url), 10000);
+          acte._pdfLoading = false;
+          this.cdr.markForCheck();
+        },
+        error: () => {
+          this.toast.error('Erreur lors de la génération du PDF');
+          acte._pdfLoading = false;
+          this.cdr.markForCheck();
+        },
+      });
+  }
+
   // ═══════════════════════════════════════════════════════════════════════════
   //  PERMISSIONS RBAC
   // ═══════════════════════════════════════════════════════════════════════════

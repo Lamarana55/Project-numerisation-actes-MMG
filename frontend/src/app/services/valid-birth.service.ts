@@ -57,4 +57,11 @@ export class ValidBirthService {
   corriger(id: string): Observable<ValidBirth> {
     return this.http.post<ValidBirth>(`${this.apiUrl}/${id}/corriger`, {});
   }
+
+  /** Télécharger la copie intégrale PDF d'un acte validé. */
+  getPdf(id: string): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/${id}/pdf`, {
+      responseType: 'blob',
+    });
+  }
 }

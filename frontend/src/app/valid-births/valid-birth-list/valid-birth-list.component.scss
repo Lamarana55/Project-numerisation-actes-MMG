@@ -1038,6 +1038,30 @@ $radius-sm: 8px;
   &:hover { background: #4f46e5 !important; }
 }
 
+// Bouton PDF copie intégrale
+.btn-pdf {
+  height: 30px;
+  line-height: 28px;
+  padding: 0 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #1e40af !important;
+  border-color: #93c5fd !important;
+  border-radius: 6px !important;
+
+  mat-icon { font-size: 14px; width: 14px; height: 14px; margin-right: 3px; }
+
+  &:hover {
+    background: #eff6ff !important;
+    border-color: #60a5fa !important;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
 // Stamp "Conforme"
 .validated-stamp {
   display: inline-flex;
@@ -1139,7 +1163,7 @@ $radius-sm: 8px;
 
   .vb-filter-topbar { height: auto; padding: 10px 14px; flex-wrap: wrap; gap: 8px; }
 
-  .btn-valider, .btn-rejeter, .btn-motif, .btn-corriger {
+  .btn-valider, .btn-rejeter, .btn-motif, .btn-corriger, .btn-pdf {
     padding: 0 7px;
     font-size: 11px;
     mat-icon { display: none; }
