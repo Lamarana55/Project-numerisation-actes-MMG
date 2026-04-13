@@ -2,11 +2,14 @@ package gov.ravec.backend.controllers;
 
 import gov.ravec.backend.dto.ValidBirthDTO;
 import gov.ravec.backend.dto.ValidationActionRequest;
+import gov.ravec.backend.services.BirthCertificatePdfService;
 import gov.ravec.backend.services.ValidBirthService;
 import gov.ravec.backend.utils.PageResponse;
 import gov.ravec.backend.utils.ValidationStatut;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -30,9 +33,12 @@ import org.springframework.web.bind.annotation.*;
 public class ValidBirthController {
 
     private final ValidBirthService validBirthService;
+    private final BirthCertificatePdfService pdfService;
 
-    public ValidBirthController(ValidBirthService validBirthService) {
+    public ValidBirthController(ValidBirthService validBirthService,
+                                BirthCertificatePdfService pdfService) {
         this.validBirthService = validBirthService;
+        this.pdfService = pdfService;
     }
 
     // ── GET /valid-births ─────────────────────────────────────────────────────
@@ -83,6 +89,21 @@ public class ValidBirthController {
             @PathVariable String id,
             @RequestBody ValidationActionRequest request) {
         return ResponseEntity.ok(validBirthService.rejeter(id, request));
+    }
+
+    // ── GET /valid-births/{id}/pdf ──────────────────────────────────────────────
+
+    @Operation(summary = "Générer la copie intégrale PDF",
+            description = "Génère et télécharge la copie intégrale de l'acte validé en PDF.")
+    @GetMapping("/{id}/pdf")
+    @PreAuthorize("hasAuthority('CAN_VIEW_VALIDATED_ACTS')")
+    public ResponseEntity<byte[]> generatePdf(@PathVariable String id) throws Exception {
+        byte[] pdf = pdfService.generate(id);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDispositionFormData("inline", "acte_naissance_" + id + ".pdf");
+        headers.setContentLength(pdf.length);
+        return ResponseEntity.ok().headers(headers).body(pdf);
     }
 
     // ── POST /valid-births/{id}/corriger ──────────────────────────────────────

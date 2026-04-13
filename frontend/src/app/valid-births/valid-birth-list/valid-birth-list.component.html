@@ -436,6 +436,14 @@
                 <span class="validated-stamp">
                   <mat-icon>verified</mat-icon> Conforme
                 </span>
+                <button mat-stroked-button class="btn-pdf"
+                        (click)="downloadPdf(acte)"
+                        [disabled]="acte._pdfLoading"
+                        matTooltip="Télécharger la copie intégrale">
+                  <mat-icon *ngIf="!acte._pdfLoading">picture_as_pdf</mat-icon>
+                  <mat-icon *ngIf="acte._pdfLoading" class="spinning">sync</mat-icon>
+                  Copie intégrale
+                </button>
               </div>
 
               <div class="action-group" *ngIf="acte.statut === 'REJETE'">

@@ -40,10 +40,12 @@ export interface ValidBirth {
   // ── Parents ───────────────────────────────────────────────
   prenomPere?: string;
   nomPere?: string;
+  dateNaissancePere?: string;
   nationalitePere?: string;
   professionPere?: string;
   prenomMere?: string;
   nomMere?: string;
+  dateNaissanceMere?: string;
   nationaliteMere?: string;
   professionMere?: string;
 
@@ -69,6 +71,9 @@ export interface ValidBirth {
   // ── Audit ─────────────────────────────────────────────────
   createdAt?: string;
   updatedAt?: string;
+
+  // ── UI state (non-API) ───────────────────────────────────
+  _pdfLoading?: boolean;
 }
 
 export interface ValidBirthPage {
