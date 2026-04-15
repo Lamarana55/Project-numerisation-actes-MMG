@@ -1,0 +1,349 @@
+<!-- Loading -->
+<div class="detail-loading" *ngIf="loading">
+  <mat-spinner diameter="48"></mat-spinner>
+  <p>Chargement de l'acte...</p>
+</div>
+
+<!-- Error -->
+<div class="detail-error" *ngIf="error && !loading">
+  <mat-icon>error_outline</mat-icon>
+  <p>{{ error }}</p>
+  <button mat-flat-button color="primary" (click)="goBack()">
+    <mat-icon>arrow_back</mat-icon> Retour à la liste
+  </button>
+</div>
+
+<!-- Main content -->
+<div class="detail-page" *ngIf="acte && !loading && !error">
+
+  <!-- Header bar -->
+  <div class="detail-topbar">
+    <button mat-icon-button (click)="goBack()" matTooltip="Retour à la liste">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <div class="topbar-info">
+      <h1>Acte n° {{ acte.numeroActe || '—' }}</h1>
+      <span class="topbar-subtitle">
+        {{ getNomComplet() }} · {{ getLocalisation() }}
+      </span>
+    </div>
+    <span class="statut-pill" [ngClass]="'pill-' + acte.statut.toLowerCase()">
+      <span class="pill-dot"></span>
+      {{ getStatutLabel(acte.statut) }}
+    </span>
+    <div class="topbar-spacer"></div>
+
+    <!-- Action buttons -->
+    <div class="topbar-actions">
+      <button mat-flat-button class="btn-valider"
+              *ngIf="canValidate && acte.statut === 'EN_ATTENTE'"
+              (click)="valider()">
+        <mat-icon>check</mat-icon> Valider
+      </button>
+      <button mat-stroked-button class="btn-rejeter"
+              *ngIf="canReject && acte.statut === 'EN_ATTENTE'"
+              (click)="openRejectDialog()">
+        <mat-icon>close</mat-icon> Rejeter
+      </button>
+      <button mat-flat-button class="btn-corriger"
+              *ngIf="canCorrect && acte.statut === 'REJETE'"
+              (click)="corriger()">
+        <mat-icon>edit</mat-icon> Corriger
+      </button>
+      <button mat-stroked-button class="btn-pdf"
+              *ngIf="acte.statut === 'VALIDE'"
+              (click)="downloadPdf()"
+              [disabled]="pdfLoading">
+        <mat-icon *ngIf="!pdfLoading">picture_as_pdf</mat-icon>
+        <mat-icon *ngIf="pdfLoading" class="spinning">sync</mat-icon>
+        Copie intégrale
+      </button>
+    </div>
+  </div>
+
+  <!-- Rejection banner -->
+  <div class="reject-banner" *ngIf="acte.statut === 'REJETE' && acte.motifRejet">
+    <mat-icon>warning</mat-icon>
+    <div class="reject-banner-content">
+      <strong>Motif du rejet :</strong>
+      <span>{{ acte.motifRejet }}</span>
+    </div>
+  </div>
+
+  <!-- Split screen -->
+  <div class="split-container">
+
+    <!-- LEFT: Document numérisé -->
+    <div class="split-left">
+      <div class="panel-header">
+        <mat-icon>image</mat-icon>
+        <span>Document numérisé</span>
+        <div class="image-controls">
+          <button mat-icon-button (click)="zoomOut()" matTooltip="Zoom arrière" [disabled]="imageZoom <= 0.5">
+            <mat-icon>zoom_out</mat-icon>
+          </button>
+          <span class="zoom-level">{{ (imageZoom * 100) | number:'1.0-0' }}%</span>
+          <button mat-icon-button (click)="zoomIn()" matTooltip="Zoom avant" [disabled]="imageZoom >= 3">
+            <mat-icon>zoom_in</mat-icon>
+          </button>
+          <button mat-icon-button (click)="rotateImage()" matTooltip="Rotation">
+            <mat-icon>rotate_right</mat-icon>
+          </button>
+          <button mat-icon-button (click)="resetZoom()" matTooltip="Réinitialiser">
+            <mat-icon>restart_alt</mat-icon>
+          </button>
+        </div>
+      </div>
+      <div class="image-viewer">
+        <div class="image-placeholder" *ngIf="!acte.images">
+          <mat-icon>hide_image</mat-icon>
+          <p>Aucun document numérisé disponible</p>
+          <span class="placeholder-hint">Le document sera disponible après numérisation</span>
+        </div>
+        <img *ngIf="acte.images"
+             [src]="acte.images"
+             alt="Document numérisé"
+             class="scanned-image"
+             [style.transform]="'scale(' + imageZoom + ') rotate(' + imageRotation + 'deg)'"
+             [style.transformOrigin]="'center center'">
+      </div>
+    </div>
+
+    <!-- RIGHT: Données structurées -->
+    <div class="split-right">
+      <div class="panel-header">
+        <div class="tab-group">
+          <button class="tab-btn" [class.active]="activeTab === 'donnees'" (click)="activeTab = 'donnees'">
+            <mat-icon>article</mat-icon> Données
+          </button>
+          <button class="tab-btn" [class.active]="activeTab === 'historique'" (click)="activeTab = 'historique'">
+            <mat-icon>history</mat-icon> Historique
+          </button>
+          <button class="tab-btn" [class.active]="activeTab === 'observations'" (click)="activeTab = 'observations'">
+            <mat-icon>comment</mat-icon> Observations
+          </button>
+        </div>
+      </div>
+
+      <div class="panel-body">
+
+        <!-- Tab: Données structurées -->
+        <div class="tab-content" *ngIf="activeTab === 'donnees'">
+
+          <!-- Identification acte -->
+          <div class="data-section">
+            <h3 class="section-title">
+              <mat-icon>badge</mat-icon> Identification de l'acte
+            </h3>
+            <div class="data-grid">
+              <div class="data-field">
+                <span class="field-label">N° Acte</span>
+                <span class="field-value">{{ acte.numeroActe || '—' }}</span>
+              </div>
+              <div class="data-field">
+                <span class="field-label">N° Registre</span>
+                <span class="field-value">{{ acte.numeroRegistre || '—' }}</span>
+              </div>
+              <div class="data-field">
+                <span class="field-label">Année registre</span>
+                <span class="field-value">{{ acte.anneeRegistre || '—' }}</span>
+              </div>
+              <div class="data-field">
+                <span class="field-label">Feuillet</span>
+                <span class="field-value">{{ acte.feuillet || '—' }}</span>
+              </div>
+              <div class="data-field" *ngIf="acte.ravecId">
+                <span class="field-label">NPI (RAVEC ID)</span>
+                <span class="field-value npi-value">{{ acte.ravecId }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Enfant -->
+          <div class="data-section">
+            <h3 class="section-title">
+              <mat-icon>child_care</mat-icon> Informations sur l'enfant
+            </h3>
+            <div class="data-grid">
+              <div class="data-field full-width">
+                <span class="field-label">Prénoms</span>
+                <span class="field-value">{{ acte.prenoms || '—' }}</span>
+              </div>
+              <div class="data-field">
+                <span class="field-label">Nom de famille</span>
+                <span class="field-value">{{ acte.nom || '—' }}</span>
+              </div>
+              <div class="data-field">
+                <span class="field-label">Sexe</span>
+                <span class="field-value">
+                  <mat-icon class="inline-icon" *ngIf="acte.genre === 'M'">male</mat-icon>
+                  <mat-icon class="inline-icon" *ngIf="acte.genre === 'F'">female</mat-icon>
+                  {{ acte.genre === 'M' ? 'Masculin' : acte.genre === 'F' ? 'Féminin' : '—' }}
+                </span>
+              </div>
+              <div class="data-field">
+                <span class="field-label">Date de naissance</span>
+                <span class="field-value">{{ acte.dateNaissance || '—' }}</span>
+              </div>
+              <div class="data-field">
+                <span class="field-label">Heure de naissance</span>
+                <span class="field-value">{{ acte.heureNaissance || '—' }}h{{ acte.minuteNaissance || '00' }}</span>
+              </div>
+              <div class="data-field">
+                <span class="field-label">Nationalité</span>
+                <span class="field-value">{{ acte.nationalite_du_membre || '—' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Localisation naissance -->
+          <div class="data-section">
+            <h3 class="section-title">
+              <mat-icon>place</mat-icon> Lieu de naissance
+            </h3>
+            <div class="data-grid">
+              <div class="data-field">
+                <span class="field-label">Région</span>
+                <span class="field-value">{{ acte.region || '—' }}</span>
+              </div>
+              <div class="data-field">
+                <span class="field-label">Préfecture</span>
+                <span class="field-value">{{ acte.prefecture || '—' }}</span>
+              </div>
+              <div class="data-field">
+                <span class="field-label">Commune</span>
+                <span class="field-value">{{ acte.commune || '—' }}</span>
+              </div>
+              <div class="data-field">
+                <span class="field-label">District/Quartier</span>
+                <span class="field-value">{{ acte.district || '—' }}</span>
+              </div>
+              <div class="data-field">
+                <span class="field-label">Secteur</span>
+                <span class="field-value">{{ acte.secteur || '—' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Père -->
+          <div class="data-section">
+            <h3 class="section-title">
+              <mat-icon>person</mat-icon> Informations sur le père
+            </h3>
+            <div class="data-grid">
+              <div class="data-field">
+                <span class="field-label">Prénoms</span>
+                <span class="field-value">{{ acte.prenomPere || '—' }}</span>
+              </div>
+              <div class="data-field">
+                <span class="field-label">Nom</span>
+                <span class="field-value">{{ acte.nomPere || '—' }}</span>
+              </div>
+              <div class="data-field">
+                <span class="field-label">Date de naissance</span>
+                <span class="field-value">{{ acte.dateNaissancePere || '—' }}</span>
+              </div>
+              <div class="data-field">
+                <span class="field-label">Nationalité</span>
+                <span class="field-value">{{ acte.nationalitePere || '—' }}</span>
+              </div>
+              <div class="data-field">
+                <span class="field-label">Profession</span>
+                <span class="field-value">{{ acte.professionPere || '—' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mère -->
+          <div class="data-section">
+            <h3 class="section-title">
+              <mat-icon>person</mat-icon> Informations sur la mère
+            </h3>
+            <div class="data-grid">
+              <div class="data-field">
+                <span class="field-label">Prénoms</span>
+                <span class="field-value">{{ acte.prenomMere || '—' }}</span>
+              </div>
+              <div class="data-field">
+                <span class="field-label">Nom</span>
+                <span class="field-value">{{ acte.nomMere || '—' }}</span>
+              </div>
+              <div class="data-field">
+                <span class="field-label">Date de naissance</span>
+                <span class="field-value">{{ acte.dateNaissanceMere || '—' }}</span>
+              </div>
+              <div class="data-field">
+                <span class="field-label">Nationalité</span>
+                <span class="field-value">{{ acte.nationaliteMere || '—' }}</span>
+              </div>
+              <div class="data-field">
+                <span class="field-label">Profession</span>
+                <span class="field-value">{{ acte.professionMere || '—' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Officier & Déclarant -->
+          <div class="data-section">
+            <h3 class="section-title">
+              <mat-icon>gavel</mat-icon> Officier & Déclarant
+            </h3>
+            <div class="data-grid">
+              <div class="data-field">
+                <span class="field-label">Officier</span>
+                <span class="field-value">{{ acte.prenomOffichier }} {{ acte.nomOfficier }}</span>
+              </div>
+              <div class="data-field">
+                <span class="field-label">Déclarant</span>
+                <span class="field-value">{{ acte.prenomDeclarant }} {{ acte.nomDeclarant }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: Historique -->
+        <div class="tab-content" *ngIf="activeTab === 'historique'">
+          <div class="timeline">
+            <div class="timeline-item">
+              <div class="timeline-dot dot-blue"></div>
+              <div class="timeline-content">
+                <span class="timeline-date">{{ acte.createdAt | date:'dd/MM/yyyy HH:mm':'':'fr' }}</span>
+                <span class="timeline-title">Indexation</span>
+                <span class="timeline-detail" *ngIf="acte.agentNomComplet || acte.agentUsername">
+                  Par {{ acte.agentNomComplet || acte.agentUsername }}
+                </span>
+              </div>
+            </div>
+
+            <div class="timeline-item" *ngIf="acte.dateAction">
+              <div class="timeline-dot"
+                   [ngClass]="acte.statut === 'VALIDE' ? 'dot-green' : acte.statut === 'REJETE' ? 'dot-red' : 'dot-orange'">
+              </div>
+              <div class="timeline-content">
+                <span class="timeline-date">{{ acte.dateAction | date:'dd/MM/yyyy HH:mm':'':'fr' }}</span>
+                <span class="timeline-title">{{ getStatutLabel(acte.statut) }}</span>
+                <span class="timeline-detail" *ngIf="acte.validateurNomComplet">
+                  Par {{ acte.validateurNomComplet }}
+                </span>
+                <span class="timeline-detail timeline-motif" *ngIf="acte.motifRejet">
+                  Motif : {{ acte.motifRejet }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: Observations -->
+        <div class="tab-content" *ngIf="activeTab === 'observations'">
+          <div class="observations-empty">
+            <mat-icon>speaker_notes_off</mat-icon>
+            <p>Aucune observation pour le moment</p>
+            <span>Les observations seront disponibles prochainement</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>

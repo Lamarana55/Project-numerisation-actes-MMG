@@ -20,14 +20,13 @@ interface Notification {
 export class AdminTemplateComponent implements OnInit {
 
   // État des sous-menus
-  showActesSubmenu = false;
-  showValidationSubmenu = false;
+  showNaissanceSubmenu = false;
+  showDecesSubmenu = false;
   showSettingsSubmenu = false;
   showUsersSubmenu = false;
   showRolesSubmenu = false;
   showLocalitiesSubmenu = false;
   showReportsSubmenu = false;
-  showConfigSubmenu = false;
 
   constructor(
     public authService: AuthService,
@@ -88,32 +87,20 @@ export class AdminTemplateComponent implements OnInit {
     }
   }
 
-  /**
-   * Basculer le sous-menu des actes
-   */
-  toggleActesSubmenu(): void {
-    this.showActesSubmenu = !this.showActesSubmenu;
+  toggleNaissanceSubmenu(): void {
+    this.showNaissanceSubmenu = !this.showNaissanceSubmenu;
   }
 
-  /**
-   * Basculer le sous-menu des utilisateurs
-   */
+  toggleDecesSubmenu(): void {
+    this.showDecesSubmenu = !this.showDecesSubmenu;
+  }
+
   toggleUsersSubmenu(): void {
     this.showUsersSubmenu = !this.showUsersSubmenu;
   }
 
-  /**
-   * Basculer le sous-menu des rapports
-   */
   toggleReportsSubmenu(): void {
     this.showReportsSubmenu = !this.showReportsSubmenu;
-  }
-
-  /**
-   * Basculer le sous-menu de validation
-   */
-  toggleValidationSubmenu(): void {
-    this.showValidationSubmenu = !this.showValidationSubmenu;
   }
 
 
@@ -138,39 +125,14 @@ export class AdminTemplateComponent implements OnInit {
     this.showLocalitiesSubmenu = !this.showLocalitiesSubmenu;
   }
 
-  /**
-   * Basculer le sous-menu de configuration
-   */
-  toggleConfigSubmenu(): void {
-    this.showConfigSubmenu = !this.showConfigSubmenu;
-  }
-
-  /**
-   * Fermer tous les sous-menus
-   */
   closeAllSubmenus(): void {
-    this.showActesSubmenu = false;
-    this.showValidationSubmenu = false;
+    this.showNaissanceSubmenu = false;
+    this.showDecesSubmenu = false;
     this.showSettingsSubmenu = false;
     this.showUsersSubmenu = false;
     this.showRolesSubmenu = false;
     this.showLocalitiesSubmenu = false;
     this.showReportsSubmenu = false;
-    this.showConfigSubmenu = false;
-  }
-
-  /**
-   * Ouvrir tous les sous-menus
-   */
-  openAllSubmenus(): void {
-    this.showActesSubmenu = true;
-    this.showValidationSubmenu = true;
-    this.showSettingsSubmenu = true;
-    this.showUsersSubmenu = true;
-    this.showRolesSubmenu = true;
-    this.showLocalitiesSubmenu = true;
-    this.showReportsSubmenu = true;
-    this.showConfigSubmenu = true;
   }
 
   // Dans admin-template.component.ts - Remplacer la méthode autoExpandMenus
@@ -179,20 +141,16 @@ export class AdminTemplateComponent implements OnInit {
  * Auto-expand des menus basé sur l'URL actuelle
  */
 private autoExpandMenus(url: string): void {
-  // Réinitialiser tous les sous-menus
   this.closeAllSubmenus();
 
-  // Ouvrir le sous-menu approprié basé sur l'URL
-  if (url.includes('/admin/collectes/')) {
-    this.showActesSubmenu = true;
-  } else if (url.includes('/admin/validation/')) {
-    this.showValidationSubmenu = true;
+  if (url.includes('/admin/actes-naissance/')) {
+    this.showNaissanceSubmenu = true;
+  } else if (url.includes('/admin/actes-deces/')) {
+    this.showDecesSubmenu = true;
   } else if (url.includes('/admin/users/') || url.includes('/admin/roles/') ||
              url.includes('/admin/permissions/') || url.includes('/admin/localites/') ||
              url.includes('/admin/settings/')) {
     this.showSettingsSubmenu = true;
-
-    // Ouvrir les sous-menus de second niveau basé sur l'URL
     if (url.includes('/admin/users/')) {
       this.showUsersSubmenu = true;
     } else if (url.includes('/admin/roles/') || url.includes('/admin/permissions/')) {
@@ -200,10 +158,8 @@ private autoExpandMenus(url: string): void {
     } else if (url.includes('/admin/localites/')) {
       this.showLocalitiesSubmenu = true;
     }
-  } else if (url.includes('/admin/reports/')) {
+  } else if (url.includes('/admin/rapports')) {
     this.showReportsSubmenu = true;
-  } else if (url.includes('/admin/config/')) {
-    this.showConfigSubmenu = true;
   }
 }
 
@@ -290,61 +246,28 @@ canViewReports(): boolean {
     this.router.navigate([route]);
   }
 
-  /**
-   * Gérer le clic sur un menu parent
-   */
   onMenuParentClick(menuType: string): void {
     switch (menuType) {
-      case 'actes':
-        this.toggleActesSubmenu();
-        break;
-      case 'validation':
-        this.toggleValidationSubmenu();
-        break;
-      case 'settings':
-        this.toggleSettingsSubmenu();
-        break;
-      case 'users':
-        this.toggleUsersSubmenu();
-        break;
-      case 'roles':
-        this.toggleRolesSubmenu();
-        break;
-      case 'localities':
-        this.toggleLocalitiesSubmenu();
-        break;
-      case 'reports':
-        this.toggleReportsSubmenu();
-        break;
-      case 'config':
-        this.toggleConfigSubmenu();
-        break;
+      case 'naissance': this.toggleNaissanceSubmenu(); break;
+      case 'deces': this.toggleDecesSubmenu(); break;
+      case 'settings': this.toggleSettingsSubmenu(); break;
+      case 'users': this.toggleUsersSubmenu(); break;
+      case 'roles': this.toggleRolesSubmenu(); break;
+      case 'localities': this.toggleLocalitiesSubmenu(); break;
+      case 'reports': this.toggleReportsSubmenu(); break;
     }
   }
 
-  /**
-   * Vérifier si un sous-menu est ouvert
-   */
   isSubmenuOpen(menuType: string): boolean {
     switch (menuType) {
-      case 'actes':
-        return this.showActesSubmenu;
-      case 'validation':
-        return this.showValidationSubmenu;
-      case 'settings':
-        return this.showSettingsSubmenu;
-      case 'users':
-        return this.showUsersSubmenu;
-      case 'roles':
-        return this.showRolesSubmenu;
-      case 'localities':
-        return this.showLocalitiesSubmenu;
-      case 'reports':
-        return this.showReportsSubmenu;
-      case 'config':
-        return this.showConfigSubmenu;
-      default:
-        return false;
+      case 'naissance': return this.showNaissanceSubmenu;
+      case 'deces': return this.showDecesSubmenu;
+      case 'settings': return this.showSettingsSubmenu;
+      case 'users': return this.showUsersSubmenu;
+      case 'roles': return this.showRolesSubmenu;
+      case 'localities': return this.showLocalitiesSubmenu;
+      case 'reports': return this.showReportsSubmenu;
+      default: return false;
     }
   }
 

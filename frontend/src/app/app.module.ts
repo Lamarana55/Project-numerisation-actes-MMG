@@ -88,6 +88,21 @@ import { ForcePasswordChangeComponent } from './pages/force-password-change/forc
 import { ValidBirthListComponent } from './valid-births/valid-birth-list/valid-birth-list.component';
 import { RejectDialogComponent } from './valid-births/reject-dialog/reject-dialog.component';
 
+// Actes de naissance
+import { BirthActCreationComponent } from './actes-naissance/creation/birth-act-creation.component';
+import { BirthActTranscriptionComponent } from './actes-naissance/transcription/birth-act-transcription.component';
+import { BirthActConsultationComponent } from './actes-naissance/consultation/birth-act-consultation.component';
+import { ActesReprisDetailComponent } from './actes-naissance/actes-repris/actes-repris-detail.component';
+
+// Actes de décès
+import { DeathActCreationComponent } from './actes-deces/creation/death-act-creation.component';
+import { DeathActTranscriptionComponent } from './actes-deces/transcription/death-act-transcription.component';
+import { DeathActConsultationComponent } from './actes-deces/consultation/death-act-consultation.component';
+import { DeathActesReprisComponent } from './actes-deces/actes-repris/death-actes-repris.component';
+
+// Rapports
+import { RapportsComponent } from './rapports/rapports.component';
+
 
 registerLocaleData(localeFr);
 
@@ -126,6 +141,18 @@ registerLocaleData(localeFr);
     ForcePasswordChangeComponent,
     ValidBirthListComponent,
     RejectDialogComponent,
+    // Actes de naissance
+    BirthActCreationComponent,
+    BirthActTranscriptionComponent,
+    BirthActConsultationComponent,
+    ActesReprisDetailComponent,
+    // Actes de décès
+    DeathActCreationComponent,
+    DeathActTranscriptionComponent,
+    DeathActConsultationComponent,
+    DeathActesReprisComponent,
+    // Rapports
+    RapportsComponent,
   ],
   imports: [
     BrowserModule,

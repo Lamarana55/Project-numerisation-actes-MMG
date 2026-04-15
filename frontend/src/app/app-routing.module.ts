@@ -16,8 +16,8 @@ import { UserProfileComponent } from './config/user-profile/user-profile.compone
 // Composant de gestion des localités
 import { LocalitesComponent } from './config/localites/localites.component';
 
-// Guards // ← Nouveau chemin corrigé
-import { AuthorizationGuard } from './gards/authorization.guard'; // ← Votre guard existant
+// Guards
+import { AuthorizationGuard } from './gards/authorization.guard';
 import { AuthGuard } from './gards/auth.guard';
 import { UserCreateComponent } from './config/user-create/user-create.component';
 import { RolesListComponent } from './config/roles-list/roles-list.component';
@@ -27,7 +27,22 @@ import { NotificationsComponent } from './config/notifications/notifications.com
 import { PrivacyPolicyComponent } from './config/about/privacy-policy/privacy-policy.component';
 import { NumerisationIndexationComponent } from './numerisation-indexation/numerisation-indexation.component';
 import { ForcePasswordChangeComponent } from './pages/force-password-change/force-password-change.component';
+
+// Actes de naissance
+import { BirthActCreationComponent } from './actes-naissance/creation/birth-act-creation.component';
+import { BirthActTranscriptionComponent } from './actes-naissance/transcription/birth-act-transcription.component';
+import { BirthActConsultationComponent } from './actes-naissance/consultation/birth-act-consultation.component';
 import { ValidBirthListComponent } from './valid-births/valid-birth-list/valid-birth-list.component';
+import { ActesReprisDetailComponent } from './actes-naissance/actes-repris/actes-repris-detail.component';
+
+// Actes de décès
+import { DeathActCreationComponent } from './actes-deces/creation/death-act-creation.component';
+import { DeathActTranscriptionComponent } from './actes-deces/transcription/death-act-transcription.component';
+import { DeathActConsultationComponent } from './actes-deces/consultation/death-act-consultation.component';
+import { DeathActesReprisComponent } from './actes-deces/actes-repris/death-actes-repris.component';
+
+// Rapports
+import { RapportsComponent } from './rapports/rapports.component';
 
 const routes: Routes = [
   // Routes publiques
@@ -44,25 +59,11 @@ const routes: Routes = [
   {
     path: 'admin',
     component: AdminTemplateComponent,
-    canActivate: [AuthGuard], // Protection globale
+    canActivate: [AuthGuard],
     children: [
       // Dashboard principal
-      {
-        path: '',
-        redirectTo: 'dashboard',
-        pathMatch: 'full',
-      },
-      {
-        path: 'dashboard',
-        component: DashboardComponent,
-      },
-      // === VALIDATION DES ACTES DE NAISSANCE ===
-      {
-        path: 'valid-births',
-        component: ValidBirthListComponent,
-        canActivate: [AuthorizationGuard],
-        data: { roles: ['CAN_VIEW_VALIDATED_ACTS'] },
-      },
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      { path: 'dashboard', component: DashboardComponent },
 
       // Numérisation et Indexation
       {
@@ -75,6 +76,59 @@ const routes: Routes = [
         component: NumerisationIndexationComponent,
         data: { title: 'Numérisation & Indexation OCR', tab: 'indexation' },
       },
+
+      // === ACTES DE NAISSANCE ===
+      {
+        path: 'actes-naissance/creation',
+        component: BirthActCreationComponent,
+      },
+      {
+        path: 'actes-naissance/transcription',
+        component: BirthActTranscriptionComponent,
+      },
+      {
+        path: 'actes-naissance/repris',
+        component: ValidBirthListComponent,
+        canActivate: [AuthorizationGuard],
+        data: { roles: ['CAN_VIEW_VALIDATED_ACTS'] },
+      },
+      {
+        path: 'actes-naissance/repris/:id',
+        component: ActesReprisDetailComponent,
+        canActivate: [AuthorizationGuard],
+        data: { roles: ['CAN_VIEW_VALIDATED_ACTS'] },
+      },
+      {
+        path: 'actes-naissance/consultation',
+        component: BirthActConsultationComponent,
+      },
+
+      // === ACTES DE DÉCÈS ===
+      {
+        path: 'actes-deces/creation',
+        component: DeathActCreationComponent,
+      },
+      {
+        path: 'actes-deces/transcription',
+        component: DeathActTranscriptionComponent,
+      },
+      {
+        path: 'actes-deces/repris',
+        component: DeathActesReprisComponent,
+      },
+      {
+        path: 'actes-deces/consultation',
+        component: DeathActConsultationComponent,
+      },
+
+      // === RAPPORTS & STATISTIQUES ===
+      {
+        path: 'rapports',
+        component: RapportsComponent,
+        canActivate: [AuthorizationGuard],
+        data: { roles: ['CAN_VIEW_REPORTS'] },
+      },
+
       // === GESTION DES UTILISATEURS ===
       {
         path: 'users/list',
@@ -108,6 +162,7 @@ const routes: Routes = [
         canActivate: [AuthorizationGuard],
         data: { roles: ['CAN_MANAGE_PERMISSIONS'] },
       },
+
       // === GESTION DES LOCALITÉS ===
       {
         path: 'localites/list',
@@ -116,12 +171,10 @@ const routes: Routes = [
         data: { roles: ['CAN_MANAGE_LOCALITES'] },
       },
 
-      // === RAPPORTS ===
-
       // === CONFIGURATION SYSTÈME ===
       {
         path: 'settings/system',
-        component: UserProfileComponent, // Remplacer par SystemSettingsComponent quand créé
+        component: UserProfileComponent,
         canActivate: [AuthorizationGuard],
         data: { roles: ['CAN_MANAGE_SETTINGS'] },
       },
@@ -133,10 +186,7 @@ const routes: Routes = [
       },
 
       // === PROFIL UTILISATEUR ===
-      {
-        path: 'profile',
-        component: UserProfileComponent,
-      },
+      { path: 'profile', component: UserProfileComponent },
 
       // === AIDE ET SUPPORT ===
       {
@@ -148,11 +198,12 @@ const routes: Routes = [
           { path: 'probleme', component: PrivacyPolicyComponent },
         ],
       },
+
       // === NOTIFICATIONS ===
-      {
-        path: 'notifications',
-        component: NotificationsComponent,
-      },
+      { path: 'notifications', component: NotificationsComponent },
+
+      // Redirect ancien lien valid-births vers nouveau chemin
+      { path: 'valid-births', redirectTo: 'actes-naissance/repris', pathMatch: 'full' },
     ],
   },
 
@@ -163,7 +214,7 @@ const routes: Routes = [
 @NgModule({
   imports: [
     RouterModule.forRoot(routes, {
-      enableTracing: false, // Mettre à true pour déboguer le routing
+      enableTracing: false,
       onSameUrlNavigation: 'reload',
     }),
   ],
