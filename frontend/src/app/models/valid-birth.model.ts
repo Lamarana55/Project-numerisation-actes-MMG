@@ -68,6 +68,9 @@ export interface ValidBirth {
   validateurNomComplet?: string;
   motifRejet?: string;
 
+  // ── Document numérisé ─────────────────────────────────────
+  imageUrl?: string;
+
   // ── Audit ─────────────────────────────────────────────────
   createdAt?: string;
   updatedAt?: string;

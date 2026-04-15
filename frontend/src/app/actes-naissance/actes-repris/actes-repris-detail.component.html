@@ -95,13 +95,13 @@
         </div>
       </div>
       <div class="image-viewer">
-        <div class="image-placeholder" *ngIf="!acte.images">
+        <div class="image-placeholder" *ngIf="!acte.imageUrl">
           <mat-icon>hide_image</mat-icon>
           <p>Aucun document numérisé disponible</p>
           <span class="placeholder-hint">Le document sera disponible après numérisation</span>
         </div>
-        <img *ngIf="acte.images"
-             [src]="acte.images"
+        <img *ngIf="acte.imageUrl"
+             [src]="acte.imageUrl"
              alt="Document numérisé"
              class="scanned-image"
              [style.transform]="'scale(' + imageZoom + ') rotate(' + imageRotation + 'deg)'"
