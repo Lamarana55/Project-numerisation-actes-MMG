@@ -87,31 +87,97 @@
 <mat-drawer-container>
   <mat-drawer #myDrawer opened="true" mode="side" position="start" class="sidebar">
     <mat-nav-list>
-      <!-- Dashboard -->
-      <a mat-list-item routerLink="/admin/dashboard" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }" class="menu-item">
+
+      <!-- ══════════ Tableau de bord ══════════ -->
+      <a mat-list-item routerLink="/admin/dashboard" routerLinkActive="active-link"
+         [routerLinkActiveOptions]="{ exact: true }" class="menu-item">
         <mat-icon matListItemIcon>dashboard</mat-icon>
         <span matListItemTitle>Tableau de bord</span>
       </a>
-      <!-- Numerisation(menu principal avec sous-menu) -->
+
+      <!-- ══════════ Numérisation & Indexation ══════════ -->
       <a mat-list-item routerLink="/admin/numerisation-indexation" routerLinkActive="active-link" class="menu-item">
-        <mat-icon matListItemIcon>auto_fix_high</mat-icon>
+        <mat-icon matListItemIcon>scanner</mat-icon>
         <span matListItemTitle>Numérisation & Indexation</span>
       </a>
 
-      <!-- Validation des actes de naissance -->
-      <a mat-list-item *ngIf="canViewValidation()" routerLink="/admin/valid-births" routerLinkActive="active-link" class="menu-item">
-        <mat-icon matListItemIcon>verified</mat-icon>
-        <span matListItemTitle>Actes validés</span>
+      <mat-divider class="menu-divider"></mat-divider>
+
+      <!-- ══════════ ACTES DE NAISSANCE ══════════ -->
+      <mat-list-item (click)="toggleNaissanceSubmenu()" class="menu-item menu-parent">
+        <mat-icon matListItemIcon class="icon-naissance">child_care</mat-icon>
+        <span matListItemTitle>Actes de naissance</span>
+        <mat-icon class="expand-icon">{{ showNaissanceSubmenu ? 'expand_less' : 'expand_more' }}</mat-icon>
+      </mat-list-item>
+
+      <div class="submenu" [class.expanded]="showNaissanceSubmenu">
+        <a mat-list-item routerLink="/admin/actes-naissance/creation" routerLinkActive="active-link"
+           class="menu-item submenu-item">
+          <mat-icon matListItemIcon>add_circle_outline</mat-icon>
+          <span matListItemTitle>Création (< 6 mois)</span>
+        </a>
+        <a mat-list-item routerLink="/admin/actes-naissance/transcription" routerLinkActive="active-link"
+           class="menu-item submenu-item">
+          <mat-icon matListItemIcon>drive_file_rename_outline</mat-icon>
+          <span matListItemTitle>Transcription</span>
+        </a>
+        <a mat-list-item *ngIf="canViewValidation()" routerLink="/admin/actes-naissance/repris" routerLinkActive="active-link"
+           class="menu-item submenu-item submenu-item--highlight">
+          <mat-icon matListItemIcon>inventory_2</mat-icon>
+          <span matListItemTitle>Actes repris</span>
+        </a>
+        <a mat-list-item routerLink="/admin/actes-naissance/consultation" routerLinkActive="active-link"
+           class="menu-item submenu-item">
+          <mat-icon matListItemIcon>search</mat-icon>
+          <span matListItemTitle>Consultation</span>
+        </a>
+      </div>
+
+      <!-- ══════════ ACTES DE DÉCÈS ══════════ -->
+      <mat-list-item (click)="toggleDecesSubmenu()" class="menu-item menu-parent">
+        <mat-icon matListItemIcon class="icon-deces">sentiment_very_dissatisfied</mat-icon>
+        <span matListItemTitle>Actes de décès</span>
+        <mat-icon class="expand-icon">{{ showDecesSubmenu ? 'expand_less' : 'expand_more' }}</mat-icon>
+      </mat-list-item>
+
+      <div class="submenu" [class.expanded]="showDecesSubmenu">
+        <a mat-list-item routerLink="/admin/actes-deces/creation" routerLinkActive="active-link"
+           class="menu-item submenu-item">
+          <mat-icon matListItemIcon>add_circle_outline</mat-icon>
+          <span matListItemTitle>Création (< 2 mois)</span>
+        </a>
+        <a mat-list-item routerLink="/admin/actes-deces/transcription" routerLinkActive="active-link"
+           class="menu-item submenu-item">
+          <mat-icon matListItemIcon>drive_file_rename_outline</mat-icon>
+          <span matListItemTitle>Transcription</span>
+        </a>
+        <a mat-list-item routerLink="/admin/actes-deces/repris" routerLinkActive="active-link"
+           class="menu-item submenu-item submenu-item--highlight">
+          <mat-icon matListItemIcon>inventory_2</mat-icon>
+          <span matListItemTitle>Actes repris</span>
+        </a>
+        <a mat-list-item routerLink="/admin/actes-deces/consultation" routerLinkActive="active-link"
+           class="menu-item submenu-item">
+          <mat-icon matListItemIcon>search</mat-icon>
+          <span matListItemTitle>Consultation</span>
+        </a>
+      </div>
+
+      <mat-divider class="menu-divider"></mat-divider>
+
+      <!-- ══════════ Rapports & Statistiques ══════════ -->
+      <a mat-list-item *ngIf="canViewReports()" routerLink="/admin/rapports" routerLinkActive="active-link" class="menu-item">
+        <mat-icon matListItemIcon class="icon-rapports">assessment</mat-icon>
+        <span matListItemTitle>Rapports & Statistiques</span>
       </a>
 
-      <!-- Paramétrages -->
+      <!-- ══════════ ADMINISTRATION ══════════ -->
       <mat-list-item *ngIf="canViewSettings()" (click)="toggleSettingsSubmenu()" class="menu-item menu-parent">
-        <mat-icon matListItemIcon>settings</mat-icon>
-        <span matListItemTitle>Paramétrages</span>
+        <mat-icon matListItemIcon>admin_panel_settings</mat-icon>
+        <span matListItemTitle>Administration</span>
         <mat-icon class="expand-icon">{{ showSettingsSubmenu ? 'expand_less' : 'expand_more' }}</mat-icon>
       </mat-list-item>
 
-      <!-- Sous-menu pour Paramétrages -->
       <div class="submenu" [class.expanded]="showSettingsSubmenu">
         <!-- Gestion des Utilisateurs -->
         <mat-list-item *ngIf="canViewUsers()" (click)="toggleUsersSubmenu()" class="menu-item submenu-item menu-parent">

@@ -373,17 +373,13 @@ mat-toolbar {
   transform: translateX(6px);
 }
 
-/* Couleurs spécifiques pour différents types de menus */
-.menu-item[routerLink*="validation"] .mat-icon {
-  color: #ff9800;
-}
-
-.menu-item[routerLink*="civil-acts"] .mat-icon {
-  color: #2196f3;
-}
+/* Couleurs spécifiques pour les icônes de menu */
+.icon-naissance { color: #2e7d32 !important; }
+.icon-deces { color: #7b1fa2 !important; }
+.icon-rapports { color: #1565c0 !important; }
 
 .menu-item[routerLink*="users"] .mat-icon {
-  color: #4caf50;;
+  color: #4caf50;
 }
 
 .menu-item[routerLink*="roles"] .mat-icon,
@@ -393,6 +389,23 @@ mat-toolbar {
 
 .menu-item[routerLink*="localites"] .mat-icon {
   color: #4caf50;
+}
+
+/* Actes repris highlight */
+.submenu-item--highlight {
+  position: relative;
+}
+.submenu-item--highlight span[matListItemTitle] {
+  font-weight: 600 !important;
+}
+.submenu-item--highlight .mat-icon[matListItemIcon] {
+  color: #e65100 !important;
+}
+
+/* Menu divider spacing */
+.menu-divider {
+  margin: 8px 16px !important;
+  border-top-color: #e0e0e0 !important;
 }
 
 /* Animation pour les menus multi-niveaux */
