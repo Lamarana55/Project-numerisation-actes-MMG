@@ -1,0 +1,158 @@
+<div class="actes-page">
+
+  <!-- ══════════════ LAYOUT 2 COLONNES ══════════════ -->
+  <div class="actes-grid">
+
+    <!-- ═══════════ GAUCHE : RECHERCHE ═══════════ -->
+    <div class="search-panel">
+      <div class="panel-title-bar">
+        <mat-icon>search</mat-icon>
+        RECHERCHE SIMPLE
+      </div>
+
+      <div class="search-body">
+        <!-- Centre d'État Civil -->
+        <div class="search-section">
+          <h4 class="section-label">CRITÈRES CONCERNANT LE CENTRE D'ÉTAT CIVIL</h4>
+          <div class="form-row">
+            <label>Centre d'État Civil</label>
+            <span class="centre-value">{{ authService.communeNom || 'Non défini' }}</span>
+          </div>
+          <div class="form-row">
+            <label>Type d'Acte</label>
+            <select [(ngModel)]="searchTypeActe" class="form-select">
+              <option value="">Tous</option>
+              <option value="naissance">Naissance</option>
+              <option value="deces">Décès</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Personnes -->
+        <div class="search-section">
+          <h4 class="section-label">CRITÈRES CONCERNANT LA OU LES PERSONNES</h4>
+          <div class="form-row">
+            <label>NPI</label>
+            <input type="text" [(ngModel)]="searchNpi" class="form-input" placeholder="">
+          </div>
+          <div class="form-row">
+            <label>Nom</label>
+            <input type="text" [(ngModel)]="searchNom" class="form-input" placeholder="">
+          </div>
+          <div class="form-row">
+            <label>Prénom</label>
+            <input type="text" [(ngModel)]="searchPrenom" class="form-input" placeholder="">
+          </div>
+        </div>
+
+        <!-- Acte -->
+        <div class="search-section">
+          <h4 class="section-label">CRITÈRES CONCERNANT L'ACTE</h4>
+          <div class="form-row form-row--dates">
+            <label>Date de l'événement</label>
+            <div class="date-range">
+              <input type="date" [(ngModel)]="searchDateDebut" class="form-input form-input--date">
+              <span class="date-sep">au</span>
+              <input type="date" [(ngModel)]="searchDateFin" class="form-input form-input--date">
+            </div>
+          </div>
+          <div class="form-row">
+            <label>Numéro</label>
+            <input type="text" [(ngModel)]="searchNumero" class="form-input" placeholder="">
+          </div>
+        </div>
+
+        <!-- Boutons -->
+        <div class="search-actions">
+          <button class="btn-rechercher" (click)="rechercher()">
+            <mat-icon>search</mat-icon> Rechercher
+          </button>
+          <button class="btn-effacer" (click)="effacerCriteres()">
+            <mat-icon>clear_all</mat-icon> Effacer les critères
+          </button>
+          <button class="btn-avancee">
+            <mat-icon>tune</mat-icon> Recherche avancée
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ DROITE : CRÉATION + AUJOURD'HUI ═══════════ -->
+    <div class="right-column">
+
+      <!-- Section Création -->
+      <div class="creation-panel">
+        <div class="panel-title-bar panel-title-bar--green">
+          <mat-icon>add_circle</mat-icon>
+          CRÉATION
+        </div>
+        <div class="creation-body">
+          <button class="creation-btn" (click)="openCreationDialog('naissance')">
+            <div class="creation-btn-icon creation-btn-icon--naissance">
+              <mat-icon>child_care</mat-icon>
+            </div>
+            <span class="creation-btn-label">Naissance</span>
+          </button>
+          <button class="creation-btn" (click)="openCreationDialog('deces')">
+            <div class="creation-btn-icon creation-btn-icon--deces">
+              <mat-icon>menu_book</mat-icon>
+            </div>
+            <span class="creation-btn-label">Décès</span>
+          </button>
+          <button class="creation-btn" (click)="openCreationDialog('autres')">
+            <div class="creation-btn-icon creation-btn-icon--autres">
+              <mat-icon>more_horiz</mat-icon>
+            </div>
+            <span class="creation-btn-label">Autres</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Section Aujourd'hui -->
+      <div class="today-panel">
+        <div class="today-header">
+          <div>
+            <h2 class="today-title">AUJOURD'HUI</h2>
+            <span class="today-date">LE {{ today | date:'dd/MM/yyyy':'':'fr' | uppercase }}</span>
+          </div>
+          <button class="today-refresh" matTooltip="Actualiser">
+            <mat-icon>refresh</mat-icon>
+          </button>
+        </div>
+        <div class="today-body">
+          <div class="today-row">
+            <span class="today-label">Actes de naissance à valider</span>
+            <span class="today-count today-count--orange">0</span>
+            <button class="today-action" matTooltip="Voir" routerLink="/admin/actes-naissance/repris">
+              <mat-icon>open_in_new</mat-icon>
+            </button>
+          </div>
+          <div class="today-row">
+            <span class="today-label">Actes de naissance à corriger</span>
+            <span class="today-count">0</span>
+            <button class="today-action" matTooltip="Voir" routerLink="/admin/actes-naissance/repris">
+              <mat-icon>open_in_new</mat-icon>
+            </button>
+          </div>
+          <div class="today-row">
+            <span class="today-label">Actes de naissance validés</span>
+            <span class="today-count today-count--green">0</span>
+            <button class="today-action" matTooltip="Voir" routerLink="/admin/actes-naissance/repris">
+              <mat-icon>open_in_new</mat-icon>
+            </button>
+          </div>
+          <div class="today-row">
+            <span class="today-label">Actes repris (numérisation)</span>
+            <span class="today-count">0</span>
+            <button class="today-action" matTooltip="Voir" routerLink="/admin/actes-naissance/repris">
+              <mat-icon>open_in_new</mat-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

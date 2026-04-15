@@ -103,65 +103,18 @@
 
       <mat-divider class="menu-divider"></mat-divider>
 
-      <!-- ══════════ ACTES DE NAISSANCE ══════════ -->
-      <mat-list-item (click)="toggleNaissanceSubmenu()" class="menu-item menu-parent">
-        <mat-icon matListItemIcon class="icon-naissance">child_care</mat-icon>
-        <span matListItemTitle>Actes de naissance</span>
-        <mat-icon class="expand-icon">{{ showNaissanceSubmenu ? 'expand_less' : 'expand_more' }}</mat-icon>
-      </mat-list-item>
+      <!-- ══════════ ACTES ══════════ -->
+      <a mat-list-item routerLink="/admin/actes" routerLinkActive="active-link" class="menu-item">
+        <mat-icon matListItemIcon class="icon-actes">description</mat-icon>
+        <span matListItemTitle>Actes</span>
+      </a>
 
-      <div class="submenu" [class.expanded]="showNaissanceSubmenu">
-        <a mat-list-item routerLink="/admin/actes-naissance/creation" routerLinkActive="active-link"
-           class="menu-item submenu-item">
-          <mat-icon matListItemIcon>add_circle_outline</mat-icon>
-          <span matListItemTitle>Création (< 6 mois)</span>
-        </a>
-        <a mat-list-item routerLink="/admin/actes-naissance/transcription" routerLinkActive="active-link"
-           class="menu-item submenu-item">
-          <mat-icon matListItemIcon>drive_file_rename_outline</mat-icon>
-          <span matListItemTitle>Transcription</span>
-        </a>
-        <a mat-list-item *ngIf="canViewValidation()" routerLink="/admin/actes-naissance/repris" routerLinkActive="active-link"
-           class="menu-item submenu-item submenu-item--highlight">
-          <mat-icon matListItemIcon>inventory_2</mat-icon>
-          <span matListItemTitle>Actes repris</span>
-        </a>
-        <a mat-list-item routerLink="/admin/actes-naissance/consultation" routerLinkActive="active-link"
-           class="menu-item submenu-item">
-          <mat-icon matListItemIcon>search</mat-icon>
-          <span matListItemTitle>Consultation</span>
-        </a>
-      </div>
-
-      <!-- ══════════ ACTES DE DÉCÈS ══════════ -->
-      <mat-list-item (click)="toggleDecesSubmenu()" class="menu-item menu-parent">
-        <mat-icon matListItemIcon class="icon-deces">sentiment_very_dissatisfied</mat-icon>
-        <span matListItemTitle>Actes de décès</span>
-        <mat-icon class="expand-icon">{{ showDecesSubmenu ? 'expand_less' : 'expand_more' }}</mat-icon>
-      </mat-list-item>
-
-      <div class="submenu" [class.expanded]="showDecesSubmenu">
-        <a mat-list-item routerLink="/admin/actes-deces/creation" routerLinkActive="active-link"
-           class="menu-item submenu-item">
-          <mat-icon matListItemIcon>add_circle_outline</mat-icon>
-          <span matListItemTitle>Création (< 2 mois)</span>
-        </a>
-        <a mat-list-item routerLink="/admin/actes-deces/transcription" routerLinkActive="active-link"
-           class="menu-item submenu-item">
-          <mat-icon matListItemIcon>drive_file_rename_outline</mat-icon>
-          <span matListItemTitle>Transcription</span>
-        </a>
-        <a mat-list-item routerLink="/admin/actes-deces/repris" routerLinkActive="active-link"
-           class="menu-item submenu-item submenu-item--highlight">
-          <mat-icon matListItemIcon>inventory_2</mat-icon>
-          <span matListItemTitle>Actes repris</span>
-        </a>
-        <a mat-list-item routerLink="/admin/actes-deces/consultation" routerLinkActive="active-link"
-           class="menu-item submenu-item">
-          <mat-icon matListItemIcon>search</mat-icon>
-          <span matListItemTitle>Consultation</span>
-        </a>
-      </div>
+      <!-- Sous-menu Actes repris (raccourci rapide) -->
+      <a mat-list-item *ngIf="canViewValidation()" routerLink="/admin/actes-naissance/repris"
+         routerLinkActive="active-link" class="menu-item submenu-item submenu-item--highlight">
+        <mat-icon matListItemIcon>inventory_2</mat-icon>
+        <span matListItemTitle>Actes repris</span>
+      </a>
 
       <mat-divider class="menu-divider"></mat-divider>
 
