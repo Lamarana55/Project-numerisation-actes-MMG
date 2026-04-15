@@ -1,0 +1,59 @@
+<div class="dialog-container">
+
+  <!-- Header -->
+  <div class="dialog-header">
+    <div class="dialog-title">
+      <mat-icon class="dialog-title-icon" [style.color]="titleColor">folder</mat-icon>
+      <div>
+        <h2>SÉLECTION D'UN MODÈLE</h2>
+        <p>Veuillez sélectionner un type d'Acte</p>
+      </div>
+    </div>
+    <button mat-icon-button class="close-btn" (click)="cancel()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Filter -->
+  <div class="dialog-filter">
+    <label>Filtrer</label>
+    <input type="text" [(ngModel)]="filterText" placeholder="Rechercher un modèle…" class="filter-input" autofocus>
+  </div>
+
+  <!-- Liste des modèles -->
+  <div class="dialog-body">
+    <div class="category-header">
+      <mat-icon [style.color]="titleColor">folder_open</mat-icon>
+      <span [style.color]="titleColor">{{ title }} ({{ models.length }})</span>
+    </div>
+
+    <div class="model-list">
+      <div
+        *ngFor="let model of models"
+        class="model-item"
+        [class.model-item--selected]="selectedModel === model"
+        (click)="select(model)"
+        (dblclick)="confirm()">
+        <mat-icon class="model-icon">insert_drive_file</mat-icon>
+        <span class="model-label">{{ model.label }}</span>
+      </div>
+
+      <div *ngIf="models.length === 0" class="model-empty">
+        <mat-icon>search_off</mat-icon>
+        <span>Aucun modèle trouvé</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Acte manquant + boutons -->
+  <div class="dialog-footer">
+    <label class="acte-manquant">
+      <input type="checkbox"> Acte manquant
+    </label>
+    <div class="footer-actions">
+      <button class="btn-ok" [disabled]="!selectedModel" (click)="confirm()">OK</button>
+      <button class="btn-annuler" (click)="cancel()">Annuler</button>
+    </div>
+  </div>
+
+</div>

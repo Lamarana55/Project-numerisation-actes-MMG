@@ -44,6 +44,9 @@ import { DeathActesReprisComponent } from './actes-deces/actes-repris/death-acte
 // Rapports
 import { RapportsComponent } from './rapports/rapports.component';
 
+// Actes (page unifiée)
+import { ActesHomeComponent } from './actes/actes-home.component';
+
 const routes: Routes = [
   // Routes publiques
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -64,6 +67,12 @@ const routes: Routes = [
       // Dashboard principal
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', component: DashboardComponent },
+
+      // === PAGE ACTES UNIFIÉE ===
+      {
+        path: 'actes',
+        component: ActesHomeComponent,
+      },
 
       // Numérisation et Indexation
       {

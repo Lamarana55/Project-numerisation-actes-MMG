@@ -374,6 +374,7 @@ mat-toolbar {
 }
 
 /* Couleurs spécifiques pour les icônes de menu */
+.icon-actes { color: #00695c !important; }
 .icon-naissance { color: #2e7d32 !important; }
 .icon-deces { color: #7b1fa2 !important; }
 .icon-rapports { color: #1565c0 !important; }

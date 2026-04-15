@@ -103,6 +103,10 @@ import { DeathActesReprisComponent } from './actes-deces/actes-repris/death-acte
 // Rapports
 import { RapportsComponent } from './rapports/rapports.component';
 
+// Actes (page unifiée)
+import { ActesHomeComponent } from './actes/actes-home.component';
+import { ActeSelectionDialogComponent } from './actes/acte-selection-dialog/acte-selection-dialog.component';
+
 
 registerLocaleData(localeFr);
 
@@ -153,6 +157,9 @@ registerLocaleData(localeFr);
     DeathActesReprisComponent,
     // Rapports
     RapportsComponent,
+    // Actes unifiés
+    ActesHomeComponent,
+    ActeSelectionDialogComponent,
   ],
   imports: [
     BrowserModule,
