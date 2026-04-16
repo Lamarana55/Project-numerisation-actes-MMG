@@ -9,7 +9,12 @@ export interface ActeModel {
   label: string;
   description: string;
   route: string;
-  icon: string;
+}
+
+export interface ActeCategory {
+  label: string;
+  expanded: boolean;
+  items: ActeModel[];
 }
 
 @Component({
@@ -22,42 +27,73 @@ export class ActeSelectionDialogComponent {
   selectedModel: ActeModel | null = null;
   filterText = '';
 
+  // ── Naissance : liste plate ──────────────────────────────────────────────
   readonly modelsNaissance: ActeModel[] = [
     {
-      label: 'Déclaration dans les délais (< 6 mois)',
-      description: 'Déclaration dans les délais d\'une naissance (6 mois)',
+      label: 'Déclaration dans les délais d\'une naissance (6 mois)',
+      description: 'Création d\'un acte de naissance dans les 6 mois',
       route: '/admin/actes-naissance/creation',
-      icon: 'child_care',
     },
     {
-      label: 'Transcription du jugement supplétif',
-      description: 'Transcription du jugement supplétif de naissance',
+      label: 'Transcription du jugement supplétif de naissance',
+      description: 'Transcription d\'un jugement supplétif de naissance',
       route: '/admin/actes-naissance/transcription',
-      icon: 'drive_file_rename_outline',
     },
-  ];
-
-  readonly modelsDeces: ActeModel[] = [
-    {
-      label: 'Déclaration dans les délais (< 2 mois)',
-      description: 'Déclaration dans les délais d\'un décès (2 mois)',
-      route: '/admin/actes-deces/creation',
-      icon: 'menu_book',
-    },
-    {
-      label: 'Transcription du jugement supplétif',
-      description: 'Transcription du jugement supplétif de décès',
-      route: '/admin/actes-deces/transcription',
-      icon: 'drive_file_rename_outline',
-    },
-  ];
-
-  readonly modelsAutres: ActeModel[] = [
     {
       label: 'Actes repris (numérisation)',
-      description: 'Valider les actes issus de la numérisation',
+      description: 'Liste des actes de naissance issus de la numérisation',
       route: '/admin/actes-naissance/repris',
-      icon: 'inventory_2',
+    },
+  ];
+
+  // ── Décès : liste plate ──────────────────────────────────────────────────
+  readonly modelsDeces: ActeModel[] = [
+    {
+      label: 'Déclaration dans les délais d\'un décès (2 mois)',
+      description: 'Création d\'un acte de décès dans les 2 mois',
+      route: '/admin/actes-deces/creation',
+    },
+    {
+      label: 'Transcription du jugement supplétif de décès',
+      description: 'Transcription d\'un jugement supplétif de décès',
+      route: '/admin/actes-deces/transcription',
+    },
+  ];
+
+  // ── Autres : liste avec catégories (style RNEC) ──────────────────────────
+  readonly categoriesAutres: ActeCategory[] = [
+    {
+      label: 'Notification de Naissance',
+      expanded: true,
+      items: [
+        {
+          label: 'Notification de naissance',
+          description: 'Notification de naissance',
+          route: '/admin/actes-naissance/consultation',
+        },
+      ],
+    },
+    {
+      label: 'Notification de Décès',
+      expanded: true,
+      items: [
+        {
+          label: 'Notification de décès',
+          description: 'Notification de décès',
+          route: '/admin/actes-deces/consultation',
+        },
+      ],
+    },
+    {
+      label: 'Jugement supplétif naissance',
+      expanded: true,
+      items: [
+        {
+          label: 'Jugement supplétif de naissance',
+          description: 'Jugement supplétif de naissance',
+          route: '/admin/actes-naissance/transcription',
+        },
+      ],
     },
   ];
 
@@ -65,6 +101,10 @@ export class ActeSelectionDialogComponent {
     public dialogRef: MatDialogRef<ActeSelectionDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: ActeSelectionData,
   ) {}
+
+  get isAutres(): boolean {
+    return this.data.type === 'autres';
+  }
 
   get title(): string {
     switch (this.data.type) {
@@ -82,16 +122,32 @@ export class ActeSelectionDialogComponent {
     }
   }
 
+  // Liste plate pour naissance/décès (avec filtre)
   get models(): ActeModel[] {
     const all = this.data.type === 'naissance'
       ? this.modelsNaissance
-      : this.data.type === 'deces'
-        ? this.modelsDeces
-        : this.modelsAutres;
+      : this.modelsDeces;
 
     if (!this.filterText.trim()) return all;
     const q = this.filterText.toLowerCase();
-    return all.filter(m => m.label.toLowerCase().includes(q) || m.description.toLowerCase().includes(q));
+    return all.filter(m => m.label.toLowerCase().includes(q));
+  }
+
+  // Catégories filtrées pour "Autres"
+  get filteredCategories(): ActeCategory[] {
+    if (!this.filterText.trim()) return this.categoriesAutres;
+    const q = this.filterText.toLowerCase();
+    return this.categoriesAutres
+      .map(cat => ({
+        ...cat,
+        expanded: true,
+        items: cat.items.filter(item => item.label.toLowerCase().includes(q)),
+      }))
+      .filter(cat => cat.label.toLowerCase().includes(q) || cat.items.length > 0);
+  }
+
+  toggleCategory(cat: ActeCategory): void {
+    cat.expanded = !cat.expanded;
   }
 
   select(model: ActeModel): void {

@@ -1,61 +1,69 @@
+/* ─── Conteneur principal ─────────────────────────────────────────────────── */
 .dialog-container {
   display: flex;
   flex-direction: column;
-  min-width: 480px;
-  max-width: 560px;
+  width: 480px;
+  max-width: 95vw;
   background: white;
-  border-radius: 8px;
+  border-radius: 6px;
   overflow: hidden;
+  font-family: inherit;
 }
 
-/* Header */
+/* ─── Header ──────────────────────────────────────────────────────────────── */
 .dialog-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  padding: 18px 20px 14px;
-  border-bottom: 1px solid #e0e0e0;
-  background: #f9f9f9;
+  padding: 14px 16px 12px;
+  background: #f5f5f5;
+  border-bottom: 1px solid #ddd;
 }
-.dialog-title {
+.dialog-title-row {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
-.dialog-title-icon {
-  font-size: 28px;
-  width: 28px;
-  height: 28px;
+.dialog-folder-icon {
+  font-size: 26px;
+  width: 26px;
+  height: 26px;
 }
-.dialog-title h2 {
+.dialog-title {
   margin: 0;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
   color: #1a1a1a;
-  letter-spacing: 0.3px;
 }
-.dialog-title p {
+.dialog-subtitle {
   margin: 3px 0 0;
-  font-size: 13px;
+  font-size: 12px;
   color: #777;
 }
 .close-btn {
-  color: #999;
-  width: 32px;
-  height: 32px;
-  line-height: 32px;
+  color: #888;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: none;
+  background: none;
+  border-radius: 50%;
 }
-.close-btn:hover { color: #333; }
+.close-btn:hover { background: #e0e0e0; color: #333; }
 
-/* Filter */
+/* ─── Filtre ──────────────────────────────────────────────────────────────── */
 .dialog-filter {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 12px 20px 8px;
-  border-bottom: 1px solid #f0f0f0;
+  padding: 10px 16px;
+  background: white;
+  border-bottom: 1px solid #eee;
 }
-.dialog-filter label {
+.filter-label {
   font-size: 13px;
   font-weight: 600;
   color: #555;
@@ -63,9 +71,9 @@
 }
 .filter-input {
   flex: 1;
-  padding: 6px 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  padding: 5px 8px;
+  border: 1px solid #c0c0c0;
+  border-radius: 3px;
   font-size: 13px;
 }
 .filter-input:focus {
@@ -74,108 +82,136 @@
   box-shadow: 0 0 0 2px rgba(76,175,80,0.15);
 }
 
-/* Body */
+/* ─── Corps ───────────────────────────────────────────────────────────────── */
 .dialog-body {
   flex: 1;
-  padding: 12px 20px;
+  padding: 10px 4px 8px;
   min-height: 200px;
-  max-height: 320px;
+  max-height: 340px;
   overflow-y: auto;
 }
 
-.category-header {
+/* ─── Ligne catégorie (dossier) ───────────────────────────────────────────── */
+.category-row {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  font-weight: 700;
-  margin-bottom: 10px;
+  padding: 4px 8px;
+  cursor: pointer;
+  border-radius: 3px;
+  user-select: none;
 }
-.category-header mat-icon { font-size: 18px; width: 18px; height: 18px; }
+.category-row:hover { background: #f0f0f0; }
 
-.model-list { display: flex; flex-direction: column; gap: 2px; }
+.cat-toggle {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  color: #666;
+}
+.cat-arrow {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  transition: transform 0.15s;
+  transform: rotate(0deg);
+}
+.cat-arrow--open {
+  transform: rotate(90deg);
+}
+
+.cat-folder-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  margin: 0 6px 0 2px;
+}
+.cat-label {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* ─── Items du modèle ─────────────────────────────────────────────────────── */
+.model-list { display: flex; flex-direction: column; }
 
 .model-item {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  border-radius: 6px;
+  padding: 5px 8px;
   cursor: pointer;
-  transition: background 0.15s;
-  border: 1px solid transparent;
+  border-radius: 3px;
+  user-select: none;
 }
-.model-item:hover { background: #f5f5f5; }
+.model-item:hover { background: #f0f7f0; }
 .model-item--selected {
-  background: #e8f5e9 !important;
-  border-color: #4caf50;
+  background: #c8e6c9 !important;
+  outline: 1px solid #81c784;
 }
 
-.model-icon {
-  font-size: 18px;
-  width: 18px;
-  height: 18px;
+.model-indent {
+  display: inline-block;
+  width: 28px;          /* indentation sous l'icône dossier */
+  flex-shrink: 0;
+}
+.model-file-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
   color: #9e9e9e;
+  margin-right: 8px;
+  flex-shrink: 0;
 }
-.model-item--selected .model-icon { color: #2e7d32; }
-
+.model-item--selected .model-file-icon { color: #388e3c; }
 .model-label {
-  font-size: 14px;
+  font-size: 13px;
   color: #333;
 }
-.model-item--selected .model-label {
-  color: #1b5e20;
-  font-weight: 600;
-}
+.model-item--selected .model-label { font-weight: 600; color: #1b5e20; }
 
+/* ─── État vide ───────────────────────────────────────────────────────────── */
 .model-empty {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   color: #bbb;
   font-size: 13px;
-  padding: 20px 0;
-  justify-content: center;
+  padding: 30px 0;
 }
 .model-empty mat-icon { font-size: 20px; width: 20px; height: 20px; }
 
-/* Footer */
+/* ─── Footer ──────────────────────────────────────────────────────────────── */
 .dialog-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 20px;
-  border-top: 1px solid #e0e0e0;
-  background: #fafafa;
+  padding: 10px 16px;
+  border-top: 1px solid #ddd;
+  background: #f9f9f9;
 }
 .acte-manquant {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 13px;
+  font-size: 12px;
   color: #555;
   cursor: pointer;
 }
 .footer-actions { display: flex; gap: 8px; }
 
 .btn-ok, .btn-annuler {
-  padding: 7px 20px;
+  padding: 6px 18px;
   border: none;
-  border-radius: 5px;
+  border-radius: 4px;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background 0.15s;
 }
-.btn-ok {
-  background: #2e7d32;
-  color: white;
-}
+.btn-ok { background: #2e7d32; color: white; }
 .btn-ok:hover:not(:disabled) { background: #1b5e20; }
 .btn-ok:disabled { background: #bdbdbd; cursor: not-allowed; }
-
-.btn-annuler {
-  background: #e0e0e0;
-  color: #555;
-}
+.btn-annuler { background: #e0e0e0; color: #555; }
 .btn-annuler:hover { background: #bdbdbd; }
