@@ -1,0 +1,284 @@
+/* ╔═══════════════════════════════════════════════════════════════════════
+   ║  PARAMÉTRAGE HUB — Expert UX Design
+   ╚═══════════════════════════════════════════════════════════════════════ */
+
+:host {
+  --P:        #00853F;
+  --P-g:      linear-gradient(135deg,#00853F 0%,#3da860 100%);
+  --page-bg:  #eef2f7;
+  --card:     #ffffff;
+  --border:   #dde3ef;
+  --txt-1:    #0f172a;
+  --txt-2:    #374151;
+  --txt-3:    #6b7280;
+  --sh-sm:    0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+  --sh-md:    0 4px 12px rgba(0,0,0,.08),0 2px 4px rgba(0,0,0,.04);
+  --sh-lg:    0 12px 36px rgba(0,0,0,.12),0 4px 10px rgba(0,0,0,.06);
+  display: block;
+  background: var(--page-bg);
+  min-height: 100%;
+}
+
+/* ── Root ──────────────────────────────────────────────────────────────── */
+.param-root {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  animation: fadeUp .4s cubic-bezier(.22,1,.36,1);
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   EN-TÊTE
+═══════════════════════════════════════════════════════════════════════ */
+.page-header {
+  background: var(--P-g);
+  border-radius: 20px;
+  padding: 32px 36px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 18px;
+  box-shadow: 0 10px 32px rgba(0,133,63,.32);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Cercles décoratifs */
+.deco {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255,255,255,.07);
+  pointer-events: none;
+}
+.deco-1 { width: 300px; height: 300px; top: -100px; right: -60px; }
+.deco-2 { width: 160px; height: 160px; bottom: -60px; left: 30px; }
+.deco-3 { width: 80px;  height: 80px;  bottom: 20px;  right: 160px; background: rgba(255,255,255,.05); }
+
+.page-header-left { display: flex; align-items: center; gap: 20px; z-index: 1; }
+
+.page-header-icon {
+  width: 60px; height: 60px; border-radius: 16px;
+  background: rgba(255,255,255,.18);
+  border: 1.5px solid rgba(255,255,255,.32);
+  backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.page-header-icon mat-icon { font-size: 1.9rem; width: 1.9rem; height: 1.9rem; color: #fff; }
+
+.page-title {
+  margin: 0;
+  font-size: 2rem; font-weight: 800; color: #fff; letter-spacing: -.4px;
+}
+.page-subtitle {
+  margin: 6px 0 0;
+  font-size: .9rem; color: rgba(255,255,255,.78); font-weight: 500; max-width: 520px;
+}
+
+/* Pills */
+.header-pills { display: flex; gap: 10px; flex-wrap: wrap; z-index: 1; }
+.header-pill {
+  display: flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,.16);
+  border: 1px solid rgba(255,255,255,.28);
+  border-radius: 20px; padding: 6px 14px;
+  font-size: .82rem; font-weight: 600; color: #fff;
+  backdrop-filter: blur(6px);
+}
+.header-pill mat-icon { font-size: .95rem; width: .95rem; height: .95rem; }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   BANNIÈRE INFO
+═══════════════════════════════════════════════════════════════════════ */
+.intro-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: rgba(0,133,63,.07);
+  border: 1px solid rgba(0,133,63,.2);
+  border-radius: 12px;
+  padding: 14px 18px;
+  font-size: .88rem;
+  color: var(--txt-2);
+  line-height: 1.55;
+}
+.intro-icon {
+  font-size: 1.1rem; width: 1.1rem; height: 1.1rem;
+  color: var(--P); flex-shrink: 0; margin-top: 2px;
+}
+.intro-banner strong { color: var(--P); }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   GRILLE DES MODULES
+═══════════════════════════════════════════════════════════════════════ */
+.modules-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+/* ── Carte module ──────────────────────────────────────────────────────── */
+.module-card {
+  background: var(--card);
+  border-radius: 18px;
+  border: 1.5px solid var(--border);
+  box-shadow: var(--sh-sm);
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  transition: transform .22s cubic-bezier(.22,1,.36,1),
+              box-shadow .22s cubic-bezier(.22,1,.36,1),
+              border-color .18s;
+  overflow: hidden;
+  position: relative;
+}
+
+.module-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--sh-lg);
+  border-color: transparent;
+}
+
+/* Barre accent gauche au hover */
+.module-card::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0; width: 4px;
+  background: inherit;
+  opacity: 0;
+  transition: opacity .2s;
+}
+.module-card:hover::before { opacity: 1; }
+
+/* ── Banner coloré en haut de la carte ────────────────────────────────── */
+.card-banner {
+  padding: 22px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+}
+.card-banner::after {
+  content: '';
+  position: absolute;
+  right: -24px; top: -24px;
+  width: 100px; height: 100px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.1);
+}
+
+.card-banner-icon {
+  width: 52px; height: 52px; border-radius: 14px;
+  background: rgba(255,255,255,.22);
+  border: 1.5px solid rgba(255,255,255,.35);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.card-banner-icon mat-icon { font-size: 1.6rem; width: 1.6rem; height: 1.6rem; color: #fff; }
+
+.card-tag {
+  font-size: .7rem; font-weight: 800; letter-spacing: .1em;
+  text-transform: uppercase; color: rgba(255,255,255,.85);
+  background: rgba(255,255,255,.15);
+  border: 1px solid rgba(255,255,255,.25);
+  border-radius: 20px; padding: 4px 12px;
+}
+
+/* ── Corps de la carte ────────────────────────────────────────────────── */
+.card-body {
+  padding: 20px 24px 16px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.card-title {
+  margin: 0;
+  font-size: 1.15rem; font-weight: 800; color: var(--txt-1); letter-spacing: -.2px;
+}
+
+.card-desc {
+  margin: 0;
+  font-size: .875rem; color: var(--txt-3); line-height: 1.6;
+  flex: 1;
+}
+
+/* Chips inline dans la description */
+.chip {
+  display: inline-block;
+  font-size: .72rem; font-weight: 700;
+  padding: 1px 7px; border-radius: 8px;
+  vertical-align: middle;
+}
+.chip--green  { background: #e8f5e9; color: #2e7d32; }
+.chip--orange { background: #fff3e0; color: #e65100; }
+
+/* Stats horizontales */
+.card-stats {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: #f8fafd;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 16px;
+  margin-top: 4px;
+}
+.card-stat {
+  display: flex; flex-direction: column; align-items: center;
+  flex: 1; gap: 2px;
+}
+.card-stat-sep {
+  width: 1px; height: 28px; background: var(--border); flex-shrink: 0;
+}
+.stat-val {
+  font-size: 1.4rem; font-weight: 800; color: var(--txt-1); line-height: 1;
+}
+.stat-lbl {
+  font-size: .7rem; color: var(--txt-3); font-weight: 600; text-transform: uppercase; letter-spacing: .04em;
+}
+
+/* ── Footer de la carte ───────────────────────────────────────────────── */
+.card-footer {
+  padding: 12px 24px 16px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: flex-end;
+}
+.card-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: .85rem; font-weight: 700;
+  color: var(--P);
+  transition: gap .18s;
+}
+.card-cta mat-icon { font-size: 1rem; width: 1rem; height: 1rem; transition: transform .18s; }
+.module-card:hover .card-cta mat-icon { transform: translateX(4px); }
+.module-card:hover .card-cta { gap: 8px; }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════════════════════════════════ */
+@media (max-width: 900px) {
+  .modules-grid { grid-template-columns: 1fr; }
+  .page-header { padding: 22px 20px; flex-direction: column; text-align: center; }
+  .page-header-left { flex-direction: column; gap: 12px; align-items: center; }
+  .header-pills { justify-content: center; }
+}
+
+@media (max-width: 600px) {
+  .param-root { padding: 16px; gap: 14px; }
+  .page-title { font-size: 1.5rem; }
+  .card-stats { flex-wrap: wrap; gap: 8px; }
+  .card-stat-sep { display: none; }
+}

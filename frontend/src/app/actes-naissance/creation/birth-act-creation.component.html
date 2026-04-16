@@ -1,33 +1,525 @@
-<div class="page-container">
+<div class="creation-page">
+
+  <!-- ── En-tête page ─────────────────────────────────────────────────── -->
   <div class="page-header">
-    <div class="header-deco header-deco--1"></div>
-    <div class="header-deco header-deco--2"></div>
-    <div class="breadcrumb">
-      <mat-icon class="breadcrumb-home">home</mat-icon>
-      <span class="breadcrumb-sep">/</span>
-      <span>Actes de naissance</span>
-      <span class="breadcrumb-sep">/</span>
-      <span class="breadcrumb-current">Création</span>
-    </div>
-    <div class="title-row">
-      <div class="title-icon-wrap">
-        <mat-icon>child_care</mat-icon>
-      </div>
-      <div class="title-text">
-        <h1>Création d'acte de naissance</h1>
-        <p>Déclaration dans les délais d'une naissance (6 mois)</p>
+    <div class="page-header-left">
+      <div class="page-header-icon"><mat-icon>child_care</mat-icon></div>
+      <div>
+        <h1 class="page-title">Acte de naissance</h1>
+        <p class="page-subtitle">Déclaration dans les délais d'une naissance (6 mois)</p>
       </div>
     </div>
+    <button mat-stroked-button class="btn-retour" (click)="cancel()">
+      <mat-icon>arrow_back</mat-icon> Retour
+    </button>
   </div>
 
-  <div class="page-content">
-    <div class="coming-soon-card">
-      <div class="coming-soon-icon">
-        <mat-icon>construction</mat-icon>
-      </div>
-      <h2>Module en cours de développement</h2>
-      <p>La création d'actes de naissance dans les délais (< 6 mois) sera bientôt disponible.</p>
-      <p class="coming-soon-detail">Ce module permettra la saisie complète des informations relatives à l'enfant, aux parents, au déclarant et à l'officier d'état civil.</p>
+  <!-- ── Carte stepper ─────────────────────────────────────────────────── -->
+  <div class="stepper-card">
+
+    <!-- Indicateur d'étapes personnalisé -->
+    <div class="step-track">
+      <ng-container *ngFor="let step of steps; let last = last">
+        <div class="step-node"
+             [class.step-node--active]="step.number === currentStep"
+             [class.step-node--done]="isStepCompleted(step.number)"
+             [class.step-node--clickable]="step.number < currentStep"
+             (click)="goTo(step.number)">
+          <div class="step-bubble">
+            <mat-icon *ngIf="isStepCompleted(step.number)" class="done-icon">check</mat-icon>
+            <span *ngIf="!isStepCompleted(step.number)">{{ step.number }}</span>
+          </div>
+          <span class="step-node-label">{{ step.label }}</span>
+        </div>
+        <div *ngIf="!last" class="step-connector"
+             [class.step-connector--done]="isStepCompleted(step.number)"></div>
+      </ng-container>
     </div>
-  </div>
-</div>
+
+    <!-- ════════════════ ÉTAPE 1 — ENFANT ════════════════ -->
+    <div class="step-body" *ngIf="currentStep === 1" [formGroup]="enfantForm">
+
+      <div class="step-intro">
+        <div class="step-intro-icon" style="background:#e8f5e9;color:#2e7d32">
+          <mat-icon>child_care</mat-icon>
+        </div>
+        <div>
+          <h2 class="step-intro-title">Renseignements sur l'enfant</h2>
+          <p class="step-intro-sub">Informations d'identité et de naissance de l'enfant</p>
+        </div>
+      </div>
+
+      <div class="form-columns">
+
+        <!-- ── Bloc 1 : Information sur l'enfant ── -->
+        <fieldset class="form-fieldset">
+          <legend>
+            <span class="legend-num">1</span>
+            Information sur l'enfant
+          </legend>
+
+          <div class="field-row">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Prénom(s)</mat-label>
+              <input matInput formControlName="prenom" placeholder="Prénom(s) de l'enfant">
+              <mat-icon matSuffix>person</mat-icon>
+              <mat-error>Ce champ est requis</mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="field-row">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Nom de famille</mat-label>
+              <input matInput formControlName="nom" placeholder="Nom de famille">
+              <mat-icon matSuffix>badge</mat-icon>
+              <mat-error>Ce champ est requis</mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="field-row">
+            <div class="radio-block">
+              <span class="radio-block-label">Sexe <span class="req">*</span></span>
+              <mat-radio-group formControlName="sexe" class="radio-inline">
+                <mat-radio-button value="M">Masculin</mat-radio-button>
+                <mat-radio-button value="F">Féminin</mat-radio-button>
+              </mat-radio-group>
+              <div class="field-error" *ngIf="enfantForm.get('sexe')?.invalid && enfantForm.get('sexe')?.touched">
+                Ce champ est requis
+              </div>
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- ── Bloc 2 : Information sur la naissance ── -->
+        <fieldset class="form-fieldset">
+          <legend>
+            <span class="legend-num">2</span>
+            Information sur la naissance de l'enfant
+          </legend>
+
+          <div class="field-row">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Date de naissance</mat-label>
+              <input matInput [matDatepicker]="pickerNaissance"
+                     formControlName="dateNaissance"
+                     placeholder="JJ/MM/AAAA"
+                     [max]="today">
+              <mat-datepicker-toggle matIconSuffix [for]="pickerNaissance">
+                <mat-icon matDatepickerToggleIcon>event</mat-icon>
+              </mat-datepicker-toggle>
+              <mat-datepicker #pickerNaissance startView="multi-year"></mat-datepicker>
+              <mat-error>Ce champ est requis</mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="field-row">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Heure de naissance</mat-label>
+              <input matInput type="time" formControlName="heureNaissance">
+              <mat-icon matSuffix>schedule</mat-icon>
+            </mat-form-field>
+          </div>
+
+          <!-- Pays de naissance -->
+          <div class="field-row">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Pays de naissance</mat-label>
+              <mat-select formControlName="paysNaissance" placeholder="Sélectionner un pays…">
+                <mat-option *ngFor="let p of pays" [value]="p.code">{{ p.nom }}</mat-option>
+              </mat-select>
+              <mat-icon matSuffix>public</mat-icon>
+              <mat-error>Ce champ est requis</mat-error>
+            </mat-form-field>
+          </div>
+
+          <!-- Guinée : Préfecture → Commune → Quartier -->
+          <ng-container *ngIf="isGuinee">
+
+            <div class="field-row conditional-field">
+              <mat-form-field appearance="outline" class="field-full">
+                <mat-label>Préfecture de naissance</mat-label>
+                <mat-select formControlName="prefectureNaissance" placeholder="Sélectionner une préfecture…">
+                  <mat-option *ngFor="let pf of prefectures" [value]="pf.code">{{ pf.nom }}</mat-option>
+                </mat-select>
+                <mat-icon matSuffix>account_balance</mat-icon>
+              </mat-form-field>
+            </div>
+
+            <div class="field-row conditional-field">
+              <mat-form-field appearance="outline" class="field-full">
+                <mat-label>Commune de naissance</mat-label>
+                <mat-select formControlName="communeNaissance"
+                            placeholder="Sélectionner une commune…"
+                            [disabled]="communes.length === 0">
+                  <mat-option *ngFor="let c of communes" [value]="c.code">{{ c.nom }}</mat-option>
+                </mat-select>
+                <mat-icon matSuffix>location_city</mat-icon>
+              </mat-form-field>
+            </div>
+
+            <div class="field-row conditional-field">
+              <mat-form-field appearance="outline" class="field-full">
+                <mat-label>Quartier</mat-label>
+                <mat-select formControlName="quartier"
+                            placeholder="Sélectionner un quartier…"
+                            [disabled]="quartiers.length === 0">
+                  <mat-option *ngFor="let q of quartiers" [value]="q.code">{{ q.nom }}</mat-option>
+                </mat-select>
+                <mat-icon matSuffix>map</mat-icon>
+              </mat-form-field>
+            </div>
+
+          </ng-container>
+
+          <!-- Autre pays : Ville uniquement -->
+          <div class="field-row conditional-field"
+               *ngIf="!isGuinee && enfantForm.get('paysNaissance')?.value">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Ville de naissance</mat-label>
+              <input matInput formControlName="villeNaissance" placeholder="Ville">
+              <mat-icon matSuffix>location_city</mat-icon>
+            </mat-form-field>
+          </div>
+
+          <div class="field-row">
+            <div class="radio-block">
+              <span class="radio-block-label">Lieu d'accouchement <span class="req">*</span></span>
+              <mat-radio-group formControlName="lieuAccouchement" class="radio-inline">
+                <mat-radio-button value="formation_sanitaire">Formation sanitaire</mat-radio-button>
+                <mat-radio-button value="domicile">Domicile</mat-radio-button>
+                <mat-radio-button value="autre">Autre</mat-radio-button>
+              </mat-radio-group>
+            </div>
+          </div>
+
+          <!-- Conditionnel : Formation sanitaire -->
+          <div class="field-row conditional-field" *ngIf="isFormationSanitaire">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Formation sanitaire</mat-label>
+              <mat-select formControlName="formationSanitaire" placeholder="Sélectionner une formation…">
+                <mat-option *ngFor="let fs of formationsSanitaires" [value]="fs">{{ fs }}</mat-option>
+              </mat-select>
+              <mat-icon matSuffix>local_hospital</mat-icon>
+            </mat-form-field>
+          </div>
+
+          <!-- Conditionnel : Domicile ou Autre -->
+          <div class="field-row conditional-field" *ngIf="isAdresseLieu">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Adresse du lieu de l'accouchement</mat-label>
+              <input matInput formControlName="adresseLieu"
+                     placeholder="Indiquez l'adresse précise">
+              <mat-icon matSuffix>home</mat-icon>
+            </mat-form-field>
+          </div>
+
+        </fieldset>
+
+      </div><!-- /form-columns -->
+
+    </div>
+
+    <!-- ════════════════ ÉTAPE 2 — NAISSANCE ════════════════ -->
+    <div class="step-body" *ngIf="currentStep === 2" [formGroup]="naissanceForm">
+
+      <div class="step-intro">
+        <div class="step-intro-icon" style="background:#e8f5e9;color:#2e7d32">
+          <mat-icon>local_hospital</mat-icon>
+        </div>
+        <div>
+          <h2 class="step-intro-title">Renseignements sur la naissance</h2>
+          <p class="step-intro-sub">Informations complémentaires sur l'accouchement</p>
+        </div>
+      </div>
+
+      <fieldset class="form-fieldset">
+        <legend>Informations sur l'accouchement</legend>
+        <div class="fields-grid-2">
+          <div class="radio-field-wrap">
+            <label class="mat-label-custom">Naissance multiple</label>
+            <mat-radio-group formControlName="naissanceMultiple" class="radio-row">
+              <mat-radio-button value="oui">Oui</mat-radio-button>
+              <mat-radio-button value="non">Non</mat-radio-button>
+            </mat-radio-group>
+          </div>
+          <mat-form-field appearance="outline" *ngIf="naissanceMultiple">
+            <mat-label>Rang de naissance chez la mère</mat-label>
+            <input matInput type="number" min="1" max="10" formControlName="rangNaissance">
+          </mat-form-field>
+        </div>
+      </fieldset>
+
+    </div>
+
+    <!-- ════════════════ ÉTAPE 3 — PÈRE ════════════════ -->
+    <div class="step-body" *ngIf="currentStep === 3" [formGroup]="pereForm">
+
+      <div class="step-intro">
+        <div class="step-intro-icon" style="background:#e3f2fd;color:#1565c0">
+          <mat-icon>man</mat-icon>
+        </div>
+        <div>
+          <h2 class="step-intro-title">Renseignements sur le père</h2>
+          <p class="step-intro-sub">Informations d'identité du père de l'enfant</p>
+        </div>
+      </div>
+
+      <div class="fields-section">
+        <h3 class="fields-section-title">Identité</h3>
+        <div class="fields-grid-2">
+          <mat-form-field appearance="outline">
+            <mat-label>Nom</mat-label>
+            <input matInput formControlName="nom">
+            <mat-error>Champ requis</mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Prénom(s)</mat-label>
+            <input matInput formControlName="prenom">
+            <mat-error>Champ requis</mat-error>
+          </mat-form-field>
+        </div>
+        <div class="fields-grid-3">
+          <mat-form-field appearance="outline">
+            <mat-label>NPI</mat-label>
+            <input matInput formControlName="npi" placeholder="Numéro d'identification">
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Date de naissance</mat-label>
+            <input matInput [matDatepicker]="pickerPereNaiss"
+                   formControlName="dateNaissance"
+                   placeholder="JJ/MM/AAAA"
+                   [max]="today">
+            <mat-datepicker-toggle matIconSuffix [for]="pickerPereNaiss">
+              <mat-icon matDatepickerToggleIcon>event</mat-icon>
+            </mat-datepicker-toggle>
+            <mat-datepicker #pickerPereNaiss startView="multi-year"></mat-datepicker>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Nationalité</mat-label>
+            <input matInput formControlName="nationalite">
+          </mat-form-field>
+        </div>
+        <div class="fields-grid-2">
+          <mat-form-field appearance="outline">
+            <mat-label>Profession</mat-label>
+            <input matInput formControlName="profession">
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Adresse / Domicile</mat-label>
+            <input matInput formControlName="adresse">
+          </mat-form-field>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ════════════════ ÉTAPE 4 — MÈRE ════════════════ -->
+    <div class="step-body" *ngIf="currentStep === 4" [formGroup]="mereForm">
+
+      <div class="step-intro">
+        <div class="step-intro-icon" style="background:#fce4ec;color:#c62828">
+          <mat-icon>woman</mat-icon>
+        </div>
+        <div>
+          <h2 class="step-intro-title">Renseignements sur la mère</h2>
+          <p class="step-intro-sub">Informations d'identité de la mère de l'enfant</p>
+        </div>
+      </div>
+
+      <div class="fields-section">
+        <h3 class="fields-section-title">Identité</h3>
+        <div class="fields-grid-2">
+          <mat-form-field appearance="outline">
+            <mat-label>Nom</mat-label>
+            <input matInput formControlName="nom">
+            <mat-error>Champ requis</mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Prénom(s)</mat-label>
+            <input matInput formControlName="prenom">
+            <mat-error>Champ requis</mat-error>
+          </mat-form-field>
+        </div>
+        <div class="fields-grid-3">
+          <mat-form-field appearance="outline">
+            <mat-label>NPI</mat-label>
+            <input matInput formControlName="npi" placeholder="Numéro d'identification">
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Date de naissance</mat-label>
+            <input matInput [matDatepicker]="pickerMereNaiss"
+                   formControlName="dateNaissance"
+                   placeholder="JJ/MM/AAAA"
+                   [max]="today">
+            <mat-datepicker-toggle matIconSuffix [for]="pickerMereNaiss">
+              <mat-icon matDatepickerToggleIcon>event</mat-icon>
+            </mat-datepicker-toggle>
+            <mat-datepicker #pickerMereNaiss startView="multi-year"></mat-datepicker>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Nationalité</mat-label>
+            <input matInput formControlName="nationalite">
+          </mat-form-field>
+        </div>
+        <div class="fields-grid-2">
+          <mat-form-field appearance="outline">
+            <mat-label>Profession</mat-label>
+            <input matInput formControlName="profession">
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Adresse / Domicile</mat-label>
+            <input matInput formControlName="adresse">
+          </mat-form-field>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ════════════════ ÉTAPE 5 — DÉCLARATION ════════════════ -->
+    <div class="step-body" *ngIf="currentStep === 5" [formGroup]="declarationForm">
+
+      <div class="step-intro">
+        <div class="step-intro-icon" style="background:#fff8e1;color:#f57c00">
+          <mat-icon>assignment_ind</mat-icon>
+        </div>
+        <div>
+          <h2 class="step-intro-title">Renseignements sur la déclaration</h2>
+          <p class="step-intro-sub">Identité du déclarant et date de déclaration</p>
+        </div>
+      </div>
+
+      <div class="fields-section">
+        <h3 class="fields-section-title">Déclarant</h3>
+        <div class="fields-grid-2">
+          <div class="radio-field-wrap">
+            <label class="mat-label-custom">Qualité du déclarant <span class="req">*</span></label>
+            <mat-radio-group formControlName="qualite" class="radio-col">
+              <mat-radio-button value="pere">Le père</mat-radio-button>
+              <mat-radio-button value="mere">La mère</mat-radio-button>
+              <mat-radio-button value="autre">Autre personne</mat-radio-button>
+            </mat-radio-group>
+          </div>
+          <mat-form-field appearance="outline">
+            <mat-label>Date de déclaration</mat-label>
+            <input matInput [matDatepicker]="pickerDeclaration"
+                   formControlName="dateDeclaration"
+                   placeholder="JJ/MM/AAAA"
+                   [max]="today">
+            <mat-datepicker-toggle matIconSuffix [for]="pickerDeclaration">
+              <mat-icon matDatepickerToggleIcon>event</mat-icon>
+            </mat-datepicker-toggle>
+            <mat-datepicker #pickerDeclaration></mat-datepicker>
+            <mat-error>Champ requis</mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="fields-section" *ngIf="declarantAutre">
+        <h3 class="fields-section-title">Identité de l'autre déclarant</h3>
+        <div class="fields-grid-2">
+          <mat-form-field appearance="outline">
+            <mat-label>Nom</mat-label>
+            <input matInput formControlName="nom">
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Prénom(s)</mat-label>
+            <input matInput formControlName="prenom">
+          </mat-form-field>
+        </div>
+        <div class="fields-grid-2">
+          <mat-form-field appearance="outline">
+            <mat-label>NPI</mat-label>
+            <input matInput formControlName="npi">
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Profession</mat-label>
+            <input matInput formControlName="profession">
+          </mat-form-field>
+        </div>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Adresse</mat-label>
+          <input matInput formControlName="adresse">
+        </mat-form-field>
+      </div>
+
+    </div>
+
+    <!-- ════════════════ ÉTAPE 6 — ACTE ════════════════ -->
+    <div class="step-body" *ngIf="currentStep === 6" [formGroup]="acteForm">
+
+      <div class="step-intro">
+        <div class="step-intro-icon" style="background:#f3e5f5;color:#6a1b9a">
+          <mat-icon>article</mat-icon>
+        </div>
+        <div>
+          <h2 class="step-intro-title">Établissement de l'acte</h2>
+          <p class="step-intro-sub">Informations finales avant enregistrement</p>
+        </div>
+      </div>
+
+      <div class="fields-section">
+        <h3 class="fields-section-title">Informations de l'acte</h3>
+        <div class="fields-grid-2">
+          <mat-form-field appearance="outline">
+            <mat-label>Numéro de l'acte</mat-label>
+            <input matInput formControlName="numeroActe" placeholder="Généré automatiquement" readonly>
+            <mat-icon matSuffix>tag</mat-icon>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Date d'établissement</mat-label>
+            <input matInput [matDatepicker]="pickerEtablissement"
+                   formControlName="dateEtablissement"
+                   placeholder="JJ/MM/AAAA"
+                   [max]="today">
+            <mat-datepicker-toggle matIconSuffix [for]="pickerEtablissement">
+              <mat-icon matDatepickerToggleIcon>event</mat-icon>
+            </mat-datepicker-toggle>
+            <mat-datepicker #pickerEtablissement></mat-datepicker>
+            <mat-error>Champ requis</mat-error>
+          </mat-form-field>
+        </div>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Officier d'état civil signataire</mat-label>
+          <input matInput formControlName="officier" placeholder="Nom et titre de l'officier">
+          <mat-icon matSuffix>badge</mat-icon>
+          <mat-error>Champ requis</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Observations / Mentions marginales</mat-label>
+          <textarea matInput formControlName="observations" rows="3"
+                    placeholder="Observations éventuelles…"></textarea>
+        </mat-form-field>
+      </div>
+
+      <!-- Bannière récapitulatif -->
+      <div class="confirm-banner">
+        <mat-icon>verified</mat-icon>
+        <div>
+          <strong>Prêt à enregistrer</strong>
+          <p>Vérifiez toutes les informations avant de valider. Cette action est définitive.</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── Pied de page : navigation ────────────────────────────────── -->
+    <div class="step-footer">
+      <button mat-stroked-button class="btn-cancel" (click)="cancel()">
+        <mat-icon>close</mat-icon> Annuler
+      </button>
+      <div class="footer-nav">
+        <button mat-stroked-button
+                [disabled]="currentStep === 1"
+                (click)="goPrev()">
+          <mat-icon>arrow_back</mat-icon> Précédent
+        </button>
+        <button mat-raised-button color="primary" (click)="goNext()">
+          {{ currentStep === 6 ? 'Enregistrer' : 'Suivant' }}
+          <mat-icon>{{ currentStep === 6 ? 'save' : 'arrow_forward' }}</mat-icon>
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /stepper-card -->
+
+</div><!-- /creation-page -->

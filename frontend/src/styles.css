@@ -248,4 +248,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   display: flex !important;
   flex-direction: column !important;
   background: transparent !important;
+  width: 960px !important;
+  max-width: 96vw !important;
+  min-width: 560px !important;
 }

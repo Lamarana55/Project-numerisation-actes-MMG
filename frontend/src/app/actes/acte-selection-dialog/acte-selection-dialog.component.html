@@ -1,48 +1,69 @@
-<div class="dialog-container">
+<div class="dialog-wrapper">
 
-  <!-- Header -->
-  <div class="dialog-header">
-    <div class="dialog-title-row">
-      <mat-icon class="dialog-folder-icon" [style.color]="titleColor">folder</mat-icon>
-      <div>
-        <h2 class="dialog-title">SÉLECTION D'UN MODÈLE</h2>
-        <p class="dialog-subtitle">Veuillez sélectionner un type d'Acte</p>
-      </div>
+  <!-- ── Barre d'accent colorée ────────────────────────────────────────── -->
+  <div class="accent-bar" [style.background]="headerBg"></div>
+
+  <!-- ── Header gradient ───────────────────────────────────────────────── -->
+  <div class="dialog-header" [style.background]="headerBg">
+    <div class="deco-circle deco-1"></div>
+    <div class="deco-circle deco-2"></div>
+
+    <div class="header-icon-wrap">
+      <mat-icon>{{ typeIcon }}</mat-icon>
     </div>
-    <button mat-icon-button class="close-btn" (click)="cancel()">
+
+    <div class="header-info">
+      <h2 class="header-title">{{ title }}</h2>
+      <p class="header-subtitle">{{ dialogSubtitle }}</p>
+    </div>
+
+    <button class="header-close" (click)="cancel()" type="button">
       <mat-icon>close</mat-icon>
     </button>
   </div>
 
-  <!-- Filter -->
-  <div class="dialog-filter">
-    <label class="filter-label">Filtrer</label>
-    <input type="text" [(ngModel)]="filterText" class="filter-input" autofocus>
+  <!-- ── Barre de recherche ─────────────────────────────────────────────── -->
+  <div class="search-bar">
+    <mat-icon class="search-icon">search</mat-icon>
+    <input
+      type="text"
+      class="search-input"
+      [(ngModel)]="filterText"
+      placeholder="Rechercher un modèle…"
+      autofocus>
+    <button *ngIf="filterText" class="search-clear" type="button" (click)="filterText=''">
+      <mat-icon>close</mat-icon>
+    </button>
   </div>
 
-  <!-- Corps : liste plate (naissance / décès) -->
+  <!-- ── Corps : liste plate (naissance / décès) ───────────────────────── -->
   <div class="dialog-body" *ngIf="!isAutres">
 
-    <div class="category-row">
-      <button class="cat-toggle" type="button">
-        <mat-icon class="cat-arrow">arrow_drop_down</mat-icon>
-      </button>
-      <mat-icon class="cat-folder-icon" [style.color]="titleColor">folder_open</mat-icon>
-      <span class="cat-label" [style.color]="titleColor">
-        {{ title }} ({{ models.length }})
-      </span>
+    <div class="section-header">
+      <mat-icon class="section-folder" [style.color]="titleColor">folder_open</mat-icon>
+      <span class="section-title" [style.color]="titleColor">{{ title }}</span>
+      <span class="count-chip">{{ models.length }}</span>
     </div>
 
-    <div class="model-list">
+    <div class="model-cards">
       <div
-        *ngFor="let model of models"
-        class="model-item"
-        [class.model-item--selected]="selectedModel === model"
+        *ngFor="let model of models; let i = index"
+        class="model-card"
+        [class.model-card--selected]="selectedModel === model"
+        [style.--accent]="titleColor"
         (click)="select(model)"
         (dblclick)="confirm()">
-        <span class="model-indent"></span>
-        <mat-icon class="model-file-icon">insert_drive_file</mat-icon>
-        <span class="model-label">{{ model.label }}</span>
+
+        <div class="card-num" [style.background]="cardNumBg" [style.color]="titleColor">
+          {{ (i + 1).toString().padStart(2, '0') }}
+        </div>
+
+        <div class="card-info">
+          <p class="card-title">{{ model.label }}</p>
+          <p class="card-desc">{{ model.description }}</p>
+        </div>
+
+        <mat-icon class="card-chevron">chevron_right</mat-icon>
       </div>
 
       <div *ngIf="models.length === 0" class="model-empty">
@@ -52,36 +73,38 @@
     </div>
   </div>
 
-  <!-- Corps : catégories groupées (autres) -->
+  <!-- ── Corps : catégories groupées (autres) ──────────────────────────── -->
   <div class="dialog-body" *ngIf="isAutres">
     <ng-container *ngFor="let cat of filteredCategories">
 
-      <!-- En-tête catégorie (dossier) -->
-      <div class="category-row" (click)="toggleCategory(cat)">
-        <button class="cat-toggle" type="button">
-          <mat-icon class="cat-arrow" [class.cat-arrow--open]="cat.expanded">
-            arrow_right
-          </mat-icon>
-        </button>
-        <mat-icon class="cat-folder-icon" [style.color]="titleColor">
+      <div class="section-header section-header--clickable" (click)="toggleCategory(cat)">
+        <mat-icon class="section-folder" [style.color]="titleColor">
           {{ cat.expanded ? 'folder_open' : 'folder' }}
         </mat-icon>
-        <span class="cat-label" [style.color]="titleColor">
-          {{ cat.label }} ({{ cat.items.length }})
-        </span>
+        <span class="section-title" [style.color]="titleColor">{{ cat.label }}</span>
+        <span class="count-chip">{{ cat.items.length }}</span>
+        <mat-icon class="expand-arrow" [class.expand-arrow--open]="cat.expanded">expand_more</mat-icon>
       </div>
 
-      <!-- Items du dossier -->
-      <div class="model-list" *ngIf="cat.expanded">
+      <div class="model-cards" *ngIf="cat.expanded">
         <div
-          *ngFor="let item of cat.items"
-          class="model-item"
-          [class.model-item--selected]="selectedModel === item"
+          *ngFor="let item of cat.items; let i = index"
+          class="model-card"
+          [class.model-card--selected]="selectedModel === item"
+          [style.--accent]="titleColor"
           (click)="select(item)"
           (dblclick)="confirm()">
-          <span class="model-indent"></span>
-          <mat-icon class="model-file-icon">insert_drive_file</mat-icon>
-          <span class="model-label">{{ item.label }}</span>
+
+          <div class="card-num" [style.background]="cardNumBg" [style.color]="titleColor">
+            {{ (i + 1).toString().padStart(2, '0') }}
+          </div>
+
+          <div class="card-info">
+            <p class="card-title">{{ item.label }}</p>
+            <p class="card-desc">{{ item.description }}</p>
+          </div>
+
+          <mat-icon class="card-chevron">chevron_right</mat-icon>
         </div>
       </div>
 
@@ -93,14 +116,22 @@
     </div>
   </div>
 
-  <!-- Footer -->
+  <!-- ── Footer ────────────────────────────────────────────────────────── -->
   <div class="dialog-footer">
     <label class="acte-manquant">
       <input type="checkbox"> Acte manquant
     </label>
     <div class="footer-actions">
-      <button class="btn-ok" [disabled]="!selectedModel" (click)="confirm()">OK</button>
-      <button class="btn-annuler" (click)="cancel()">Annuler</button>
+      <button class="btn-annuler" type="button" (click)="cancel()">Annuler</button>
+      <button
+        class="btn-creer"
+        type="button"
+        [disabled]="!selectedModel"
+        [style.background]="selectedModel ? headerBg : null"
+        (click)="confirm()">
+        <mat-icon>add</mat-icon>
+        Créer
+      </button>
     </div>
   </div>
 

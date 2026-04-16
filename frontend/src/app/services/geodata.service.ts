@@ -19,6 +19,7 @@ export class GeodataService {
   private regionsCache$?: Observable<RegionDTO[]>;
   private paysCache$?: Observable<PaysDTO[]>;
   private communesCache$?: Observable<CommuneDTO[]>;
+  private prefecturesCache$?: Observable<PrefectureDTO[]>;
 
   constructor(private http: HttpClient) {}
 
@@ -68,6 +69,21 @@ export class GeodataService {
     return this.communesCache$;
   }
 
+  getAllPrefectures(): Observable<PrefectureDTO[]> {
+    if (!this.prefecturesCache$) {
+      this.prefecturesCache$ = this.http.get<PrefectureDTO[]>(`${this.API_URL}/prefectures`).pipe(
+        shareReplay(1),
+        catchError((error: HttpErrorResponse) => {
+          if (error.status === 401) {
+            this.prefecturesCache$ = undefined;
+          }
+          return this.handleError('getAllPrefectures', [])(error);
+        })
+      );
+    }
+    return this.prefecturesCache$;
+  }
+
   getPrefecturesByRegion(codeRegion: string): Observable<PrefectureDTO[]> {
     return this.http
       .get<PrefectureDTO[]>(`${this.API_URL}/regions/${codeRegion}/prefectures`)
@@ -97,6 +113,7 @@ export class GeodataService {
     this.regionsCache$ = undefined;
     this.paysCache$ = undefined;
     this.communesCache$ = undefined;
+    this.prefecturesCache$ = undefined;
   }
 
   checkApiHealth(): Observable<boolean> {

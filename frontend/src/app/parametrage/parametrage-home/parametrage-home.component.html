@@ -1,0 +1,209 @@
+<div class="param-root">
+
+  <!-- ══ EN-TÊTE ════════════════════════════════════════════════════════ -->
+  <header class="page-header">
+    <!-- Cercles décoratifs -->
+    <div class="deco deco-1"></div>
+    <div class="deco deco-2"></div>
+    <div class="deco deco-3"></div>
+
+    <div class="page-header-left">
+      <div class="page-header-icon">
+        <mat-icon>tune</mat-icon>
+      </div>
+      <div>
+        <h1 class="page-title">Paramétrage</h1>
+        <p class="page-subtitle">
+          Configuration des centres d'état civil, types d'actes, registres et officiers
+        </p>
+      </div>
+    </div>
+
+    <div class="header-pills">
+      <span class="header-pill">
+        <mat-icon>home_work</mat-icon>
+        6 centres
+      </span>
+      <span class="header-pill">
+        <mat-icon>badge</mat-icon>
+        5 officiers
+      </span>
+      <span class="header-pill">
+        <mat-icon>menu_book</mat-icon>
+        4 registres actifs
+      </span>
+    </div>
+  </header>
+
+  <!-- ══ INTRO ══════════════════════════════════════════════════════════ -->
+  <div class="intro-banner">
+    <mat-icon class="intro-icon">info_outline</mat-icon>
+    <div>
+      <strong>Espace de configuration</strong> — Utilisez les modules ci-dessous pour paramétrer
+      les éléments fondamentaux du système d'état civil : communes, types d'actes, registres et officiers.
+    </div>
+  </div>
+
+  <!-- ══ GRILLE DES MODULES ═════════════════════════════════════════════ -->
+  <div class="modules-grid">
+
+    <!-- ── Centres d'état civil ── -->
+    <div class="module-card" (click)="navigateTo('/admin/parametrage/centres')">
+      <div class="card-banner" style="background: linear-gradient(135deg,#1565c0 0%,#1e88e5 60%,#42a5f5 100%)">
+        <div class="card-banner-icon">
+          <mat-icon>home_work</mat-icon>
+        </div>
+        <span class="card-tag">Communes</span>
+      </div>
+      <div class="card-body">
+        <h2 class="card-title">Centres d'état civil</h2>
+        <p class="card-desc">
+          Gérez les communes et leurs centres. Définissez le type
+          <span class="chip chip--green">Principal</span> ou
+          <span class="chip chip--orange">Secondaire</span>
+          et rattachez les centres secondaires à leur centre principal.
+        </p>
+        <div class="card-stats">
+          <div class="card-stat">
+            <span class="stat-val">6</span>
+            <span class="stat-lbl">centres</span>
+          </div>
+          <div class="card-stat-sep"></div>
+          <div class="card-stat">
+            <span class="stat-val">4</span>
+            <span class="stat-lbl">principaux</span>
+          </div>
+          <div class="card-stat-sep"></div>
+          <div class="card-stat">
+            <span class="stat-val">2</span>
+            <span class="stat-lbl">secondaires</span>
+          </div>
+        </div>
+      </div>
+      <div class="card-footer">
+        <span class="card-cta">
+          Accéder
+          <mat-icon>arrow_forward</mat-icon>
+        </span>
+      </div>
+    </div>
+
+    <!-- ── Types d'actes ── -->
+    <div class="module-card" (click)="navigateTo('/admin/parametrage/types-actes')">
+      <div class="card-banner" style="background: linear-gradient(135deg,#6a1b9a 0%,#8e24aa 60%,#ab47bc 100%)">
+        <div class="card-banner-icon">
+          <mat-icon>category</mat-icon>
+        </div>
+        <span class="card-tag">Référentiel</span>
+      </div>
+      <div class="card-body">
+        <h2 class="card-title">Types d'actes</h2>
+        <p class="card-desc">
+          Configurez le référentiel des types d'actes civils reconnus :
+          naissance, décès, mariage, transcription de jugement supplétif, etc.
+        </p>
+        <div class="card-stats">
+          <div class="card-stat">
+            <span class="stat-val">7</span>
+            <span class="stat-lbl">types définis</span>
+          </div>
+          <div class="card-stat-sep"></div>
+          <div class="card-stat">
+            <span class="stat-val">6</span>
+            <span class="stat-lbl">actifs</span>
+          </div>
+          <div class="card-stat-sep"></div>
+          <div class="card-stat">
+            <span class="stat-val">1</span>
+            <span class="stat-lbl">inactif</span>
+          </div>
+        </div>
+      </div>
+      <div class="card-footer">
+        <span class="card-cta">
+          Accéder
+          <mat-icon>arrow_forward</mat-icon>
+        </span>
+      </div>
+    </div>
+
+    <!-- ── Registres ── -->
+    <div class="module-card" (click)="navigateTo('/admin/parametrage/registres')">
+      <div class="card-banner" style="background: linear-gradient(135deg,#00695c 0%,#00897b 60%,#26a69a 100%)">
+        <div class="card-banner-icon">
+          <mat-icon>menu_book</mat-icon>
+        </div>
+        <span class="card-tag">Archives</span>
+      </div>
+      <div class="card-body">
+        <h2 class="card-title">Registres</h2>
+        <p class="card-desc">
+          Gérez les registres d'état civil par centre et par année d'exercice.
+          Suivez le nombre d'actes inscrits et le statut ouvert / clôturé.
+        </p>
+        <div class="card-stats">
+          <div class="card-stat">
+            <span class="stat-val">6</span>
+            <span class="stat-lbl">registres</span>
+          </div>
+          <div class="card-stat-sep"></div>
+          <div class="card-stat">
+            <span class="stat-val">549</span>
+            <span class="stat-lbl">actes inscrits</span>
+          </div>
+          <div class="card-stat-sep"></div>
+          <div class="card-stat">
+            <span class="stat-val">4</span>
+            <span class="stat-lbl">actifs</span>
+          </div>
+        </div>
+      </div>
+      <div class="card-footer">
+        <span class="card-cta">
+          Accéder
+          <mat-icon>arrow_forward</mat-icon>
+        </span>
+      </div>
+    </div>
+
+    <!-- ── Officiers d'état civil ── -->
+    <div class="module-card" (click)="navigateTo('/admin/parametrage/officiers')">
+      <div class="card-banner" style="background: linear-gradient(135deg,#bf360c 0%,#d84315 60%,#ef6c00 100%)">
+        <div class="card-banner-icon">
+          <mat-icon>badge</mat-icon>
+        </div>
+        <span class="card-tag">Personnel</span>
+      </div>
+      <div class="card-body">
+        <h2 class="card-title">Officiers d'état civil</h2>
+        <p class="card-desc">
+          Gérez les officiers principaux et les officiers délégués.
+          L'officier délégué d'un centre principal signe les actes des centres secondaires rattachés.
+        </p>
+        <div class="card-stats">
+          <div class="card-stat">
+            <span class="stat-val">6</span>
+            <span class="stat-lbl">officiers</span>
+          </div>
+          <div class="card-stat-sep"></div>
+          <div class="card-stat">
+            <span class="stat-val">4</span>
+            <span class="stat-lbl">principaux</span>
+          </div>
+          <div class="card-stat-sep"></div>
+          <div class="card-stat">
+            <span class="stat-val">2</span>
+            <span class="stat-lbl">délégués</span>
+          </div>
+        </div>
+      </div>
+      <div class="card-footer">
+        <span class="card-cta">
+          Accéder
+          <mat-icon>arrow_forward</mat-icon>
+        </span>
+      </div>
+    </div>
+
+  </div>
+</div>

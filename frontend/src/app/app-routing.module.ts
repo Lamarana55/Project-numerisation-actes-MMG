@@ -44,6 +44,13 @@ import { DeathActesReprisComponent } from './actes-deces/actes-repris/death-acte
 // Rapports
 import { RapportsComponent } from './rapports/rapports.component';
 
+// Paramétrage
+import { ParametrageHomeComponent } from './parametrage/parametrage-home/parametrage-home.component';
+import { CentresEtatCivilComponent } from './parametrage/centres-etat-civil/centres-etat-civil.component';
+import { TypesActesComponent } from './parametrage/types-actes/types-actes.component';
+import { RegistresComponent } from './parametrage/registres/registres.component';
+import { OfficiersEtatCivilComponent } from './parametrage/officiers-etat-civil/officiers-etat-civil.component';
+
 // Actes (page unifiée)
 import { ActesHomeComponent } from './actes/actes-home.component';
 
@@ -178,6 +185,38 @@ const routes: Routes = [
         component: LocalitesComponent,
         canActivate: [AuthorizationGuard],
         data: { roles: ['CAN_MANAGE_LOCALITES'] },
+      },
+
+      // === PARAMÉTRAGE ===
+      {
+        path: 'parametrage',
+        component: ParametrageHomeComponent,
+        canActivate: [AuthorizationGuard],
+        data: { roles: ['CAN_MANAGE_PARAMETRAGE', 'CAN_MANAGE_SETTINGS'] },
+      },
+      {
+        path: 'parametrage/centres',
+        component: CentresEtatCivilComponent,
+        canActivate: [AuthorizationGuard],
+        data: { roles: ['CAN_MANAGE_PARAMETRAGE', 'CAN_MANAGE_SETTINGS'] },
+      },
+      {
+        path: 'parametrage/types-actes',
+        component: TypesActesComponent,
+        canActivate: [AuthorizationGuard],
+        data: { roles: ['CAN_MANAGE_PARAMETRAGE', 'CAN_MANAGE_SETTINGS'] },
+      },
+      {
+        path: 'parametrage/registres',
+        component: RegistresComponent,
+        canActivate: [AuthorizationGuard],
+        data: { roles: ['CAN_MANAGE_PARAMETRAGE', 'CAN_MANAGE_SETTINGS'] },
+      },
+      {
+        path: 'parametrage/officiers',
+        component: OfficiersEtatCivilComponent,
+        canActivate: [AuthorizationGuard],
+        data: { roles: ['CAN_MANAGE_PARAMETRAGE', 'CAN_MANAGE_SETTINGS'] },
       },
 
       // === CONFIGURATION SYSTÈME ===

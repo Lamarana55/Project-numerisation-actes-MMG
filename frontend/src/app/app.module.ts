@@ -107,6 +107,13 @@ import { RapportsComponent } from './rapports/rapports.component';
 import { ActesHomeComponent } from './actes/actes-home.component';
 import { ActeSelectionDialogComponent } from './actes/acte-selection-dialog/acte-selection-dialog.component';
 
+// Paramétrage
+import { ParametrageHomeComponent } from './parametrage/parametrage-home/parametrage-home.component';
+import { CentresEtatCivilComponent } from './parametrage/centres-etat-civil/centres-etat-civil.component';
+import { TypesActesComponent } from './parametrage/types-actes/types-actes.component';
+import { RegistresComponent } from './parametrage/registres/registres.component';
+import { OfficiersEtatCivilComponent } from './parametrage/officiers-etat-civil/officiers-etat-civil.component';
+
 
 registerLocaleData(localeFr);
 
@@ -160,6 +167,12 @@ registerLocaleData(localeFr);
     // Actes unifiés
     ActesHomeComponent,
     ActeSelectionDialogComponent,
+    // Paramétrage
+    ParametrageHomeComponent,
+    CentresEtatCivilComponent,
+    TypesActesComponent,
+    RegistresComponent,
+    OfficiersEtatCivilComponent,
   ],
   imports: [
     BrowserModule,
