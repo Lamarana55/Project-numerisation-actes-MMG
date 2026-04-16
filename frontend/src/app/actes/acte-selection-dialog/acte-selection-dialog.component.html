@@ -1,36 +1,45 @@
 <div class="dialog-container">
 
-  <!-- Header -->
+  <!-- ── Header ─────────────────────────────────────────────────────────── -->
   <div class="dialog-header">
     <div class="dialog-title-row">
-      <mat-icon class="dialog-folder-icon" [style.color]="titleColor">folder</mat-icon>
-      <div>
+      <div class="dialog-icon-wrap" [style.background]="titleColor + '18'">
+        <mat-icon [style.color]="titleColor">folder</mat-icon>
+      </div>
+      <div class="dialog-title-text">
         <h2 class="dialog-title">SÉLECTION D'UN MODÈLE</h2>
         <p class="dialog-subtitle">Veuillez sélectionner un type d'Acte</p>
       </div>
     </div>
-    <button mat-icon-button class="close-btn" (click)="cancel()">
+    <button class="close-btn" type="button" (click)="cancel()">
       <mat-icon>close</mat-icon>
     </button>
   </div>
 
-  <!-- Filter -->
+  <!-- ── Barre de recherche ─────────────────────────────────────────────── -->
   <div class="dialog-filter">
-    <label class="filter-label">Filtrer</label>
-    <input type="text" [(ngModel)]="filterText" class="filter-input" autofocus>
+    <mat-icon class="filter-icon">search</mat-icon>
+    <input
+      type="text"
+      [(ngModel)]="filterText"
+      class="filter-input"
+      placeholder="Rechercher un modèle..."
+      autofocus>
+    <button *ngIf="filterText" class="filter-clear" type="button" (click)="filterText=''">
+      <mat-icon>close</mat-icon>
+    </button>
   </div>
 
-  <!-- Corps : liste plate (naissance / décès) -->
+  <!-- ── Corps : liste plate (naissance / décès) ────────────────────────── -->
   <div class="dialog-body" *ngIf="!isAutres">
 
     <div class="category-row">
       <button class="cat-toggle" type="button">
-        <mat-icon class="cat-arrow">arrow_drop_down</mat-icon>
+        <mat-icon class="cat-arrow cat-arrow--open">arrow_right</mat-icon>
       </button>
       <mat-icon class="cat-folder-icon" [style.color]="titleColor">folder_open</mat-icon>
-      <span class="cat-label" [style.color]="titleColor">
-        {{ title }} ({{ models.length }})
-      </span>
+      <span class="cat-label" [style.color]="titleColor">{{ title }}</span>
+      <span class="cat-count">{{ models.length }}</span>
     </div>
 
     <div class="model-list">
@@ -52,26 +61,21 @@
     </div>
   </div>
 
-  <!-- Corps : catégories groupées (autres) -->
+  <!-- ── Corps : catégories groupées (autres) ───────────────────────────── -->
   <div class="dialog-body" *ngIf="isAutres">
     <ng-container *ngFor="let cat of filteredCategories">
 
-      <!-- En-tête catégorie (dossier) -->
       <div class="category-row" (click)="toggleCategory(cat)">
         <button class="cat-toggle" type="button">
-          <mat-icon class="cat-arrow" [class.cat-arrow--open]="cat.expanded">
-            arrow_right
-          </mat-icon>
+          <mat-icon class="cat-arrow" [class.cat-arrow--open]="cat.expanded">arrow_right</mat-icon>
         </button>
         <mat-icon class="cat-folder-icon" [style.color]="titleColor">
           {{ cat.expanded ? 'folder_open' : 'folder' }}
         </mat-icon>
-        <span class="cat-label" [style.color]="titleColor">
-          {{ cat.label }} ({{ cat.items.length }})
-        </span>
+        <span class="cat-label" [style.color]="titleColor">{{ cat.label }}</span>
+        <span class="cat-count">{{ cat.items.length }}</span>
       </div>
 
-      <!-- Items du dossier -->
       <div class="model-list" *ngIf="cat.expanded">
         <div
           *ngFor="let item of cat.items"
@@ -93,14 +97,14 @@
     </div>
   </div>
 
-  <!-- Footer -->
-  <div class="dialog-footer">
-    <label class="acte-manquant">
+  <!-- ── Footer ─────────────────────────────────────────────────────────── -->
+  <div class="dialog-footer" [class.dialog-footer--end]="isAutres">
+    <label class="acte-manquant" *ngIf="!isAutres">
       <input type="checkbox"> Acte manquant
     </label>
     <div class="footer-actions">
-      <button class="btn-ok" [disabled]="!selectedModel" (click)="confirm()">OK</button>
-      <button class="btn-annuler" (click)="cancel()">Annuler</button>
+      <button class="btn-annuler" type="button" (click)="cancel()">Annuler</button>
+      <button class="btn-ok" type="button" [disabled]="!selectedModel" (click)="confirm()">OK</button>
     </div>
   </div>
 
