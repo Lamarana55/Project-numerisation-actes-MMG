@@ -2,11 +2,11 @@
 
   <!-- Header -->
   <div class="dialog-header">
-    <div class="dialog-title">
-      <mat-icon class="dialog-title-icon" [style.color]="titleColor">folder</mat-icon>
+    <div class="dialog-title-row">
+      <mat-icon class="dialog-folder-icon" [style.color]="titleColor">folder</mat-icon>
       <div>
-        <h2>SÉLECTION D'UN MODÈLE</h2>
-        <p>Veuillez sélectionner un type d'Acte</p>
+        <h2 class="dialog-title">SÉLECTION D'UN MODÈLE</h2>
+        <p class="dialog-subtitle">Veuillez sélectionner un type d'Acte</p>
       </div>
     </div>
     <button mat-icon-button class="close-btn" (click)="cancel()">
@@ -16,15 +16,21 @@
 
   <!-- Filter -->
   <div class="dialog-filter">
-    <label>Filtrer</label>
-    <input type="text" [(ngModel)]="filterText" placeholder="Rechercher un modèle…" class="filter-input" autofocus>
+    <label class="filter-label">Filtrer</label>
+    <input type="text" [(ngModel)]="filterText" class="filter-input" autofocus>
   </div>
 
-  <!-- Liste des modèles -->
-  <div class="dialog-body">
-    <div class="category-header">
-      <mat-icon [style.color]="titleColor">folder_open</mat-icon>
-      <span [style.color]="titleColor">{{ title }} ({{ models.length }})</span>
+  <!-- Corps : liste plate (naissance / décès) -->
+  <div class="dialog-body" *ngIf="!isAutres">
+
+    <div class="category-row">
+      <button class="cat-toggle" type="button">
+        <mat-icon class="cat-arrow">arrow_drop_down</mat-icon>
+      </button>
+      <mat-icon class="cat-folder-icon" [style.color]="titleColor">folder_open</mat-icon>
+      <span class="cat-label" [style.color]="titleColor">
+        {{ title }} ({{ models.length }})
+      </span>
     </div>
 
     <div class="model-list">
@@ -34,7 +40,8 @@
         [class.model-item--selected]="selectedModel === model"
         (click)="select(model)"
         (dblclick)="confirm()">
-        <mat-icon class="model-icon">insert_drive_file</mat-icon>
+        <span class="model-indent"></span>
+        <mat-icon class="model-file-icon">insert_drive_file</mat-icon>
         <span class="model-label">{{ model.label }}</span>
       </div>
 
@@ -45,7 +52,48 @@
     </div>
   </div>
 
-  <!-- Acte manquant + boutons -->
+  <!-- Corps : catégories groupées (autres) -->
+  <div class="dialog-body" *ngIf="isAutres">
+    <ng-container *ngFor="let cat of filteredCategories">
+
+      <!-- En-tête catégorie (dossier) -->
+      <div class="category-row" (click)="toggleCategory(cat)">
+        <button class="cat-toggle" type="button">
+          <mat-icon class="cat-arrow" [class.cat-arrow--open]="cat.expanded">
+            arrow_right
+          </mat-icon>
+        </button>
+        <mat-icon class="cat-folder-icon" [style.color]="titleColor">
+          {{ cat.expanded ? 'folder_open' : 'folder' }}
+        </mat-icon>
+        <span class="cat-label" [style.color]="titleColor">
+          {{ cat.label }} ({{ cat.items.length }})
+        </span>
+      </div>
+
+      <!-- Items du dossier -->
+      <div class="model-list" *ngIf="cat.expanded">
+        <div
+          *ngFor="let item of cat.items"
+          class="model-item"
+          [class.model-item--selected]="selectedModel === item"
+          (click)="select(item)"
+          (dblclick)="confirm()">
+          <span class="model-indent"></span>
+          <mat-icon class="model-file-icon">insert_drive_file</mat-icon>
+          <span class="model-label">{{ item.label }}</span>
+        </div>
+      </div>
+
+    </ng-container>
+
+    <div *ngIf="filteredCategories.length === 0" class="model-empty">
+      <mat-icon>search_off</mat-icon>
+      <span>Aucun modèle trouvé</span>
+    </div>
+  </div>
+
+  <!-- Footer -->
   <div class="dialog-footer">
     <label class="acte-manquant">
       <input type="checkbox"> Acte manquant
