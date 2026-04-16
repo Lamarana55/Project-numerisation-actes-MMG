@@ -172,6 +172,13 @@
             <span matListItemTitle>Listes</span>
           </a>
         </div>
+
+        <!-- Paramétrage -->
+        <a *ngIf="canViewParametrage()" mat-list-item routerLink="/admin/parametrage"
+          routerLinkActive="active-link" class="menu-item submenu-item">
+          <mat-icon matListItemIcon>tune</mat-icon>
+          <span matListItemTitle>Paramétrage</span>
+        </a>
       </div>
 
       <!-- Divider -->

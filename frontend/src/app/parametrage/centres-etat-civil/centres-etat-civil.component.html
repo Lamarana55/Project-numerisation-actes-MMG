@@ -1,0 +1,171 @@
+<div class="page-container">
+
+  <!-- ── En-tête ───────────────────────────────────────────────────────── -->
+  <div class="page-header">
+    <div class="header-left">
+      <div class="header-icon-wrap">
+        <mat-icon>home_work</mat-icon>
+      </div>
+      <div>
+        <h1 class="page-title">Centres d'état civil</h1>
+        <p class="page-subtitle">Gestion des communes et de leurs centres (principal / secondaire)</p>
+      </div>
+    </div>
+    <button mat-raised-button color="primary" class="btn-nouveau">
+      <mat-icon>add</mat-icon>
+      Nouveau centre
+    </button>
+  </div>
+
+  <!-- ── Statistiques ──────────────────────────────────────────────────── -->
+  <div class="stat-chips">
+    <div class="stat-chip stat-chip--blue">
+      <mat-icon>home_work</mat-icon>
+      <span class="stat-val">{{ mockData.length }}</span>
+      <span class="stat-lbl">Total</span>
+    </div>
+    <div class="stat-chip stat-chip--green">
+      <mat-icon>star</mat-icon>
+      <span class="stat-val">{{ totalPrincipal }}</span>
+      <span class="stat-lbl">Principaux</span>
+    </div>
+    <div class="stat-chip stat-chip--orange">
+      <mat-icon>link</mat-icon>
+      <span class="stat-val">{{ totalSecondaire }}</span>
+      <span class="stat-lbl">Secondaires</span>
+    </div>
+    <div class="stat-chip stat-chip--teal">
+      <mat-icon>check_circle</mat-icon>
+      <span class="stat-val">{{ totalActif }}</span>
+      <span class="stat-lbl">Actifs</span>
+    </div>
+  </div>
+
+  <!-- ── Filtres ───────────────────────────────────────────────────────── -->
+  <div class="filter-bar">
+    <mat-form-field appearance="outline" class="filter-search">
+      <mat-label>Rechercher…</mat-label>
+      <mat-icon matPrefix>search</mat-icon>
+      <input matInput [(ngModel)]="filterTexte" (ngModelChange)="applyFilter()" placeholder="Code, nom, commune…">
+      <button *ngIf="filterTexte" matSuffix mat-icon-button (click)="filterTexte=''; applyFilter()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="filter-type">
+      <mat-label>Type</mat-label>
+      <mat-select [(ngModel)]="filterType" (ngModelChange)="applyFilter()">
+        <mat-option value="">Tous les types</mat-option>
+        <mat-option value="PRINCIPAL">Principal</mat-option>
+        <mat-option value="SECONDAIRE">Secondaire</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <button mat-stroked-button (click)="resetFilter()" *ngIf="filterTexte || filterType" class="btn-reset">
+      <mat-icon>filter_alt_off</mat-icon>
+      Réinitialiser
+    </button>
+  </div>
+
+  <!-- ── Tableau ───────────────────────────────────────────────────────── -->
+  <div class="table-card">
+    <table mat-table [dataSource]="dataSource" matSort class="data-table">
+
+      <!-- Code -->
+      <ng-container matColumnDef="code">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Code</th>
+        <td mat-cell *matCellDef="let row">
+          <code class="code-badge">{{ row.code }}</code>
+        </td>
+      </ng-container>
+
+      <!-- Nom -->
+      <ng-container matColumnDef="nom">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Nom du centre</th>
+        <td mat-cell *matCellDef="let row">
+          <div class="cell-nom">{{ row.nom }}</div>
+        </td>
+      </ng-container>
+
+      <!-- Commune -->
+      <ng-container matColumnDef="commune">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Commune</th>
+        <td mat-cell *matCellDef="let row">
+          <div class="cell-commune">
+            <mat-icon class="cell-icon">location_on</mat-icon>
+            {{ row.commune }}
+          </div>
+        </td>
+      </ng-container>
+
+      <!-- Type -->
+      <ng-container matColumnDef="type">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Type</th>
+        <td mat-cell *matCellDef="let row">
+          <span class="type-badge" [class.type-badge--principal]="row.type === 'PRINCIPAL'"
+                [class.type-badge--secondaire]="row.type === 'SECONDAIRE'">
+            <mat-icon>{{ row.type === 'PRINCIPAL' ? 'star' : 'link' }}</mat-icon>
+            {{ row.type === 'PRINCIPAL' ? 'Principal' : 'Secondaire' }}
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- Centre parent / Officier délégué -->
+      <ng-container matColumnDef="centreParent">
+        <th mat-header-cell *matHeaderCellDef>Centre parent / Officier délégué</th>
+        <td mat-cell *matCellDef="let row">
+          <ng-container *ngIf="row.type === 'SECONDAIRE'; else principalTpl">
+            <div class="cell-parent">
+              <span class="parent-label">{{ row.centreParentNom }}</span>
+              <span class="delegue-label" *ngIf="row.officierDelegueNom">
+                <mat-icon style="font-size:12px;width:12px;height:12px">person</mat-icon>
+                {{ row.officierDelegueNom }}
+              </span>
+            </div>
+          </ng-container>
+          <ng-template #principalTpl>
+            <span class="no-parent">—</span>
+          </ng-template>
+        </td>
+      </ng-container>
+
+      <!-- Statut -->
+      <ng-container matColumnDef="actif">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Statut</th>
+        <td mat-cell *matCellDef="let row">
+          <span class="status-badge" [class.status-badge--actif]="row.actif" [class.status-badge--inactif]="!row.actif">
+            {{ row.actif ? 'Actif' : 'Inactif' }}
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- Actions -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let row">
+          <div class="action-btns">
+            <button mat-icon-button matTooltip="Modifier" color="primary">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button matTooltip="Voir les détails" color="accent">
+              <mat-icon>visibility</mat-icon>
+            </button>
+          </div>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="data-row"></tr>
+
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell empty-row" [attr.colspan]="displayedColumns.length">
+          <mat-icon>search_off</mat-icon>
+          Aucun centre trouvé
+        </td>
+      </tr>
+    </table>
+
+    <mat-paginator [pageSizeOptions]="[5, 10, 20]" pageSize="10" showFirstLastButtons></mat-paginator>
+  </div>
+
+</div>

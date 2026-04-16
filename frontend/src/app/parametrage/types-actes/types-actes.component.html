@@ -1,0 +1,95 @@
+<div class="page-container">
+
+  <div class="page-header">
+    <div class="header-left">
+      <div class="header-icon-wrap">
+        <mat-icon>category</mat-icon>
+      </div>
+      <div>
+        <h1 class="page-title">Types d'actes</h1>
+        <p class="page-subtitle">Référentiel des types d'actes d'état civil gérés</p>
+      </div>
+    </div>
+    <button mat-raised-button color="primary" class="btn-nouveau">
+      <mat-icon>add</mat-icon>
+      Nouveau type
+    </button>
+  </div>
+
+  <div class="stat-chips">
+    <div class="stat-chip stat-chip--blue">
+      <mat-icon>category</mat-icon>
+      <span class="stat-val">{{ mockData.length }}</span>
+      <span class="stat-lbl">Types définis</span>
+    </div>
+    <div class="stat-chip stat-chip--green">
+      <mat-icon>check_circle</mat-icon>
+      <span class="stat-val">{{ totalActif }}</span>
+      <span class="stat-lbl">Actifs</span>
+    </div>
+    <div class="stat-chip stat-chip--red">
+      <mat-icon>cancel</mat-icon>
+      <span class="stat-val">{{ totalInactif }}</span>
+      <span class="stat-lbl">Inactifs</span>
+    </div>
+  </div>
+
+  <div class="filter-bar">
+    <mat-form-field appearance="outline" class="filter-search">
+      <mat-label>Rechercher…</mat-label>
+      <mat-icon matPrefix>search</mat-icon>
+      <input matInput [(ngModel)]="filterTexte" (ngModelChange)="applyFilter()" placeholder="Code, libellé, description…">
+      <button *ngIf="filterTexte" matSuffix mat-icon-button (click)="filterTexte=''; applyFilter()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </mat-form-field>
+  </div>
+
+  <div class="table-card">
+    <table mat-table [dataSource]="dataSource" matSort class="data-table">
+
+      <ng-container matColumnDef="code">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Code</th>
+        <td mat-cell *matCellDef="let row"><code class="code-badge">{{ row.code }}</code></td>
+      </ng-container>
+
+      <ng-container matColumnDef="libelle">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Libellé</th>
+        <td mat-cell *matCellDef="let row"><strong class="cell-nom">{{ row.libelle }}</strong></td>
+      </ng-container>
+
+      <ng-container matColumnDef="description">
+        <th mat-header-cell *matHeaderCellDef>Description</th>
+        <td mat-cell *matCellDef="let row"><span class="cell-desc">{{ row.description }}</span></td>
+      </ng-container>
+
+      <ng-container matColumnDef="actif">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Statut</th>
+        <td mat-cell *matCellDef="let row">
+          <span class="status-badge" [class.status-badge--actif]="row.actif" [class.status-badge--inactif]="!row.actif">
+            {{ row.actif ? 'Actif' : 'Inactif' }}
+          </span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let row">
+          <div class="action-btns">
+            <button mat-icon-button matTooltip="Modifier" color="primary"><mat-icon>edit</mat-icon></button>
+            <button mat-icon-button matTooltip="Désactiver" color="warn"><mat-icon>toggle_off</mat-icon></button>
+          </div>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="data-row"></tr>
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell empty-row" [attr.colspan]="displayedColumns.length">
+          <mat-icon>search_off</mat-icon> Aucun type trouvé
+        </td>
+      </tr>
+    </table>
+    <mat-paginator [pageSizeOptions]="[5, 10, 20]" pageSize="10" showFirstLastButtons></mat-paginator>
+  </div>
+</div>

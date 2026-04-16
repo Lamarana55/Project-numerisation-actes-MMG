@@ -39,11 +39,6 @@ export class ActeSelectionDialogComponent {
       description: 'Transcription d\'un jugement supplétif de naissance',
       route: '/admin/actes-naissance/transcription',
     },
-    {
-      label: 'Actes repris (numérisation)',
-      description: 'Liste des actes de naissance issus de la numérisation',
-      route: '/admin/actes-naissance/repris',
-    },
   ];
 
   // ── Décès : liste plate ──────────────────────────────────────────────────
@@ -119,6 +114,38 @@ export class ActeSelectionDialogComponent {
       case 'naissance': return '#2e7d32';
       case 'deces':     return '#4a148c';
       default:          return '#e65100';
+    }
+  }
+
+  get headerBg(): string {
+    switch (this.data.type) {
+      case 'naissance': return 'linear-gradient(135deg, #1b5e20 0%, #2e7d32 55%, #43a047 100%)';
+      case 'deces':     return 'linear-gradient(135deg, #4a148c 0%, #6a1b9a 55%, #8e24aa 100%)';
+      default:          return 'linear-gradient(135deg, #bf360c 0%, #d84315 55%, #f4511e 100%)';
+    }
+  }
+
+  get typeIcon(): string {
+    switch (this.data.type) {
+      case 'naissance': return 'child_care';
+      case 'deces':     return 'sentiment_very_dissatisfied';
+      default:          return 'folder_special';
+    }
+  }
+
+  get dialogSubtitle(): string {
+    switch (this.data.type) {
+      case 'naissance': return 'Sélectionnez le type d\'acte de naissance à créer';
+      case 'deces':     return 'Sélectionnez le type d\'acte de décès à créer';
+      default:          return 'Sélectionnez la catégorie et le modèle d\'acte';
+    }
+  }
+
+  get cardNumBg(): string {
+    switch (this.data.type) {
+      case 'naissance': return 'rgba(46,125,50,0.12)';
+      case 'deces':     return 'rgba(106,27,154,0.12)';
+      default:          return 'rgba(230,81,0,0.12)';
     }
   }
 

@@ -28,8 +28,8 @@ export class ActesHomeComponent {
 
   openCreationDialog(type: 'naissance' | 'deces' | 'autres'): void {
     const ref = this.dialog.open(ActeSelectionDialogComponent, {
-      width: '560px',
-      maxWidth: '95vw',
+      width: '960px',
+      maxWidth: '96vw',
       data: { type },
       panelClass: 'acte-selection-panel',
     });

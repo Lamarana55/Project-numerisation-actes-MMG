@@ -1,0 +1,31 @@
+.page-container { padding: 24px; background: #f4f6f8; min-height: 100%; }
+.page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+.header-left { display: flex; align-items: center; gap: 14px; }
+.header-icon-wrap { width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #6a1b9a, #ab47bc); display: flex; align-items: center; justify-content: center; }
+.header-icon-wrap mat-icon { color: #fff; font-size: 26px; width: 26px; height: 26px; }
+.page-title { margin: 0; font-size: 20px; font-weight: 700; color: #1a1a2e; }
+.page-subtitle { margin: 3px 0 0; font-size: 12px; color: #888; }
+.btn-nouveau { border-radius: 8px !important; font-weight: 600 !important; }
+.stat-chips { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+.stat-chip { display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 10px; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+.stat-chip mat-icon { font-size: 20px; width: 20px; height: 20px; }
+.stat-val { font-size: 22px; font-weight: 700; line-height: 1; }
+.stat-lbl { font-size: 11px; color: #888; }
+.stat-chip--blue mat-icon { color: #1565c0; } .stat-chip--blue .stat-val { color: #1565c0; }
+.stat-chip--green mat-icon { color: #2e7d32; } .stat-chip--green .stat-val { color: #2e7d32; }
+.stat-chip--red mat-icon { color: #c62828; } .stat-chip--red .stat-val { color: #c62828; }
+.filter-bar { display: flex; gap: 12px; margin-bottom: 16px; }
+.filter-search { flex: 1; max-width: 420px; }
+.table-card { background: #fff; border-radius: 12px; box-shadow: 0 1px 6px rgba(0,0,0,0.08); overflow: hidden; }
+.data-table { width: 100%; }
+.code-badge { font-size: 11px; font-weight: 700; background: #f3e5f5; color: #6a1b9a; padding: 3px 8px; border-radius: 4px; }
+.cell-nom { font-size: 13px; color: #222; }
+.cell-desc { font-size: 12px; color: #777; }
+.status-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+.status-badge--actif { background: #e8f5e9; color: #2e7d32; }
+.status-badge--inactif { background: #fce4ec; color: #c62828; }
+.action-btns { display: flex; gap: 2px; }
+.data-row:hover { background: #f5f8ff; }
+.mat-mdc-header-row { background: #f8f9fa; }
+.mat-mdc-header-cell { font-size: 12px; font-weight: 700; color: #555; text-transform: uppercase; letter-spacing: 0.4px; }
+.empty-row { text-align: center; padding: 40px !important; color: #bbb; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 8px; }

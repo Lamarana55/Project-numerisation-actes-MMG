@@ -1,0 +1,67 @@
+.page-container { padding: 24px; background: #f4f6f8; min-height: 100%; }
+.page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+.header-left { display: flex; align-items: center; gap: 14px; }
+.header-icon-wrap { width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #bf360c, #ef6c00); display: flex; align-items: center; justify-content: center; }
+.header-icon-wrap mat-icon { color: #fff; font-size: 26px; width: 26px; height: 26px; }
+.page-title { margin: 0; font-size: 20px; font-weight: 700; color: #1a1a2e; }
+.page-subtitle { margin: 3px 0 0; font-size: 12px; color: #888; }
+.btn-nouveau { border-radius: 8px !important; font-weight: 600 !important; }
+
+.stat-chips { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+.stat-chip { display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 10px; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+.stat-chip mat-icon { font-size: 20px; width: 20px; height: 20px; }
+.stat-val { font-size: 22px; font-weight: 700; line-height: 1; }
+.stat-lbl { font-size: 11px; color: #888; }
+.stat-chip--blue   mat-icon { color: #1565c0; } .stat-chip--blue   .stat-val { color: #1565c0; }
+.stat-chip--green  mat-icon { color: #2e7d32; } .stat-chip--green  .stat-val { color: #2e7d32; }
+.stat-chip--orange mat-icon { color: #e65100; } .stat-chip--orange .stat-val { color: #e65100; }
+.stat-chip--teal   mat-icon { color: #00695c; } .stat-chip--teal   .stat-val { color: #00695c; }
+
+.filter-bar { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
+.filter-search { flex: 1; min-width: 220px; }
+.filter-type { width: 220px; }
+.btn-reset { height: 56px; border-radius: 8px !important; }
+
+.table-card { background: #fff; border-radius: 12px; box-shadow: 0 1px 6px rgba(0,0,0,0.08); overflow: hidden; }
+.data-table { width: 100%; }
+
+.code-badge { font-size: 11px; font-weight: 700; background: #fbe9e7; color: #bf360c; padding: 3px 8px; border-radius: 4px; }
+
+/* Identité */
+.cell-identite { display: flex; align-items: center; gap: 10px; }
+.avatar-circle {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: linear-gradient(135deg, #bf360c, #ef6c00);
+  color: #fff; font-size: 11px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; letter-spacing: 0.5px;
+}
+.cell-nom { font-size: 13px; font-weight: 600; color: #222; }
+
+/* Centre */
+.cell-centre { display: flex; align-items: flex-start; gap: 6px; font-size: 13px; color: #444; }
+.cell-icon { font-size: 16px; width: 16px; height: 16px; color: #9e9e9e; margin-top: 2px; flex-shrink: 0; }
+.centre-type-chip { font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 8px; display: inline-block; margin-top: 2px; }
+.centre-type-chip--principal  { background: #e8f5e9; color: #2e7d32; }
+.centre-type-chip--secondaire { background: #fff3e0; color: #e65100; }
+
+/* Rôle badge */
+.role-badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+.role-badge mat-icon { font-size: 13px; width: 13px; height: 13px; }
+.role-badge--principal { background: #e3f2fd; color: #1565c0; }
+.role-badge--delegue   { background: #fff8e1; color: #f57f17; }
+
+/* Période */
+.cell-periode { font-size: 12px; color: #555; }
+.date-fin { color: #888; }
+
+/* Statut */
+.status-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+.status-badge--actif   { background: #e8f5e9; color: #2e7d32; }
+.status-badge--inactif { background: #fce4ec; color: #c62828; }
+
+.action-btns { display: flex; gap: 2px; }
+.data-row:hover { background: #f5f8ff; }
+.mat-mdc-header-row { background: #f8f9fa; }
+.mat-mdc-header-cell { font-size: 12px; font-weight: 700; color: #555; text-transform: uppercase; letter-spacing: 0.4px; }
+.empty-row { text-align: center; padding: 40px !important; color: #bbb; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 8px; }

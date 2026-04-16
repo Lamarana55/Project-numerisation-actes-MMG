@@ -149,7 +149,7 @@ private autoExpandMenus(url: string): void {
     this.showDecesSubmenu = true;
   } else if (url.includes('/admin/users/') || url.includes('/admin/roles/') ||
              url.includes('/admin/permissions/') || url.includes('/admin/localites/') ||
-             url.includes('/admin/settings/')) {
+             url.includes('/admin/settings/') || url.includes('/admin/parametrage')) {
     this.showSettingsSubmenu = true;
     if (url.includes('/admin/users/')) {
       this.showUsersSubmenu = true;
@@ -207,6 +207,11 @@ canViewLocalities(): boolean {
 
 canViewReports(): boolean {
   return this.authService.roles?.includes('CAN_VIEW_REPORTS') ||
+         this.authService.roles?.includes('CAN_MANAGE_SETTINGS') || false;
+}
+
+canViewParametrage(): boolean {
+  return this.authService.roles?.includes('CAN_MANAGE_PARAMETRAGE') ||
          this.authService.roles?.includes('CAN_MANAGE_SETTINGS') || false;
 }
 
