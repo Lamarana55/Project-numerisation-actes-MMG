@@ -222,3 +222,30 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important; }
 }
+
+/* ========================== */
+/* DIALOG ACTE SELECTION       */
+/* ========================== */
+
+/* Supprime le padding interne qu'Angular Material MDC ajoute par défaut */
+.acte-selection-panel .mat-mdc-dialog-container,
+.acte-selection-panel .mat-mdc-dialog-inner-container,
+.acte-selection-panel .mat-mdc-dialog-surface,
+.acte-selection-panel .mdc-dialog__surface,
+.acte-selection-panel .mdc-dialog__content,
+.acte-selection-panel .mat-mdc-dialog-content {
+  padding: 0 !important;
+}
+
+.acte-selection-panel .mdc-dialog__surface {
+  border-radius: 6px !important;
+  overflow: hidden !important;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.25) !important;
+}
+
+/* Aligne le contenu sans marges parasites */
+.acte-selection-panel .mat-mdc-dialog-container {
+  display: flex !important;
+  flex-direction: column !important;
+  background: transparent !important;
+}
