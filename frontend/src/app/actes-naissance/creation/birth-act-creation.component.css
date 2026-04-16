@@ -92,12 +92,23 @@
 .btn-retour {
   z-index: 1;
   color: #fff !important;
-  border-color: rgba(255,255,255,.4) !important;
-  background: rgba(255,255,255,.1) !important;
+  border-color: rgba(255,255,255,.35) !important;
+  background: rgba(255,255,255,.12) !important;
   font-weight: 600;
   flex-shrink: 0;
+  border-radius: 10px !important;
+  padding: 0 18px !important;
+  height: 40px;
+  backdrop-filter: blur(4px);
+  transition: all .2s !important;
+  letter-spacing: .02em;
 }
-.btn-retour:hover { background: rgba(255,255,255,.2) !important; }
+.btn-retour mat-icon { font-size: 16px; width: 16px; height: 16px; margin-right: 4px; }
+.btn-retour:hover {
+  background: rgba(255,255,255,.22) !important;
+  border-color: rgba(255,255,255,.6) !important;
+  transform: translateX(-2px);
+}
 
 /* ── Carte stepper ──────────────────────────────────────────────── */
 .stepper-card {
@@ -466,10 +477,23 @@
 }
 
 .btn-cancel {
-  color: var(--txt-3) !important;
-  border-color: var(--border) !important;
+  color: #64748b !important;
+  border-color: #e2e8f0 !important;
+  background: #fff !important;
+  font-weight: 600 !important;
+  border-radius: 10px !important;
+  padding: 0 18px !important;
+  height: 40px;
+  transition: all .2s !important;
+  letter-spacing: .02em;
 }
-.btn-cancel:hover { color: #c62828 !important; border-color: #ef9a9a !important; background: #fff5f5 !important; }
+.btn-cancel mat-icon { font-size: 18px; width: 18px; height: 18px; margin-right: 4px; color: #94a3b8; transition: color .2s; }
+.btn-cancel:hover {
+  color: #dc2626 !important;
+  border-color: #fca5a5 !important;
+  background: #fff5f5 !important;
+}
+.btn-cancel:hover mat-icon { color: #dc2626; }
 
 /* ── Datepicker toggle ──────────────────────────────────────────── */
 .form-fieldset .mat-datepicker-toggle button,

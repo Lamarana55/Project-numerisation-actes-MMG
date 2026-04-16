@@ -10,7 +10,7 @@
       </div>
     </div>
     <button mat-stroked-button class="btn-retour" (click)="cancel()">
-      <mat-icon>arrow_back</mat-icon> Retour
+      <mat-icon>arrow_back_ios</mat-icon> Retour
     </button>
   </div>
 
@@ -72,7 +72,6 @@
               <mat-label>Nom de famille</mat-label>
               <input matInput formControlName="nom" placeholder="Nom de famille">
               <mat-icon matSuffix>badge</mat-icon>
-              <mat-error>Ce champ est requis</mat-error>
             </mat-form-field>
           </div>
 
@@ -124,7 +123,9 @@
           <div class="field-row">
             <mat-form-field appearance="outline" class="field-full">
               <mat-label>Pays de naissance</mat-label>
-              <mat-select formControlName="paysNaissance" placeholder="Sélectionner un pays…">
+              <mat-select formControlName="paysNaissance" placeholder="Sélectionner un pays…"
+                          (selectionChange)="onPaysNaissanceChange($event.value)">
+                <mat-option value="GN">Guinée</mat-option>
                 <mat-option *ngFor="let p of pays" [value]="p.code">{{ p.nom }}</mat-option>
               </mat-select>
               <mat-icon matSuffix>public</mat-icon>
@@ -132,51 +133,72 @@
             </mat-form-field>
           </div>
 
-          <!-- Guinée : Préfecture → Commune → Quartier -->
-          <ng-container *ngIf="isGuinee">
+          <!-- Guinée : affichage progressif Région → Préfecture → Commune → Quartier -->
 
-            <div class="field-row conditional-field">
-              <mat-form-field appearance="outline" class="field-full">
-                <mat-label>Préfecture de naissance</mat-label>
-                <mat-select formControlName="prefectureNaissance" placeholder="Sélectionner une préfecture…">
-                  <mat-option *ngFor="let pf of prefectures" [value]="pf.code">{{ pf.nom }}</mat-option>
-                </mat-select>
-                <mat-icon matSuffix>account_balance</mat-icon>
-              </mat-form-field>
-            </div>
+          <!-- Région (visible dès que Guinée sélectionnée) -->
+          <div class="field-row conditional-field" *ngIf="isGuinee">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Région de naissance</mat-label>
+              <mat-select formControlName="regionNaissance"
+                          (selectionChange)="onRegionNaissanceChange($event.value)">
+                <mat-option value="" disabled>
+                  {{ isLoadingRegions ? 'Chargement…' : '— Sélectionner —' }}
+                </mat-option>
+                <mat-option *ngFor="let r of regions" [value]="r.code">{{ r.nom }}</mat-option>
+              </mat-select>
+              <mat-icon matSuffix>map</mat-icon>
+            </mat-form-field>
+          </div>
 
-            <div class="field-row conditional-field">
-              <mat-form-field appearance="outline" class="field-full">
-                <mat-label>Commune de naissance</mat-label>
-                <mat-select formControlName="communeNaissance"
-                            placeholder="Sélectionner une commune…"
-                            [disabled]="communes.length === 0">
-                  <mat-option *ngFor="let c of communes" [value]="c.code">{{ c.nom }}</mat-option>
-                </mat-select>
-                <mat-icon matSuffix>location_city</mat-icon>
-              </mat-form-field>
-            </div>
+          <!-- Préfecture (visible après sélection de la région) -->
+          <div class="field-row conditional-field" *ngIf="isGuinee && regionNaissanceVal">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Préfecture de naissance</mat-label>
+              <mat-select formControlName="prefectureNaissance"
+                          (selectionChange)="onPrefectureNaissanceChange($event.value)">
+                <mat-option value="" disabled>
+                  {{ isLoadingPrefectures ? 'Chargement…' : '— Sélectionner —' }}
+                </mat-option>
+                <mat-option *ngFor="let pf of prefectures" [value]="pf.code">{{ pf.nom }}</mat-option>
+              </mat-select>
+              <mat-icon matSuffix>account_balance</mat-icon>
+            </mat-form-field>
+          </div>
 
-            <div class="field-row conditional-field">
-              <mat-form-field appearance="outline" class="field-full">
-                <mat-label>Quartier</mat-label>
-                <mat-select formControlName="quartier"
-                            placeholder="Sélectionner un quartier…"
-                            [disabled]="quartiers.length === 0">
-                  <mat-option *ngFor="let q of quartiers" [value]="q.code">{{ q.nom }}</mat-option>
-                </mat-select>
-                <mat-icon matSuffix>map</mat-icon>
-              </mat-form-field>
-            </div>
+          <!-- Commune (visible après sélection de la préfecture) -->
+          <div class="field-row conditional-field" *ngIf="isGuinee && prefectureNaissanceVal">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Commune de naissance</mat-label>
+              <mat-select formControlName="communeNaissance"
+                          (selectionChange)="onCommuneNaissanceChange($event.value)">
+                <mat-option value="" disabled>
+                  {{ isLoadingCommunes ? 'Chargement…' : '— Sélectionner —' }}
+                </mat-option>
+                <mat-option *ngFor="let c of communes" [value]="c.code">{{ c.nom }}</mat-option>
+              </mat-select>
+              <mat-icon matSuffix>location_city</mat-icon>
+            </mat-form-field>
+          </div>
 
-          </ng-container>
+          <!-- Quartier (visible après sélection de la commune) -->
+          <div class="field-row conditional-field" *ngIf="isGuinee && communeNaissanceVal">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Quartier</mat-label>
+              <mat-select formControlName="quartier">
+                <mat-option value="" disabled>
+                  {{ isLoadingQuartiers ? 'Chargement…' : '— Sélectionner —' }}
+                </mat-option>
+                <mat-option *ngFor="let q of quartiers" [value]="q.code">{{ q.nom }}</mat-option>
+              </mat-select>
+              <mat-icon matSuffix>home_work</mat-icon>
+            </mat-form-field>
+          </div>
 
           <!-- Autre pays : Ville uniquement -->
-          <div class="field-row conditional-field"
-               *ngIf="!isGuinee && enfantForm.get('paysNaissance')?.value">
+          <div class="field-row conditional-field" *ngIf="isAutrePays">
             <mat-form-field appearance="outline" class="field-full">
               <mat-label>Ville de naissance</mat-label>
-              <input matInput formControlName="villeNaissance" placeholder="Ville">
+              <input matInput formControlName="villeNaissance" placeholder="Nom de la ville">
               <mat-icon matSuffix>location_city</mat-icon>
             </mat-form-field>
           </div>
@@ -299,16 +321,73 @@
             <input matInput formControlName="nationalite">
           </mat-form-field>
         </div>
-        <div class="fields-grid-2">
-          <mat-form-field appearance="outline">
-            <mat-label>Profession</mat-label>
-            <input matInput formControlName="profession">
-          </mat-form-field>
-          <mat-form-field appearance="outline">
-            <mat-label>Adresse / Domicile</mat-label>
-            <input matInput formControlName="adresse">
-          </mat-form-field>
-        </div>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Profession</mat-label>
+          <input matInput formControlName="profession">
+        </mat-form-field>
+      </div>
+
+      <!-- Domicile père -->
+      <div class="fields-section">
+        <h3 class="fields-section-title">Domicile</h3>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Pays de résidence</mat-label>
+          <mat-select formControlName="pays" placeholder="Sélectionner un pays…"
+                      (selectionChange)="onPerePaysChange($event.value)">
+            <mat-option value="GN">Guinée</mat-option>
+            <mat-option *ngFor="let p of pays" [value]="p.code">{{ p.nom }}</mat-option>
+          </mat-select>
+          <mat-icon matSuffix>public</mat-icon>
+        </mat-form-field>
+
+        <!-- Préfecture (visible dès que Guinée sélectionnée) -->
+        <mat-form-field appearance="outline" class="full-width" *ngIf="isPerePaysGuinee">
+          <mat-label>Préfecture</mat-label>
+          <mat-select formControlName="prefecture"
+                      (selectionChange)="onPerePrefectureChange($event.value)">
+            <mat-option value="" disabled>
+              {{ isLoadingPerePrefectures ? 'Chargement…' : '— Sélectionner —' }}
+            </mat-option>
+            <mat-option *ngFor="let pf of perePrefectures" [value]="pf.code">{{ pf.nom }}</mat-option>
+          </mat-select>
+          <mat-icon matSuffix>account_balance</mat-icon>
+        </mat-form-field>
+
+        <!-- Commune (visible après sélection de la préfecture) -->
+        <mat-form-field appearance="outline" class="full-width"
+                        *ngIf="isPerePaysGuinee && pereForm.get('prefecture')?.value">
+          <mat-label>Commune</mat-label>
+          <mat-select formControlName="commune"
+                      (selectionChange)="onPereCommuneChange($event.value)">
+            <mat-option value="" disabled>
+              {{ isLoadingPereCommunes ? 'Chargement…' : '— Sélectionner —' }}
+            </mat-option>
+            <mat-option *ngFor="let c of pereCommunes" [value]="c.code">{{ c.nom }}</mat-option>
+          </mat-select>
+          <mat-icon matSuffix>location_city</mat-icon>
+        </mat-form-field>
+
+        <!-- Quartier (visible après sélection de la commune) -->
+        <mat-form-field appearance="outline" class="full-width"
+                        *ngIf="isPerePaysGuinee && pereForm.get('commune')?.value">
+          <mat-label>Quartier</mat-label>
+          <mat-select formControlName="quartier">
+            <mat-option value="" disabled>
+              {{ isLoadingPereQuartiers ? 'Chargement…' : '— Sélectionner —' }}
+            </mat-option>
+            <mat-option *ngFor="let q of pereQuartiers" [value]="q.code">{{ q.nom }}</mat-option>
+          </mat-select>
+          <mat-icon matSuffix>home_work</mat-icon>
+        </mat-form-field>
+
+        <!-- Autre pays : Adresse texte libre -->
+        <mat-form-field appearance="outline" class="full-width"
+                        *ngIf="pereForm.get('pays')?.value && !isPerePaysGuinee">
+          <mat-label>Adresse / Domicile</mat-label>
+          <input matInput formControlName="adresse" placeholder="Adresse complète">
+          <mat-icon matSuffix>home</mat-icon>
+        </mat-form-field>
       </div>
 
     </div>
@@ -361,16 +440,73 @@
             <input matInput formControlName="nationalite">
           </mat-form-field>
         </div>
-        <div class="fields-grid-2">
-          <mat-form-field appearance="outline">
-            <mat-label>Profession</mat-label>
-            <input matInput formControlName="profession">
-          </mat-form-field>
-          <mat-form-field appearance="outline">
-            <mat-label>Adresse / Domicile</mat-label>
-            <input matInput formControlName="adresse">
-          </mat-form-field>
-        </div>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Profession</mat-label>
+          <input matInput formControlName="profession">
+        </mat-form-field>
+      </div>
+
+      <!-- Domicile mère -->
+      <div class="fields-section">
+        <h3 class="fields-section-title">Domicile</h3>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Pays de résidence</mat-label>
+          <mat-select formControlName="pays" placeholder="Sélectionner un pays…"
+                      (selectionChange)="onMerePaysChange($event.value)">
+            <mat-option value="GN">Guinée</mat-option>
+            <mat-option *ngFor="let p of pays" [value]="p.code">{{ p.nom }}</mat-option>
+          </mat-select>
+          <mat-icon matSuffix>public</mat-icon>
+        </mat-form-field>
+
+        <!-- Préfecture (visible dès que Guinée sélectionnée) -->
+        <mat-form-field appearance="outline" class="full-width" *ngIf="isMerePaysGuinee">
+          <mat-label>Préfecture</mat-label>
+          <mat-select formControlName="prefecture"
+                      (selectionChange)="onMerePrefectureChange($event.value)">
+            <mat-option value="" disabled>
+              {{ isLoadingMerePrefectures ? 'Chargement…' : '— Sélectionner —' }}
+            </mat-option>
+            <mat-option *ngFor="let pf of merePrefectures" [value]="pf.code">{{ pf.nom }}</mat-option>
+          </mat-select>
+          <mat-icon matSuffix>account_balance</mat-icon>
+        </mat-form-field>
+
+        <!-- Commune (visible après sélection de la préfecture) -->
+        <mat-form-field appearance="outline" class="full-width"
+                        *ngIf="isMerePaysGuinee && mereForm.get('prefecture')?.value">
+          <mat-label>Commune</mat-label>
+          <mat-select formControlName="commune"
+                      (selectionChange)="onMereCommuneChange($event.value)">
+            <mat-option value="" disabled>
+              {{ isLoadingMereCommunes ? 'Chargement…' : '— Sélectionner —' }}
+            </mat-option>
+            <mat-option *ngFor="let c of mereCommunes" [value]="c.code">{{ c.nom }}</mat-option>
+          </mat-select>
+          <mat-icon matSuffix>location_city</mat-icon>
+        </mat-form-field>
+
+        <!-- Quartier (visible après sélection de la commune) -->
+        <mat-form-field appearance="outline" class="full-width"
+                        *ngIf="isMerePaysGuinee && mereForm.get('commune')?.value">
+          <mat-label>Quartier</mat-label>
+          <mat-select formControlName="quartier">
+            <mat-option value="" disabled>
+              {{ isLoadingMereQuartiers ? 'Chargement…' : '— Sélectionner —' }}
+            </mat-option>
+            <mat-option *ngFor="let q of mereQuartiers" [value]="q.code">{{ q.nom }}</mat-option>
+          </mat-select>
+          <mat-icon matSuffix>home_work</mat-icon>
+        </mat-form-field>
+
+        <!-- Autre pays : Adresse texte libre -->
+        <mat-form-field appearance="outline" class="full-width"
+                        *ngIf="mereForm.get('pays')?.value && !isMerePaysGuinee">
+          <mat-label>Adresse / Domicile</mat-label>
+          <input matInput formControlName="adresse" placeholder="Adresse complète">
+          <mat-icon matSuffix>home</mat-icon>
+        </mat-form-field>
       </div>
 
     </div>
@@ -505,7 +641,7 @@
     <!-- ── Pied de page : navigation ────────────────────────────────── -->
     <div class="step-footer">
       <button mat-stroked-button class="btn-cancel" (click)="cancel()">
-        <mat-icon>close</mat-icon> Annuler
+        <mat-icon>cancel_outline</mat-icon> Annuler
       </button>
       <div class="footer-nav">
         <button mat-stroked-button

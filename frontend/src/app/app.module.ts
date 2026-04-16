@@ -53,6 +53,7 @@ import { HomeComponent } from './home/home.component';
 import { LoginComponent } from './pages/login/login.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { ValidationDialogComponent } from './shared/validation-dialog/validation-dialog.component';
+import { ConfirmLeaveDialogComponent } from './shared/confirm-leave-dialog/confirm-leave-dialog.component';
 import { FooterComponent } from './shared/footer/footer.component';
 import { LoaderComponent } from './shared/loader/loader.component';
 import { RegisterComponent } from './pages/register/register.component';
@@ -125,6 +126,7 @@ registerLocaleData(localeFr);
     DashboardComponent,
     LoginComponent,
     ValidationDialogComponent,
+    ConfirmLeaveDialogComponent,
     FooterComponent,
     LoaderComponent,
     RegisterComponent,

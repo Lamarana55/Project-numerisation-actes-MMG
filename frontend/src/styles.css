@@ -252,3 +252,47 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   max-width: 96vw !important;
   min-width: 560px !important;
 }
+
+/* ── Popup confirmation quitter formulaire ─────────────────────── */
+.confirm-leave-panel .mat-mdc-dialog-container,
+.confirm-leave-panel .mdc-dialog__surface {
+  border-radius: 20px !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+  box-shadow: 0 24px 64px rgba(0,0,0,.18) !important;
+}
+
+/* ── Toast confirmation quitter formulaire ─────────────────────── */
+.confirm-leave-snack .mdc-snackbar__surface {
+  background: #1e293b !important;
+  border-left: 4px solid #f59e0b !important;
+  border-radius: 10px !important;
+  min-width: 420px !important;
+  max-width: 560px !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,.25) !important;
+  padding: 4px 8px !important;
+}
+
+.confirm-leave-snack .mdc-snackbar__label {
+  color: #f1f5f9 !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  padding: 12px 8px !important;
+}
+
+.confirm-leave-snack .mdc-snackbar__label::before {
+  content: '⚠️  ';
+}
+
+.confirm-leave-snack .mat-mdc-snack-bar-action {
+  color: #fbbf24 !important;
+  font-weight: 700 !important;
+  font-size: 13px !important;
+  letter-spacing: .04em;
+}
+
+.confirm-leave-snack .mat-mdc-snack-bar-action:hover {
+  background: rgba(251,191,36,.12) !important;
+  border-radius: 6px;
+}
+
