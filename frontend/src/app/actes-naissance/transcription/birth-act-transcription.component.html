@@ -1,32 +1,1094 @@
-<div class="page-container">
+<div class="creation-page">
+
+  <!-- ── En-tête page ─────────────────────────────────────────────────── -->
   <div class="page-header">
-    <div class="header-deco header-deco--1"></div>
-    <div class="header-deco header-deco--2"></div>
-    <div class="breadcrumb">
-      <mat-icon class="breadcrumb-home">home</mat-icon>
-      <span class="breadcrumb-sep">/</span>
-      <span>Actes de naissance</span>
-      <span class="breadcrumb-sep">/</span>
-      <span class="breadcrumb-current">Transcription</span>
-    </div>
-    <div class="title-row">
-      <div class="title-icon-wrap">
-        <mat-icon>drive_file_rename_outline</mat-icon>
-      </div>
-      <div class="title-text">
-        <h1>Transcription de jugement supplétif</h1>
-        <p>Transcription d'un jugement supplétif de naissance</p>
+    <div class="page-header-left">
+      <div class="page-header-icon"><mat-icon>drive_file_rename_outline</mat-icon></div>
+      <div>
+        <h1 class="page-title">Acte de naissance</h1>
+        <p class="page-subtitle">Transcription du jugement supplétif de naissance</p>
       </div>
     </div>
+    <button mat-stroked-button class="btn-retour" (click)="cancel()">
+      <mat-icon>arrow_back_ios</mat-icon> Retour
+    </button>
   </div>
 
-  <div class="page-content">
-    <div class="coming-soon-card">
-      <div class="coming-soon-icon">
-        <mat-icon>construction</mat-icon>
-      </div>
-      <h2>Module en cours de développement</h2>
-      <p>La transcription de jugements supplétifs de naissance sera bientôt disponible.</p>
+  <!-- ── Carte stepper ─────────────────────────────────────────────────── -->
+  <div class="stepper-card">
+
+    <!-- Indicateur d'étapes -->
+    <div class="step-track">
+      <ng-container *ngFor="let step of steps; let last = last">
+        <div class="step-node"
+             [class.step-node--active]="step.number === currentStep"
+             [class.step-node--done]="isStepCompleted(step.number)"
+             [class.step-node--clickable]="step.number < currentStep"
+             (click)="goTo(step.number)">
+          <div class="step-bubble">
+            <mat-icon *ngIf="isStepCompleted(step.number)" class="done-icon">check</mat-icon>
+            <span *ngIf="!isStepCompleted(step.number)">{{ step.number }}</span>
+          </div>
+          <span class="step-node-label">{{ step.label }}</span>
+        </div>
+        <div *ngIf="!last" class="step-connector"
+             [class.step-connector--done]="isStepCompleted(step.number)"></div>
+      </ng-container>
     </div>
-  </div>
-</div>
+
+    <!-- ════════════════ ÉTAPE 1 — JUGEMENT ════════════════ -->
+    <div class="step-body" *ngIf="currentStep === 1" [formGroup]="jugementForm">
+
+      <div class="step-intro">
+        <div class="step-intro-icon" style="background:#e8eaf6;color:#3949ab">
+          <mat-icon>gavel</mat-icon>
+        </div>
+        <div>
+          <h2 class="step-intro-title">RENSEIGNEMENTS SUR LE JUGEMENT</h2>
+          <p class="step-intro-sub">Informations relatives au jugement supplétif</p>
+        </div>
+      </div>
+
+      <div class="fields-section">
+        <h3 class="fields-section-title">Informations sur le jugement</h3>
+
+        <div class="field-row--split">
+          <mat-form-field appearance="outline">
+            <mat-label>Date du jugement <span class="req">*</span></mat-label>
+            <input matInput [matDatepicker]="pickerJugement"
+                   formControlName="dateJugement"
+                   placeholder="JJ/MM/AAAA"
+                   [max]="today">
+            <mat-datepicker-toggle matIconSuffix [for]="pickerJugement">
+              <mat-icon matDatepickerToggleIcon>event</mat-icon>
+            </mat-datepicker-toggle>
+            <mat-datepicker #pickerJugement startView="multi-year"></mat-datepicker>
+            <mat-error>Champ requis</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Numéro du jugement <span class="req">*</span></mat-label>
+            <input matInput formControlName="numeroJugement" placeholder="Numéro du jugement">
+            <mat-icon matSuffix>tag</mat-icon>
+            <mat-error>Champ requis</mat-error>
+          </mat-form-field>
+        </div>
+
+        <mat-form-field appearance="outline" class="field-full">
+          <mat-label>Tribunal <span class="req">*</span></mat-label>
+          <mat-select formControlName="tribunal">
+            <mat-option value="">-- Sélectionner --</mat-option>
+            <mat-option *ngFor="let t of tribunaux" [value]="t">{{ t }}</mat-option>
+          </mat-select>
+          <mat-error>Champ requis</mat-error>
+        </mat-form-field>
+      </div>
+
+    </div>
+
+    <!-- ════════════════ ÉTAPE 2 — ENFANT ════════════════ -->
+    <div class="step-body" *ngIf="currentStep === 2" [formGroup]="enfantForm">
+
+      <div class="step-intro">
+        <div class="step-intro-icon" style="background:#e8f5e9;color:#2e7d32">
+          <mat-icon>child_care</mat-icon>
+        </div>
+        <div>
+          <h2 class="step-intro-title">Renseignements sur l'enfant</h2>
+          <p class="step-intro-sub">Informations d'identité et de naissance de l'enfant</p>
+        </div>
+      </div>
+
+      <div class="form-columns">
+
+        <!-- ── Bloc 1 : Information sur l'enfant ── -->
+        <fieldset class="form-fieldset">
+          <legend>
+            <span class="legend-num">1</span>
+            Information sur l'enfant
+          </legend>
+
+          <div class="field-row">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Prénom(s)</mat-label>
+              <input matInput formControlName="prenom" placeholder="Prénom(s) de l'enfant">
+              <mat-icon matSuffix>person</mat-icon>
+              <mat-error>Ce champ est requis</mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="field-row">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Nom de famille</mat-label>
+              <input matInput formControlName="nom" placeholder="Nom de famille">
+              <mat-icon matSuffix>badge</mat-icon>
+            </mat-form-field>
+          </div>
+
+          <div class="field-row">
+            <div class="radio-block">
+              <span class="radio-block-label">Sexe <span class="req">*</span></span>
+              <mat-radio-group formControlName="sexe" class="radio-inline">
+                <mat-radio-button value="M">Masculin</mat-radio-button>
+                <mat-radio-button value="F">Féminin</mat-radio-button>
+              </mat-radio-group>
+              <div class="field-error" *ngIf="enfantForm.get('sexe')?.invalid && enfantForm.get('sexe')?.touched">
+                Ce champ est requis
+              </div>
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- ── Bloc 2 : Date et heure de naissance ── -->
+        <fieldset class="form-fieldset">
+          <legend>
+            <span class="legend-num">2</span>
+            Date et heure de naissance
+          </legend>
+
+          <div class="field-row">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Date de naissance</mat-label>
+              <input matInput [matDatepicker]="pickerNaissEnfant"
+                     formControlName="dateNaissance"
+                     placeholder="JJ/MM/AAAA"
+                     [max]="today">
+              <mat-datepicker-toggle matIconSuffix [for]="pickerNaissEnfant">
+                <mat-icon matDatepickerToggleIcon>event</mat-icon>
+              </mat-datepicker-toggle>
+              <mat-datepicker #pickerNaissEnfant startView="multi-year"></mat-datepicker>
+              <mat-error>Ce champ est requis</mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="field-row">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Heure de naissance</mat-label>
+              <input matInput type="time" formControlName="heureNaissance">
+              <mat-icon matSuffix>schedule</mat-icon>
+            </mat-form-field>
+          </div>
+
+        </fieldset>
+
+        <!-- ── Bloc 3 : Lieu de naissance ── -->
+        <fieldset class="form-fieldset">
+          <legend>
+            <span class="legend-num">3</span>
+            Lieu de naissance
+          </legend>
+
+          <div class="field-row lieu-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Pays <span class="req">*</span></mat-label>
+              <mat-select formControlName="paysNaissance" placeholder="Sélectionner…"
+                          (selectionChange)="onPaysNaissanceChange($event.value)">
+                <mat-option *ngFor="let p of pays" [value]="p.code">{{ p.nom }}</mat-option>
+              </mat-select>
+              <mat-icon matSuffix>public</mat-icon>
+              <mat-error>Requis</mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" *ngIf="isGuinee" class="conditional-field">
+              <mat-label>Région</mat-label>
+              <mat-select formControlName="regionNaissance"
+                          (selectionChange)="onRegionNaissanceChange($event.value)">
+                <mat-option value="" disabled>
+                  {{ isLoadingRegions ? 'Chargement…' : '— Sélectionner —' }}
+                </mat-option>
+                <mat-option *ngFor="let r of regions" [value]="r.code">{{ r.nom }}</mat-option>
+              </mat-select>
+              <mat-icon matSuffix>map</mat-icon>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" *ngIf="isGuinee && regionNaissanceVal" class="conditional-field">
+              <mat-label>Préfecture</mat-label>
+              <mat-select formControlName="prefectureNaissance"
+                          (selectionChange)="onPrefectureNaissanceChange($event.value)">
+                <mat-option value="" disabled>
+                  {{ isLoadingPrefectures ? 'Chargement…' : '— Sélectionner —' }}
+                </mat-option>
+                <mat-option *ngFor="let pf of prefectures" [value]="pf.code">{{ pf.nom }}</mat-option>
+              </mat-select>
+              <mat-icon matSuffix>account_balance</mat-icon>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" *ngIf="isGuinee && prefectureNaissanceVal" class="conditional-field">
+              <mat-label>Commune</mat-label>
+              <mat-select formControlName="communeNaissance"
+                          (selectionChange)="onCommuneNaissanceChange($event.value)">
+                <mat-option value="" disabled>
+                  {{ isLoadingCommunes ? 'Chargement…' : '— Sélectionner —' }}
+                </mat-option>
+                <mat-option *ngFor="let c of communes" [value]="c.code">{{ c.nom }}</mat-option>
+              </mat-select>
+              <mat-icon matSuffix>location_city</mat-icon>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" *ngIf="isGuinee && communeNaissanceVal" class="conditional-field">
+              <mat-label>Quartier</mat-label>
+              <mat-select formControlName="quartier">
+                <mat-option value="" disabled>
+                  {{ isLoadingQuartiers ? 'Chargement…' : '— Sélectionner —' }}
+                </mat-option>
+                <mat-option *ngFor="let q of quartiers" [value]="q.code">{{ q.nom }}</mat-option>
+              </mat-select>
+              <mat-icon matSuffix>home_work</mat-icon>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" *ngIf="isAutrePays" class="conditional-field">
+              <mat-label>Ville</mat-label>
+              <mat-select formControlName="villeNaissance">
+                <mat-option value="" disabled>
+                  {{ isLoadingVilles ? 'Chargement…' : '— Sélectionner —' }}
+                </mat-option>
+                <mat-option *ngFor="let v of villes" [value]="v.code">{{ v.nom }}</mat-option>
+              </mat-select>
+              <mat-icon matSuffix>location_city</mat-icon>
+            </mat-form-field>
+          </div>
+
+        </fieldset>
+
+        <!-- ── Bloc 4 : Lieu d'accouchement ── -->
+        <fieldset class="form-fieldset">
+          <legend>
+            <span class="legend-num">4</span>
+            Lieu d'accouchement
+          </legend>
+
+          <div class="field-row">
+            <div class="radio-block">
+              <span class="radio-block-label">Lieu d'accouchement <span class="req">*</span></span>
+              <mat-radio-group formControlName="lieuAccouchement" class="radio-inline">
+                <mat-radio-button value="formation_sanitaire">Formation sanitaire</mat-radio-button>
+                <mat-radio-button value="domicile">Domicile</mat-radio-button>
+                <mat-radio-button value="autre">Autre</mat-radio-button>
+              </mat-radio-group>
+            </div>
+          </div>
+
+          <!-- Conditionnel : Formation sanitaire -->
+          <div class="field-row conditional-field" *ngIf="isFormationSanitaire">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Formation sanitaire</mat-label>
+              <mat-select formControlName="formationSanitaire" placeholder="Sélectionner une formation…">
+                <mat-option *ngFor="let fs of formationsSanitaires" [value]="fs">{{ fs }}</mat-option>
+              </mat-select>
+              <mat-icon matSuffix>local_hospital</mat-icon>
+            </mat-form-field>
+          </div>
+
+          <!-- Conditionnel : Domicile ou Autre -->
+          <div class="field-row conditional-field" *ngIf="isAdresseLieu">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Adresse du lieu de l'accouchement</mat-label>
+              <input matInput formControlName="adresseLieu"
+                     placeholder="Indiquez l'adresse précise">
+              <mat-icon matSuffix>home</mat-icon>
+            </mat-form-field>
+          </div>
+
+        </fieldset>
+
+      </div><!-- /form-columns -->
+
+    </div>
+
+    <!-- ════════════════ ÉTAPE 3 — PÈRE ════════════════ -->
+    <div class="step-body" *ngIf="currentStep === 3" [formGroup]="pereForm">
+
+      <div class="step-intro">
+        <div class="step-intro-icon" style="background:#e3f2fd;color:#1565c0">
+          <mat-icon>man</mat-icon>
+        </div>
+        <div>
+          <h2 class="step-intro-title">Renseignements sur le père</h2>
+          <p class="step-intro-sub">Informations d'identité du père de l'enfant</p>
+        </div>
+      </div>
+
+      <div class="form-columns">
+
+        <!-- ── Bloc 1 : Statut + Identité ── -->
+        <fieldset class="form-fieldset">
+          <legend><span class="legend-num">1</span> Informations sur le père</legend>
+
+          <div class="field-row field-row--split">
+            <div class="radio-block">
+              <span class="radio-block-label">Père connu <span class="req">*</span></span>
+              <mat-radio-group formControlName="pereConnu" class="radio-inline">
+                <mat-radio-button value="oui">Oui</mat-radio-button>
+                <mat-radio-button value="non">Non</mat-radio-button>
+              </mat-radio-group>
+            </div>
+            <div class="radio-block">
+              <span class="radio-block-label">Père décédé <span class="req">*</span></span>
+              <mat-radio-group formControlName="pereDecede" class="radio-inline">
+                <mat-radio-button value="oui">Oui</mat-radio-button>
+                <mat-radio-button value="non">Non</mat-radio-button>
+              </mat-radio-group>
+            </div>
+          </div>
+
+          <ng-container *ngIf="isPereConnu">
+
+            <!-- NPI -->
+            <div class="field-row">
+              <div class="radio-block">
+                <span class="radio-block-label">NPI ?</span>
+                <mat-radio-group formControlName="hasNpi" class="radio-inline"
+                                 (change)="onPereHasNpiChange($event.value)">
+                  <mat-radio-button value="oui">Oui</mat-radio-button>
+                  <mat-radio-button value="non">Non</mat-radio-button>
+                </mat-radio-group>
+              </div>
+            </div>
+
+            <div class="field-row conditional-field" *ngIf="isPereHasNpi">
+              <mat-form-field appearance="outline" class="field-full">
+                <mat-label>Numéro NPI <span class="req">*</span></mat-label>
+                <input matInput formControlName="npi" placeholder="Numéro d'identification">
+                <mat-icon matSuffix>fingerprint</mat-icon>
+                <mat-error>Ce champ est requis</mat-error>
+              </mat-form-field>
+            </div>
+
+            <!-- Prénoms -->
+            <div class="field-row">
+              <mat-form-field appearance="outline" class="field-full">
+                <mat-label>Prénoms <span class="req">*</span></mat-label>
+                <input matInput formControlName="prenom" placeholder="Prénoms du père">
+                <mat-icon matSuffix>person</mat-icon>
+                <mat-error>Ce champ est requis</mat-error>
+              </mat-form-field>
+            </div>
+
+            <!-- Nom -->
+            <div class="field-row">
+              <mat-form-field appearance="outline" class="field-full">
+                <mat-label>Nom <span class="req">*</span></mat-label>
+                <input matInput formControlName="nom" placeholder="Nom de famille">
+                <mat-icon matSuffix>badge</mat-icon>
+                <mat-error>Ce champ est requis</mat-error>
+              </mat-form-field>
+            </div>
+
+            <!-- Date de naissance -->
+            <div class="field-row">
+              <mat-form-field appearance="outline" class="field-full">
+                <mat-label>Date de naissance</mat-label>
+                <input matInput [matDatepicker]="pickerNaissPere"
+                       formControlName="dateNaissance" placeholder="JJ/MM/AAAA" [max]="today">
+                <mat-datepicker-toggle matIconSuffix [for]="pickerNaissPere">
+                  <mat-icon matDatepickerToggleIcon>event</mat-icon>
+                </mat-datepicker-toggle>
+                <mat-datepicker #pickerNaissPere startView="multi-year"></mat-datepicker>
+              </mat-form-field>
+            </div>
+
+            <!-- Lieu de naissance père — en ligne -->
+            <div class="field-row lieu-row">
+              <mat-form-field appearance="outline">
+                <mat-label>Pays <span class="req">*</span></mat-label>
+                <mat-select formControlName="paysNaissancePere" placeholder="Sélectionner…"
+                            (selectionChange)="onPerePaysNaissanceChange($event.value)">
+                  <mat-option *ngFor="let p of pays" [value]="p.code">{{ p.nom }}</mat-option>
+                </mat-select>
+                <mat-icon matSuffix>public</mat-icon>
+                <mat-error>Requis</mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" *ngIf="isPerePaysNaissGuinee && pereForm.get('paysNaissancePere')?.value" class="conditional-field">
+                <mat-label>Région</mat-label>
+                <mat-select formControlName="regionNaissancePere"
+                            (selectionChange)="onPereRegionNaissanceChange($event.value)">
+                  <mat-option value="" disabled>
+                    {{ isLoadingPereNaissRegions ? 'Chargement…' : '— Sélectionner —' }}
+                  </mat-option>
+                  <mat-option *ngFor="let r of pereNaissRegions" [value]="r.code">{{ r.nom }}</mat-option>
+                </mat-select>
+                <mat-icon matSuffix>map</mat-icon>
+                <mat-error>Requis</mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" *ngIf="isPerePaysNaissGuinee && pereNaissRegionVal" class="conditional-field">
+                <mat-label>Préfecture</mat-label>
+                <mat-select formControlName="prefectureNaissancePere"
+                            (selectionChange)="onPerePrefectureNaissanceChange($event.value)">
+                  <mat-option value="" disabled>
+                    {{ isLoadingPereNaissPrefectures ? 'Chargement…' : '— Sélectionner —' }}
+                  </mat-option>
+                  <mat-option *ngFor="let pf of pereNaissPrefectures" [value]="pf.code">{{ pf.nom }}</mat-option>
+                </mat-select>
+                <mat-icon matSuffix>account_balance</mat-icon>
+                <mat-error>Requis</mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" *ngIf="isPerePaysNaissGuinee && pereNaissPrefectureVal" class="conditional-field">
+                <mat-label>Commune</mat-label>
+                <mat-select formControlName="communeNaissancePere"
+                            (selectionChange)="onPereCommuneNaissanceChange($event.value)">
+                  <mat-option value="" disabled>
+                    {{ isLoadingPereNaissCommunes ? 'Chargement…' : '— Sélectionner —' }}
+                  </mat-option>
+                  <mat-option *ngFor="let c of pereNaissCommunes" [value]="c.code">{{ c.nom }}</mat-option>
+                </mat-select>
+                <mat-icon matSuffix>location_city</mat-icon>
+                <mat-error>Requis</mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" *ngIf="isPerePaysNaissGuinee && pereNaissCommuneVal" class="conditional-field">
+                <mat-label>Quartier</mat-label>
+                <mat-select formControlName="quartierNaissancePere">
+                  <mat-option value="" disabled>
+                    {{ isLoadingPereNaissQuartiers ? 'Chargement…' : '— Sélectionner —' }}
+                  </mat-option>
+                  <mat-option *ngFor="let q of pereNaissQuartiers" [value]="q.code">{{ q.nom }}</mat-option>
+                </mat-select>
+                <mat-icon matSuffix>home_work</mat-icon>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" *ngIf="isPereAutrePaysNaiss" class="conditional-field">
+                <mat-label>Ville</mat-label>
+                <mat-select formControlName="villeNaissancePere">
+                  <mat-option value="" disabled>
+                    {{ isLoadingPereNaissVilles ? 'Chargement…' : '— Sélectionner —' }}
+                  </mat-option>
+                  <mat-option *ngFor="let v of pereNaissVilles" [value]="v.code">{{ v.nom }}</mat-option>
+                </mat-select>
+                <mat-icon matSuffix>location_city</mat-icon>
+              </mat-form-field>
+            </div>
+
+            <!-- Nationalité connue -->
+            <div class="field-row">
+              <div class="radio-block">
+                <span class="radio-block-label">Nationalité connue</span>
+                <mat-radio-group formControlName="nationaliteConnue" class="radio-inline">
+                  <mat-radio-button value="oui">Oui</mat-radio-button>
+                  <mat-radio-button value="non">Non</mat-radio-button>
+                </mat-radio-group>
+              </div>
+            </div>
+
+            <!-- Nationalité (si connue) -->
+            <div class="field-row conditional-field" *ngIf="isPereNationaliteConnue">
+              <mat-form-field appearance="outline" class="field-full">
+                <mat-label>Nationalité</mat-label>
+                <mat-select formControlName="nationalite">
+                  <mat-option value="">— Non renseignée —</mat-option>
+                  <mat-option *ngFor="let n of nationalites" [value]="n.code">
+                    {{ n.libelleMasculin }}
+                  </mat-option>
+                </mat-select>
+                <mat-icon matSuffix>flag</mat-icon>
+              </mat-form-field>
+            </div>
+
+            <!-- Profession -->
+            <div class="field-row">
+              <mat-form-field appearance="outline" class="field-full">
+                <mat-label>Profession</mat-label>
+                <input matInput formControlName="profession"
+                       placeholder="Tapez pour rechercher…"
+                       [matAutocomplete]="autoProfPere">
+                <mat-icon matSuffix>work</mat-icon>
+                <mat-autocomplete #autoProfPere="matAutocomplete">
+                  <mat-option *ngFor="let p of filteredProfessionsPere$ | async" [value]="p.masculin">
+                    {{ p.masculin }}
+                  </mat-option>
+                </mat-autocomplete>
+              </mat-form-field>
+            </div>
+
+            <!-- Téléphone -->
+            <div class="field-row">
+              <app-phone-input formControlName="telephone" label="Numéro de téléphone"></app-phone-input>
+            </div>
+
+            <!-- Situation matrimoniale -->
+            <div class="field-row">
+              <div class="radio-block">
+                <span class="radio-block-label">Situation matrimoniale</span>
+                <mat-radio-group formControlName="situationMatrimoniale" class="radio-inline">
+                  <mat-radio-button value="celibataire">Célibataire</mat-radio-button>
+                  <mat-radio-button value="marie">Marié(e)</mat-radio-button>
+                  <mat-radio-button value="divorce">Divorcé(e)</mat-radio-button>
+                  <mat-radio-button value="veuf">Veuf(ve)</mat-radio-button>
+                </mat-radio-group>
+              </div>
+            </div>
+
+          </ng-container>
+
+        </fieldset>
+
+        <!-- ── Bloc 2 : Domicile (si père connu) ── -->
+        <fieldset class="form-fieldset" *ngIf="isPereConnu">
+          <legend><span class="legend-num">2</span> Informations sur le domicile du père</legend>
+
+          <div class="field-row">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Adresse du domicile</mat-label>
+              <input matInput formControlName="adresse" placeholder="Adresse complète">
+              <mat-icon matSuffix>home</mat-icon>
+            </mat-form-field>
+          </div>
+
+          <div class="field-row">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Pays de résidence</mat-label>
+              <mat-select formControlName="pays" placeholder="Sélectionner un pays…"
+                          (selectionChange)="onPerePaysChange($event.value)">
+                <mat-option *ngFor="let p of pays" [value]="p.code">{{ p.nom }}</mat-option>
+              </mat-select>
+              <mat-icon matSuffix>public</mat-icon>
+            </mat-form-field>
+          </div>
+
+          <!-- Région (après sélection Guinée) -->
+          <div class="field-row conditional-field" *ngIf="isPerePaysGuinee">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Région de résidence</mat-label>
+              <mat-select formControlName="regionDomicilePere"
+                          (selectionChange)="onPereRegionDomicileChange($event.value)">
+                <mat-option value="" disabled>
+                  {{ isLoadingPereRegions ? 'Chargement…' : '— Sélectionner —' }}
+                </mat-option>
+                <mat-option *ngFor="let r of pereRegions" [value]="r.code">{{ r.nom }}</mat-option>
+              </mat-select>
+              <mat-icon matSuffix>map</mat-icon>
+            </mat-form-field>
+          </div>
+
+          <!-- Préfecture (après région) -->
+          <div class="field-row conditional-field" *ngIf="isPerePaysGuinee && pereRegionDomicileVal">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Préfecture</mat-label>
+              <mat-select formControlName="prefecture"
+                          (selectionChange)="onPerePrefectureDomicileChange($event.value)">
+                <mat-option value="" disabled>
+                  {{ isLoadingPerePrefectures ? 'Chargement…' : '— Sélectionner —' }}
+                </mat-option>
+                <mat-option *ngFor="let pf of perePrefectures" [value]="pf.code">{{ pf.nom }}</mat-option>
+              </mat-select>
+              <mat-icon matSuffix>account_balance</mat-icon>
+            </mat-form-field>
+          </div>
+
+          <!-- Commune (après préfecture) -->
+          <div class="field-row conditional-field" *ngIf="isPerePaysGuinee && perePrefectureDomicileVal">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Commune du domicile</mat-label>
+              <mat-select formControlName="commune"
+                          (selectionChange)="onPereCommuneDomicileChange($event.value)">
+                <mat-option value="" disabled>
+                  {{ isLoadingPereCommunes ? 'Chargement…' : '— Sélectionner —' }}
+                </mat-option>
+                <mat-option *ngFor="let c of pereCommunes" [value]="c.code">{{ c.nom }}</mat-option>
+              </mat-select>
+              <mat-icon matSuffix>location_city</mat-icon>
+            </mat-form-field>
+          </div>
+
+          <!-- Quartier (après commune) -->
+          <div class="field-row conditional-field" *ngIf="isPerePaysGuinee && pereForm.get('commune')?.value">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>District / Quartier</mat-label>
+              <mat-select formControlName="quartier">
+                <mat-option value="" disabled>
+                  {{ isLoadingPereQuartiers ? 'Chargement…' : '— Sélectionner —' }}
+                </mat-option>
+                <mat-option *ngFor="let q of pereQuartiers" [value]="q.code">{{ q.nom }}</mat-option>
+              </mat-select>
+              <mat-icon matSuffix>home_work</mat-icon>
+            </mat-form-field>
+          </div>
+
+        </fieldset>
+
+      </div><!-- /form-columns -->
+
+    </div>
+
+    <!-- ════════════════ ÉTAPE 4 — MÈRE ════════════════ -->
+    <div class="step-body" *ngIf="currentStep === 4" [formGroup]="mereForm">
+
+      <div class="step-intro">
+        <div class="step-intro-icon" style="background:#fce4ec;color:#c62828">
+          <mat-icon>woman</mat-icon>
+        </div>
+        <div>
+          <h2 class="step-intro-title">Renseignements sur la mère</h2>
+          <p class="step-intro-sub">Informations d'identité de la mère de l'enfant</p>
+        </div>
+      </div>
+
+      <div class="form-columns">
+
+        <!-- ── Bloc 1 : Statut + Identité ── -->
+        <fieldset class="form-fieldset">
+          <legend><span class="legend-num">1</span> Informations sur la mère</legend>
+
+          <div class="field-row field-row--split">
+            <div class="radio-block">
+              <span class="radio-block-label">Mère connue <span class="req">*</span></span>
+              <mat-radio-group formControlName="mereConnue" class="radio-inline">
+                <mat-radio-button value="oui">Oui</mat-radio-button>
+                <mat-radio-button value="non">Non</mat-radio-button>
+              </mat-radio-group>
+            </div>
+            <div class="radio-block">
+              <span class="radio-block-label">Mère décédée <span class="req">*</span></span>
+              <mat-radio-group formControlName="mereDecedee" class="radio-inline">
+                <mat-radio-button value="oui">Oui</mat-radio-button>
+                <mat-radio-button value="non">Non</mat-radio-button>
+              </mat-radio-group>
+            </div>
+          </div>
+
+          <ng-container *ngIf="isMereConnue">
+
+            <!-- NPI -->
+            <div class="field-row">
+              <div class="radio-block">
+                <span class="radio-block-label">NPI ?</span>
+                <mat-radio-group formControlName="hasNpi" class="radio-inline"
+                                 (change)="onMereHasNpiChange($event.value)">
+                  <mat-radio-button value="oui">Oui</mat-radio-button>
+                  <mat-radio-button value="non">Non</mat-radio-button>
+                </mat-radio-group>
+              </div>
+            </div>
+
+            <div class="field-row conditional-field" *ngIf="isMereHasNpi">
+              <mat-form-field appearance="outline" class="field-full">
+                <mat-label>Numéro NPI <span class="req">*</span></mat-label>
+                <input matInput formControlName="npi" placeholder="Numéro d'identification">
+                <mat-icon matSuffix>fingerprint</mat-icon>
+                <mat-error>Ce champ est requis</mat-error>
+              </mat-form-field>
+            </div>
+
+            <!-- Prénoms -->
+            <div class="field-row">
+              <mat-form-field appearance="outline" class="field-full">
+                <mat-label>Prénoms <span class="req">*</span></mat-label>
+                <input matInput formControlName="prenom" placeholder="Prénoms de la mère">
+                <mat-icon matSuffix>person</mat-icon>
+                <mat-error>Ce champ est requis</mat-error>
+              </mat-form-field>
+            </div>
+
+            <!-- Nom -->
+            <div class="field-row">
+              <mat-form-field appearance="outline" class="field-full">
+                <mat-label>Nom <span class="req">*</span></mat-label>
+                <input matInput formControlName="nom" placeholder="Nom de famille">
+                <mat-icon matSuffix>badge</mat-icon>
+                <mat-error>Ce champ est requis</mat-error>
+              </mat-form-field>
+            </div>
+
+            <!-- Date de naissance -->
+            <div class="field-row">
+              <mat-form-field appearance="outline" class="field-full">
+                <mat-label>Date de naissance</mat-label>
+                <input matInput [matDatepicker]="pickerNaissMere"
+                       formControlName="dateNaissance" placeholder="JJ/MM/AAAA" [max]="today">
+                <mat-datepicker-toggle matIconSuffix [for]="pickerNaissMere">
+                  <mat-icon matDatepickerToggleIcon>event</mat-icon>
+                </mat-datepicker-toggle>
+                <mat-datepicker #pickerNaissMere startView="multi-year"></mat-datepicker>
+              </mat-form-field>
+            </div>
+
+            <!-- Lieu de naissance mère — en ligne -->
+            <div class="field-row lieu-row">
+              <mat-form-field appearance="outline">
+                <mat-label>Pays</mat-label>
+                <mat-select formControlName="paysNaissanceMere" placeholder="Sélectionner…"
+                            (selectionChange)="onMerePaysNaissanceChange($event.value)">
+                  <mat-option *ngFor="let p of pays" [value]="p.code">{{ p.nom }}</mat-option>
+                </mat-select>
+                <mat-icon matSuffix>public</mat-icon>
+                <mat-error>Requis</mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" *ngIf="isMerePaysNaissGuinee && mereForm.get('paysNaissanceMere')?.value" class="conditional-field">
+                <mat-label>Région</mat-label>
+                <mat-select formControlName="regionNaissanceMere"
+                            (selectionChange)="onMereRegionNaissanceChange($event.value)">
+                  <mat-option value="" disabled>
+                    {{ isLoadingMereNaissRegions ? 'Chargement…' : '— Sélectionner —' }}
+                  </mat-option>
+                  <mat-option *ngFor="let r of mereNaissRegions" [value]="r.code">{{ r.nom }}</mat-option>
+                </mat-select>
+                <mat-icon matSuffix>map</mat-icon>
+                <mat-error>Requis</mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" *ngIf="isMerePaysNaissGuinee && mereNaissRegionVal" class="conditional-field">
+                <mat-label>Préfecture</mat-label>
+                <mat-select formControlName="prefectureNaissanceMere"
+                            (selectionChange)="onMerePrefectureNaissanceChange($event.value)">
+                  <mat-option value="" disabled>
+                    {{ isLoadingMereNaissPrefectures ? 'Chargement…' : '— Sélectionner —' }}
+                  </mat-option>
+                  <mat-option *ngFor="let pf of mereNaissPrefectures" [value]="pf.code">{{ pf.nom }}</mat-option>
+                </mat-select>
+                <mat-icon matSuffix>account_balance</mat-icon>
+                <mat-error>Requis</mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" *ngIf="isMerePaysNaissGuinee && mereNaissPrefectureVal" class="conditional-field">
+                <mat-label>Commune</mat-label>
+                <mat-select formControlName="communeNaissanceMere"
+                            (selectionChange)="onMereCommuneNaissanceChange($event.value)">
+                  <mat-option value="" disabled>
+                    {{ isLoadingMereNaissCommunes ? 'Chargement…' : '— Sélectionner —' }}
+                  </mat-option>
+                  <mat-option *ngFor="let c of mereNaissCommunes" [value]="c.code">{{ c.nom }}</mat-option>
+                </mat-select>
+                <mat-icon matSuffix>location_city</mat-icon>
+                <mat-error>Requis</mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" *ngIf="isMerePaysNaissGuinee && mereNaissCommuneVal" class="conditional-field">
+                <mat-label>Quartier</mat-label>
+                <mat-select formControlName="quartierNaissanceMere">
+                  <mat-option value="" disabled>
+                    {{ isLoadingMereNaissQuartiers ? 'Chargement…' : '— Sélectionner —' }}
+                  </mat-option>
+                  <mat-option *ngFor="let q of mereNaissQuartiers" [value]="q.code">{{ q.nom }}</mat-option>
+                </mat-select>
+                <mat-icon matSuffix>home_work</mat-icon>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" *ngIf="isMereAutrePaysNaiss" class="conditional-field">
+                <mat-label>Ville</mat-label>
+                <mat-select formControlName="villeNaissanceMere">
+                  <mat-option value="" disabled>
+                    {{ isLoadingMereNaissVilles ? 'Chargement…' : '— Sélectionner —' }}
+                  </mat-option>
+                  <mat-option *ngFor="let v of mereNaissVilles" [value]="v.code">{{ v.nom }}</mat-option>
+                </mat-select>
+                <mat-icon matSuffix>location_city</mat-icon>
+              </mat-form-field>
+            </div>
+
+            <!-- Nationalité connue -->
+            <div class="field-row">
+              <div class="radio-block">
+                <span class="radio-block-label">Nationalité connue</span>
+                <mat-radio-group formControlName="nationaliteConnue" class="radio-inline">
+                  <mat-radio-button value="oui">Oui</mat-radio-button>
+                  <mat-radio-button value="non">Non</mat-radio-button>
+                </mat-radio-group>
+              </div>
+            </div>
+
+            <!-- Nationalité (si connue) -->
+            <div class="field-row conditional-field" *ngIf="isMereNationaliteConnue">
+              <mat-form-field appearance="outline" class="field-full">
+                <mat-label>Nationalité</mat-label>
+                <mat-select formControlName="nationalite">
+                  <mat-option value="">— Non renseignée —</mat-option>
+                  <mat-option *ngFor="let n of nationalites" [value]="n.code">
+                    {{ n.libelleFeminin }}
+                  </mat-option>
+                </mat-select>
+                <mat-icon matSuffix>flag</mat-icon>
+              </mat-form-field>
+            </div>
+
+            <!-- Profession -->
+            <div class="field-row">
+              <mat-form-field appearance="outline" class="field-full">
+                <mat-label>Profession</mat-label>
+                <input matInput formControlName="profession"
+                       placeholder="Tapez pour rechercher…"
+                       [matAutocomplete]="autoProfMere">
+                <mat-icon matSuffix>work</mat-icon>
+                <mat-autocomplete #autoProfMere="matAutocomplete">
+                  <mat-option *ngFor="let p of filteredProfessionsMere$ | async" [value]="p.feminin">
+                    {{ p.feminin }}
+                  </mat-option>
+                </mat-autocomplete>
+              </mat-form-field>
+            </div>
+
+            <!-- Téléphone -->
+            <div class="field-row">
+              <app-phone-input formControlName="telephone" label="Numéro de téléphone"></app-phone-input>
+            </div>
+
+            <!-- Situation matrimoniale -->
+            <div class="field-row">
+              <div class="radio-block">
+                <span class="radio-block-label">Situation matrimoniale</span>
+                <mat-radio-group formControlName="situationMatrimoniale" class="radio-inline">
+                  <mat-radio-button value="celibataire">Célibataire</mat-radio-button>
+                  <mat-radio-button value="mariee">Mariée</mat-radio-button>
+                  <mat-radio-button value="divorcee">Divorcée</mat-radio-button>
+                  <mat-radio-button value="veuve">Veuve</mat-radio-button>
+                </mat-radio-group>
+              </div>
+            </div>
+
+          </ng-container>
+
+        </fieldset>
+
+        <!-- ── Bloc 2 : Domicile (si mère connue) ── -->
+        <fieldset class="form-fieldset" *ngIf="isMereConnue">
+          <legend><span class="legend-num">2</span> Informations sur le domicile de la mère</legend>
+
+          <!-- Même domicile que le père -->
+          <div class="field-row">
+            <div class="radio-block">
+              <span class="radio-block-label">Même domicile que le père</span>
+              <mat-radio-group formControlName="memeDomicileQuePere" class="radio-inline"
+                               (change)="onMemeDomicileQuePereChange($event.value)">
+                <mat-radio-button value="oui">Oui</mat-radio-button>
+                <mat-radio-button value="non">Non</mat-radio-button>
+              </mat-radio-group>
+            </div>
+          </div>
+
+          <div class="field-row">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Adresse du domicile</mat-label>
+              <input matInput formControlName="adresse" placeholder="Adresse complète">
+              <mat-icon matSuffix>home</mat-icon>
+            </mat-form-field>
+          </div>
+
+          <div class="field-row">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Pays de résidence</mat-label>
+              <mat-select formControlName="pays" placeholder="Sélectionner un pays…"
+                          (selectionChange)="onMerePaysChange($event.value)">
+                <mat-option *ngFor="let p of pays" [value]="p.code">{{ p.nom }}</mat-option>
+              </mat-select>
+              <mat-icon matSuffix>public</mat-icon>
+            </mat-form-field>
+          </div>
+
+          <!-- Région (après sélection Guinée) -->
+          <div class="field-row conditional-field" *ngIf="isMerePaysGuinee">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Région de résidence</mat-label>
+              <mat-select formControlName="regionDomicileMere"
+                          (selectionChange)="onMereRegionDomicileChange($event.value)">
+                <mat-option value="" disabled>
+                  {{ isLoadingMereRegions ? 'Chargement…' : '— Sélectionner —' }}
+                </mat-option>
+                <mat-option *ngFor="let r of mereRegions" [value]="r.code">{{ r.nom }}</mat-option>
+              </mat-select>
+              <mat-icon matSuffix>map</mat-icon>
+            </mat-form-field>
+          </div>
+
+          <!-- Préfecture (après région) -->
+          <div class="field-row conditional-field" *ngIf="isMerePaysGuinee && mereRegionDomicileVal">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Préfecture</mat-label>
+              <mat-select formControlName="prefecture"
+                          (selectionChange)="onMerePrefectureDomicileChange($event.value)">
+                <mat-option value="" disabled>
+                  {{ isLoadingMerePrefectures ? 'Chargement…' : '— Sélectionner —' }}
+                </mat-option>
+                <mat-option *ngFor="let pf of merePrefectures" [value]="pf.code">{{ pf.nom }}</mat-option>
+              </mat-select>
+              <mat-icon matSuffix>account_balance</mat-icon>
+            </mat-form-field>
+          </div>
+
+          <!-- Commune (après préfecture) -->
+          <div class="field-row conditional-field" *ngIf="isMerePaysGuinee && merePrefectureDomicileVal">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Commune du domicile</mat-label>
+              <mat-select formControlName="commune"
+                          (selectionChange)="onMereCommuneDomicileChange($event.value)">
+                <mat-option value="" disabled>
+                  {{ isLoadingMereCommunes ? 'Chargement…' : '— Sélectionner —' }}
+                </mat-option>
+                <mat-option *ngFor="let c of mereCommunes" [value]="c.code">{{ c.nom }}</mat-option>
+              </mat-select>
+              <mat-icon matSuffix>location_city</mat-icon>
+            </mat-form-field>
+          </div>
+
+          <!-- Quartier (après commune) -->
+          <div class="field-row conditional-field" *ngIf="isMerePaysGuinee && mereForm.get('commune')?.value">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>District / Quartier</mat-label>
+              <mat-select formControlName="quartier">
+                <mat-option value="" disabled>
+                  {{ isLoadingMereQuartiers ? 'Chargement…' : '— Sélectionner —' }}
+                </mat-option>
+                <mat-option *ngFor="let q of mereQuartiers" [value]="q.code">{{ q.nom }}</mat-option>
+              </mat-select>
+              <mat-icon matSuffix>home_work</mat-icon>
+            </mat-form-field>
+          </div>
+
+        </fieldset>
+
+        <!-- ── Bloc 3 : Informations sur le mariage ── -->
+        <fieldset class="form-fieldset">
+          <legend><span class="legend-num">3</span> Informations sur le mariage</legend>
+
+          <div class="field-row">
+            <div class="radio-block">
+              <span class="radio-block-label">Parents mariés ?</span>
+              <mat-radio-group formControlName="parentsMaries" class="radio-inline">
+                <mat-radio-button value="oui">Oui</mat-radio-button>
+                <mat-radio-button value="non">Non</mat-radio-button>
+              </mat-radio-group>
+            </div>
+          </div>
+
+          <div class="field-row conditional-field" *ngIf="isParentsMaries">
+            <div class="radio-block">
+              <span class="radio-block-label">Document présenté prouvant mariage des parents</span>
+              <mat-radio-group formControlName="documentMariage" class="radio-inline">
+                <mat-radio-button value="oui">Oui</mat-radio-button>
+                <mat-radio-button value="non">Non</mat-radio-button>
+              </mat-radio-group>
+            </div>
+          </div>
+
+          <ng-container *ngIf="isDocumentMariage">
+
+            <div class="field-row conditional-field">
+              <mat-form-field appearance="outline" class="field-full">
+                <mat-label>Numéro de l'acte de mariage des parents</mat-label>
+                <input matInput formControlName="numeroActeMariage" placeholder="Numéro de l'acte">
+                <mat-icon matSuffix>article</mat-icon>
+              </mat-form-field>
+            </div>
+
+            <div class="field-row conditional-field">
+              <mat-form-field appearance="outline" class="field-full">
+                <mat-label>Date du mariage des parents</mat-label>
+                <input matInput [matDatepicker]="pickerMariage"
+                       formControlName="dateMariage" placeholder="JJ/MM/AAAA" [max]="today">
+                <mat-datepicker-toggle matIconSuffix [for]="pickerMariage">
+                  <mat-icon matDatepickerToggleIcon>event</mat-icon>
+                </mat-datepicker-toggle>
+                <mat-datepicker #pickerMariage startView="multi-year"></mat-datepicker>
+              </mat-form-field>
+            </div>
+
+            <div class="field-row conditional-field">
+              <mat-form-field appearance="outline" class="field-full">
+                <mat-label>Commune de mariage des parents</mat-label>
+                <mat-select formControlName="communeMariage" placeholder="Sélectionner une commune…">
+                  <mat-option value="" disabled>
+                    {{ isLoadingCommunesMariage ? 'Chargement…' : '— Sélectionner —' }}
+                  </mat-option>
+                  <mat-option *ngFor="let c of communesMariage" [value]="c.code">{{ c.nom }}</mat-option>
+                </mat-select>
+                <mat-icon matSuffix>location_city</mat-icon>
+              </mat-form-field>
+            </div>
+
+          </ng-container>
+
+        </fieldset>
+
+      </div><!-- /form-columns -->
+
+    </div>
+
+    <!-- ════════════════ ÉTAPE 5 — TRANSCRIPTION ════════════════ -->
+    <div class="step-body" *ngIf="currentStep === 5" [formGroup]="transcriptionForm">
+
+      <div class="step-intro">
+        <div class="step-intro-icon" style="background:#f3e5f5;color:#6a1b9a">
+          <mat-icon>drive_file_rename_outline</mat-icon>
+        </div>
+        <div>
+          <h2 class="step-intro-title">RENSEIGNEMENTS SUR LA TRANSCRIPTION</h2>
+          <p class="step-intro-sub">Informations finales avant enregistrement</p>
+        </div>
+      </div>
+
+      <!-- Fieldset 1 — Informations sur l'inscription -->
+      <fieldset class="form-fieldset">
+        <legend>Informations sur l'inscription</legend>
+
+        <div class="field-row field-row--split">
+          <mat-form-field appearance="outline">
+            <mat-label>Date de l'inscription</mat-label>
+            <input matInput [matDatepicker]="pickerInscription"
+                   formControlName="dateInscription"
+                   placeholder="JJ/MM/AAAA"
+                   [max]="today">
+            <mat-datepicker-toggle matIconSuffix [for]="pickerInscription">
+              <mat-icon matDatepickerToggleIcon>event</mat-icon>
+            </mat-datepicker-toggle>
+            <mat-datepicker #pickerInscription></mat-datepicker>
+            <mat-error>Champ requis</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Heure de l'inscription</mat-label>
+            <input matInput type="time" formControlName="heureInscription">
+            <mat-icon matSuffix>schedule</mat-icon>
+          </mat-form-field>
+        </div>
+      </fieldset>
+
+      <!-- Fieldset 2 — Actions à faire -->
+      <fieldset class="form-fieldset">
+        <legend>Informations sur les actions à faire sur l'acte</legend>
+
+        <div class="field-row">
+          <div class="radio-block">
+            <span class="radio-block-label">Actions à faire</span>
+            <mat-radio-group formControlName="actionsFaire" class="radio-col">
+              <mat-radio-button value="en_cours_saisie">En cours de saisie</mat-radio-button>
+              <mat-radio-button value="a_corriger">A corriger</mat-radio-button>
+              <mat-radio-button value="a_valider">A valider</mat-radio-button>
+            </mat-radio-group>
+          </div>
+        </div>
+      </fieldset>
+
+      <!-- Alerte délai > 6 mois -->
+      <div class="delai-warning" *ngIf="retardDressage">
+        <mat-icon>warning</mat-icon>
+        <div>
+          <strong>Délai dépassé</strong>
+          <span>
+            Le délai entre la date du jugement et la date d'inscription est de
+            <strong>{{ delaiDressageMois }} mois</strong>, ce qui dépasse le délai légal de 6 mois.
+          </span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── Pied de page : navigation ────────────────────────────────── -->
+    <div class="step-footer">
+      <button mat-stroked-button class="btn-cancel" (click)="cancel()">
+        <mat-icon>cancel_outline</mat-icon> Annuler
+      </button>
+      <div class="footer-nav">
+        <button mat-stroked-button [disabled]="currentStep === 1" (click)="goPrev()">
+          <mat-icon>arrow_back</mat-icon> Précédent
+        </button>
+        <button mat-raised-button color="primary" (click)="goNext()">
+          {{ currentStep === 5 ? 'Enregistrer' : 'Suivant' }}
+          <mat-icon>{{ currentStep === 5 ? 'save' : 'arrow_forward' }}</mat-icon>
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /stepper-card -->
+
+</div><!-- /creation-page -->

@@ -134,12 +134,7 @@
                       <mat-error *ngIf="profileForm.get('email')?.hasError('email')">Format invalide</mat-error>
                     </mat-form-field>
 
-                    <mat-form-field appearance="outline" class="full-width">
-                      <mat-label>Téléphone</mat-label>
-                      <input matInput formControlName="telephone" type="tel" placeholder="+224 6XX XXX XXX">
-                      <mat-icon matSuffix>phone</mat-icon>
-                      <mat-error *ngIf="profileForm.get('telephone')?.hasError('pattern')">Format invalide</mat-error>
-                    </mat-form-field>
+                    <app-phone-input formControlName="telephone" label="Téléphone"></app-phone-input>
                   </div>
 
                   <mat-form-field appearance="outline" class="full-width">

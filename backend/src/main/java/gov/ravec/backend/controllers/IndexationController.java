@@ -1,7 +1,7 @@
 package gov.ravec.backend.controllers;
 
+import gov.ravec.backend.dto.ActeSummaryDTO;
 import gov.ravec.backend.dto.IndexationRequest;
-import gov.ravec.backend.dto.ValidBirthDTO;
 import gov.ravec.backend.services.IndexationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -29,8 +29,8 @@ public class IndexationController {
             description = "Crée un acte de naissance avec le statut EN_ATTENTE à partir des données d'indexation.")
     @PostMapping("/indexation")
     @PreAuthorize("hasAuthority('CAN_SAISIR_NAISSANCE')")
-    public ResponseEntity<ValidBirthDTO> sauvegarder(@RequestBody IndexationRequest request) {
-        ValidBirthDTO saved = indexationService.sauvegarder(request);
+    public ResponseEntity<ActeSummaryDTO> sauvegarder(@RequestBody IndexationRequest request) {
+        ActeSummaryDTO saved = indexationService.sauvegarder(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 }

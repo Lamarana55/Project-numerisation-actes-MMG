@@ -366,6 +366,17 @@
   margin-top: 4em !important;
 }
 
+/* Variante : deux colonnes côte à côte */
+.field-row--split {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.field-row--split > * {
+  flex: 1;
+}
+
 .field-full { width: 100%; }
 
 /* ── Champs compacts pleine largeur (override MDC) ──────────────── */
@@ -516,3 +527,60 @@
   .fields-grid-3 { grid-template-columns: 1fr; }
   .page-header { flex-direction: column; align-items: flex-start; }
 }
+
+/* ── Lieu de naissance en ligne ─────────────────────────────────── */
+.lieu-row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: flex-start;
+  padding: 0 20px;
+  margin-top: 8px;
+}
+
+.lieu-row mat-form-field {
+  flex: 1;
+  min-width: 130px;
+}
+
+/* ── Bannière acte manquant ─────────────────────────────────────── */
+.acte-manquant-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 20px;
+  background: #fffbeb;
+  border-bottom: 2px solid #fde68a;
+  color: #92400e;
+  font-size: .83rem;
+  line-height: 1.5;
+  animation: slideIn .22s ease;
+}
+.acte-manquant-banner mat-icon {
+  font-size: 20px; width: 20px; height: 20px;
+  flex-shrink: 0; color: #f59e0b;
+}
+.acte-manquant-banner strong { font-weight: 700; }
+
+/* ── Alerte délai dressage > 6 mois ────────────────────────────── */
+.delai-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-top: 16px;
+  padding: 14px 18px;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-left: 4px solid #f97316;
+  border-radius: 10px;
+  color: #9a3412;
+  animation: slideIn .22s ease;
+}
+.delai-warning mat-icon {
+  font-size: 22px; width: 22px; height: 22px;
+  flex-shrink: 0; margin-top: 1px; color: #f97316;
+}
+.delai-warning div { display: flex; flex-direction: column; gap: 4px; }
+.delai-warning strong { font-size: .88rem; display: block; }
+.delai-warning span { font-size: .82rem; line-height: 1.5; }

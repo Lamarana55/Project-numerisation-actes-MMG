@@ -1,0 +1,286 @@
+/* ══════════════════════════════════════════════════════════════
+   CONSULTATION ACTE DE NAISSANCE
+   ══════════════════════════════════════════════════════════════ */
+
+:host { display: block; background: #f0f4f8; min-height: 100vh; }
+
+/* ── EN-TÊTE ─────────────────────────────────────────────────── */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 28px;
+  background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 60%, #388e3c 100%);
+  color: white;
+  box-shadow: 0 2px 10px rgba(27,94,32,.35);
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.page-header-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.header-icon {
+  width: 44px; height: 44px;
+  background: rgba(255,255,255,.15);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+}
+.header-icon mat-icon { font-size: 26px; width: 26px; height: 26px; color: white; }
+
+.page-title { font-size: 17px; font-weight: 700; margin: 0; color: white; }
+.page-subtitle { font-size: 12px; color: rgba(255,255,255,.75); margin: 2px 0 0; }
+
+.page-header-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+.btn-action {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 18px; border-radius: 8px; border: none;
+  font-size: 13px; font-weight: 600; cursor: pointer;
+  transition: all .18s;
+}
+.btn-action mat-icon { font-size: 16px; width: 16px; height: 16px; }
+.btn-action--outline {
+  background: rgba(255,255,255,.12); color: white;
+  border: 1.5px solid rgba(255,255,255,.4);
+}
+.btn-action--outline:hover { background: rgba(255,255,255,.22); }
+.btn-action--edit {
+  background: #fff8e1; color: #e65100;
+  border: 1.5px solid #ffe0b2;
+}
+.btn-action--edit:hover { background: #ffe0b2; }
+.btn-action--validate {
+  background: #e8f5e9; color: #2e7d32;
+  border: 1.5px solid #a5d6a7;
+}
+.btn-action--validate:hover { background: #c8e6c9; }
+.btn-action--validate:disabled { opacity: .6; cursor: not-allowed; }
+.btn-action--pdf {
+  background: #b71c1c; color: white;
+  border: 1.5px solid #c62828;
+}
+.btn-action--pdf:hover { background: #c62828; }
+
+/* ── ÉTAT ─────────────────────────────────────────────────────── */
+.state-box {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 12px; padding: 60px 24px;
+  color: #607d8b; font-size: 14px; text-align: center;
+}
+.state-box--error { color: #c62828; }
+
+/* ── CORPS ──────────────────────────────────────────────────────── */
+.acte-body { padding: 24px 28px; }
+
+/* Bandeau statut */
+.statut-banner {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  padding: 10px 18px; border-radius: 10px; margin-bottom: 20px;
+  font-size: 13px; font-weight: 600;
+}
+.statut-banner mat-icon { font-size: 20px; width: 20px; height: 20px; }
+.statut-banner--valide {
+  background: #e8f5e9; color: #1a7a3c; border: 1px solid #a5d6a7;
+}
+.statut-banner--brouillon {
+  background: #f0f2f5; color: #637089; border: 1px solid #dce1ea;
+}
+.statut-banner--corriger {
+  background: #fef2f2; color: #b91c1c; border: 1px solid #fca5a5;
+}
+.source-badge {
+  background: rgba(0,0,0,.07); padding: 2px 10px;
+  border-radius: 20px; font-size: 12px;
+}
+.meta-info { color: inherit; opacity: .7; font-size: 12px; }
+
+/* ── DOCUMENT OFFICIEL ──────────────────────────────────────────── */
+.acte-document {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 28px rgba(0,0,0,.10), 0 1px 6px rgba(0,0,0,.06);
+  padding: 36px 44px;
+  max-width: 880px;
+  margin: 0 auto;
+  border: 1px solid #e8edf2;
+  position: relative;
+}
+
+/* En-tête document */
+.doc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+.republic-title {
+  font-size: 12px; font-weight: 800; letter-spacing: .8px;
+  text-transform: uppercase; color: #1a1a1a;
+}
+.devise {
+  font-size: 11px; font-style: italic; margin: 3px 0 8px; color: #37474f;
+}
+.rouge { color: #ce1126; font-weight: 700; }
+.jaune { color: #bf9000; font-weight: 700; }
+.vert  { color: #00853f; font-weight: 700; }
+.doc-commune {
+  font-size: 11px; font-weight: 700;
+  color: #1b5e20; background: #f1f8e9;
+  display: inline-block; padding: 2px 8px;
+  border-radius: 4px; border: 1px solid #c8e6c9;
+}
+.doc-header-right { text-align: right; }
+.doc-copy-label {
+  font-size: 9px; font-weight: 800; letter-spacing: 1.5px;
+  color: #8d6e63; text-transform: uppercase;
+  background: #efebe9; padding: 2px 8px; border-radius: 4px;
+  display: inline-block; margin-bottom: 4px;
+}
+.doc-type {
+  font-size: 18px; font-weight: 800; color: #1b5e20;
+  text-transform: uppercase; letter-spacing: .5px;
+}
+.doc-registre {
+  font-size: 11px; color: #455a64; margin-top: 4px;
+  line-height: 1.6;
+}
+
+/* Ligne tricolore */
+.tricolor-line {
+  display: flex; height: 3px; margin: 10px 0 20px;
+}
+.rouge-bar { flex: 1; background: #ce1126; }
+.jaune-bar { flex: 1; background: #fcd116; }
+.vert-bar  { flex: 1; background: #00853f; }
+
+/* ── NPI HÉROS ───────────────────────────────────────────────── */
+.npi-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: linear-gradient(135deg, #e3f2fd 0%, #ede7f6 100%);
+  border: 1.5px solid #90caf9;
+  border-radius: 10px;
+  padding: 12px 20px;
+  margin-bottom: 22px;
+}
+.npi-hero--pending {
+  background: #f8f9fa;
+  border-color: #dce1ea;
+}
+.npi-hero-left {
+  display: flex; align-items: center; gap: 8px;
+}
+.npi-hero-left mat-icon {
+  font-size: 22px; width: 22px; height: 22px; color: #1565c0;
+}
+.npi-hero--pending .npi-hero-left mat-icon { color: #9e9e9e; }
+.npi-hero-label {
+  font-size: 11px; font-weight: 700; color: #37474f;
+  text-transform: uppercase; letter-spacing: .5px;
+}
+.npi-hero-value {
+  font-family: 'Courier New', monospace;
+  font-size: 18px; font-weight: 700;
+  color: #0d47a1;
+  letter-spacing: 3px;
+  background: white;
+  padding: 4px 14px;
+  border-radius: 6px;
+  border: 1px solid #90caf9;
+  box-shadow: 0 1px 4px rgba(13,71,161,.1);
+}
+.npi-hero-empty {
+  font-size: 12px; font-style: italic; color: #9e9e9e;
+}
+
+/* ── SECTIONS ────────────────────────────────────────────────── */
+.doc-section {
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #eceff1;
+}
+.doc-section:last-child { border-bottom: none; }
+
+.section-title {
+  font-size: 13px; font-weight: 800;
+  text-decoration: underline;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: #1b5e20;
+  margin: 0 0 14px;
+}
+
+/* ── CHAMPS ──────────────────────────────────────────────────── */
+.fields-grid { display: flex; flex-direction: column; gap: 6px; }
+
+.field-row {
+  display: grid;
+  grid-template-columns: 220px 16px 1fr;
+  align-items: baseline;
+  gap: 4px;
+}
+.field-label {
+  font-size: 11px; font-weight: 700; font-style: italic;
+  color: #37474f;
+}
+.field-sep { color: #37474f; font-weight: 700; }
+.field-value { font-size: 12px; color: #212121; }
+.npi-value { font-family: monospace; font-size: 12px; font-weight: 700; color: #1565c0; }
+.name-value { font-weight: 600; font-size: 13px; color: #1b5e20; }
+
+/* ── TABLEAU PARENTS ─────────────────────────────────────────── */
+.parents-table { display: flex; flex-direction: column; gap: 0; }
+
+.parents-header, .parents-row {
+  display: grid;
+  grid-template-columns: 160px 1fr 1fr;
+  gap: 8px;
+  padding: 5px 8px;
+  border-radius: 4px;
+}
+.parents-header {
+  background: #f5f7fa;
+  font-size: 11px; font-weight: 800;
+  color: #37474f;
+  margin-bottom: 4px;
+}
+.parents-row:nth-child(even) { background: #fafafa; }
+
+.parents-col-label {
+  font-size: 11px; font-weight: 700; font-style: italic; color: #37474f;
+}
+.parents-col { font-size: 12px; color: #212121; }
+.parents-col--pere { color: #1565c0; font-weight: 700; text-align: center; }
+.parents-col--mere { color: #880e4f; font-weight: 700; text-align: center; }
+
+/* ── MARIAGE ─────────────────────────────────────────────────── */
+.marriage-info {
+  display: flex; align-items: center; gap: 8px;
+  margin-top: 12px;
+  padding: 8px 14px;
+  background: #fce4ec;
+  border-radius: 8px;
+  font-size: 12px; color: #880e4f;
+}
+.marriage-info mat-icon { font-size: 16px; width: 16px; height: 16px; color: #e91e63; }
+
+/* ── CLÔTURE ─────────────────────────────────────────────────── */
+.closing-formula {
+  margin-top: 20px;
+  padding: 16px 20px;
+  background: #f9fbe7;
+  border-left: 3px solid #2e7d32;
+  border-radius: 4px;
+  font-size: 12px;
+  font-style: italic;
+  color: #33691e;
+  line-height: 1.7;
+}
+.closing-formula p { margin: 0 0 6px; }
+.closing-formula p:last-child { margin-bottom: 0; }

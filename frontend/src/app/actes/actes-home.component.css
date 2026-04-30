@@ -266,3 +266,63 @@
 }
 .today-action:hover { color: #2e7d32; }
 .today-action mat-icon { font-size: 16px; width: 16px; height: 16px; }
+
+/* ═══════ LIEN LISTE COMPLÈTE ═══════ */
+.list-link-panel {
+  margin-top: 20px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+}
+
+.list-link-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #1b5e20, #388e3c);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+}
+.list-link-icon mat-icon { font-size: 22px; width: 22px; height: 22px; }
+
+.list-link-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.list-link-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1b5e20;
+}
+.list-link-sub {
+  font-size: 12px;
+  color: #888;
+}
+
+.btn-voir-liste {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 18px;
+  background: #2e7d32;
+  color: white;
+  border: none;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+.btn-voir-liste:hover { background: #1b5e20; }
+.btn-voir-liste mat-icon { font-size: 16px; width: 16px; height: 16px; }
+

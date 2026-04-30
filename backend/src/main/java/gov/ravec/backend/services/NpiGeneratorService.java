@@ -1,10 +1,12 @@
 package gov.ravec.backend.services;
 
-import gov.ravec.backend.entities.Commune;
+import gov.ravec.backend.entities.ActeNaissance;
+import gov.ravec.backend.entities.Personne;
 import gov.ravec.backend.entities.ValidBirth;
 import gov.ravec.backend.repositories.CommuneRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
@@ -63,6 +65,44 @@ public class NpiGeneratorService {
         String cle = calculerCleControle(npiSansCle);
 
         return npiSansCle + cle;
+    }
+
+    /**
+     * Génère un NPI pour un acte de naissance (module formulaire/déclaration).
+     * Format identique au NPI ValidBirth : Sexe+Année+Mois+PrefCode+CommuneCode+Quartier+Aléatoire+Clé
+     *
+     * Exemple réel (acte_ref.pdf) : 21304CKY0601814796
+     *   2=Féminin | 13=2013 | 04=Avril | CKY=Conakry | 06=Lambanyi | 01=quartier | 8147=aléatoire | 96=clé
+     */
+    public String generate(ActeNaissance acte) {
+        Personne enfant = acte.getEnfant();
+        if (enfant == null) throw new IllegalArgumentException("L'acte ne contient pas d'enfant.");
+
+        // ── Sexe : 1 = Masculin, 2 = Féminin ──────────────────────────
+        String sexe = "M".equalsIgnoreCase(safe(enfant.getSexe())) ? "1" : "2";
+
+        // ── Année et mois de naissance ─────────────────────────────────
+        LocalDate dn = enfant.getDateNaissance();
+        String annee  = (dn != null) ? String.format("%02d", dn.getYear() % 100) : "00";
+        String mois   = (dn != null) ? String.format("%02d", dn.getMonthValue())  : "00";
+
+        // ── Code commune → préfecture (3 chars) + commune (2 digits) ───
+        // Priorité : communeNaissance de l'enfant, sinon commune de l'acte
+        String communeName = safe(enfant.getCommuneNaissance());
+        if (communeName.isEmpty() && acte.getCommune() != null) {
+            communeName = safe(acte.getCommune().getNom());
+        }
+        String prefectureCode = resolveCommune(communeName, 0, 3, "000");
+        String communeCode    = resolveCommune(communeName, 3, 5, "00");
+
+        // ── Quartier : non disponible dans ce module → "00" ────────────
+        String quartier = "00";
+
+        // ── Numéro aléatoire (4 chiffres) ──────────────────────────────
+        String aleatoire = String.valueOf(ThreadLocalRandom.current().nextInt(1000, 10000));
+
+        String npiSansCle = sexe + annee + mois + prefectureCode + communeCode + quartier + aleatoire;
+        return npiSansCle + calculerCleControle(npiSansCle);
     }
 
     // ═══════════════════════════════════════════════════════════════════
@@ -141,5 +181,17 @@ public class NpiGeneratorService {
 
     private String safe(String value) {
         return value != null ? value.trim() : "";
+    }
+
+    /** Extrait un segment du code commune (ex: CKY06 → [0,3)="CKY" ou [3,5)="06"). */
+    private String resolveCommune(String communeName, int start, int end, String fallback) {
+        if (communeName.isEmpty()) return fallback;
+        return communeRepository.findByNom(communeName)
+                .map(c -> {
+                    String code = c.getCode();
+                    if (code == null || code.length() < end) return fallback;
+                    return code.substring(start, end);
+                })
+                .orElse(fallback);
     }
 }

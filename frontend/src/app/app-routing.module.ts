@@ -53,6 +53,7 @@ import { OfficiersEtatCivilComponent } from './parametrage/officiers-etat-civil/
 
 // Actes (page unifiée)
 import { ActesHomeComponent } from './actes/actes-home.component';
+import { ActesListeComponent } from './actes/actes-liste/actes-liste.component';
 
 const routes: Routes = [
   // Routes publiques
@@ -79,6 +80,10 @@ const routes: Routes = [
       {
         path: 'actes',
         component: ActesHomeComponent,
+      },
+      {
+        path: 'actes/listes',
+        component: ActesListeComponent,
       },
 
       // Numérisation et Indexation

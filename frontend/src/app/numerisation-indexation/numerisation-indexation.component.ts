@@ -3,6 +3,7 @@ import { forkJoin } from 'rxjs';
 import { ToastService } from '../services/toast.service';
 import { GeodataService } from '../services/geodata.service';
 import { Profession, ProfessionService } from '../services/profession.service';
+import { Nationalite, NationaliteService } from '../services/nationalite.service';
 import { ApiService } from '../services/api.service';
 import { RegionDTO, PrefectureDTO, CommuneDTO, QuartierDTO, PaysDTO, VilleDTO } from '../models/geodata';
 import { MatDatepickerInputEvent } from '@angular/material/datepicker';
@@ -144,6 +145,7 @@ export class NumerisationIndexationComponent implements OnInit {
 
   // ── Professions / nationalités ────────────────────────────────────────────
   professions: Profession[] = [];
+  nationalites: Nationalite[] = [];
 
   // ── Liens de parenté (déclarant) ──────────────────────────────────────────
   readonly LIENS_PARENTE = [
@@ -197,19 +199,22 @@ export class NumerisationIndexationComponent implements OnInit {
     private toast: ToastService,
     private geodataService: GeodataService,
     private professionService: ProfessionService,
+    private nationaliteService: NationaliteService,
     private apiService: ApiService,
   ) {}
 
   ngOnInit(): void {
     forkJoin({
-      regions:     this.geodataService.getAllRegions(),
-      pays:        this.geodataService.getAllPays(),
-      professions: this.professionService.getProfessions(),
+      regions:      this.geodataService.getAllRegions(),
+      pays:         this.geodataService.getAllPays(),
+      professions:  this.professionService.getProfessions(),
+      nationalites: this.nationaliteService.getNationalites(),
     }).subscribe({
-      next: ({ regions, pays, professions }) => {
-        this.allRegions  = regions;
-        this.allPays     = pays;
-        this.professions = professions;
+      next: ({ regions, pays, professions, nationalites }) => {
+        this.allRegions   = regions;
+        this.allPays      = pays;
+        this.professions  = professions;
+        this.nationalites = nationalites;
       },
       error: () => this.showError('Erreur lors du chargement des référentiels.'),
     });
@@ -565,7 +570,7 @@ export class NumerisationIndexationComponent implements OnInit {
   }
 
   getNationalite(code: string): string {
-    return this.professionService.getNationalite(code);
+    return this.nationaliteService.getLibelle(code, 'F', this.nationalites);
   }
 
   getProfession(code: number | string | undefined, genre: string): string {
