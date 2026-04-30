@@ -1,0 +1,228 @@
+<div class="liste-page">
+
+  <!-- ── En-tête ──────────────────────────────────────────────── -->
+  <div class="page-header">
+    <div class="page-header-title">
+      <mat-icon>list_alt</mat-icon>
+      Résultats de recherche
+    </div>
+    <div class="page-header-actions">
+      <button class="btn-header btn-header--active" (click)="retourRecherche()">
+        <mat-icon style="font-size:14px;width:14px;height:14px;vertical-align:middle;margin-right:4px">search</mat-icon>
+        Recherche simple
+      </button>
+      <button class="btn-header">
+        <mat-icon style="font-size:14px;width:14px;height:14px;vertical-align:middle;margin-right:4px">tune</mat-icon>
+        Avancée
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Barre résultats ───────────────────────────────────────── -->
+  <div class="results-bar">
+    <div class="results-bar-left">
+      <span class="results-count">Actes trouvés</span>
+      <span class="results-badge">{{ totalElements }}</span>
+      <div class="divider-v"></div>
+      <button class="btn-icon-sm" matTooltip="Ajouter un acte" routerLink="/admin/actes">
+        <mat-icon>add</mat-icon>
+      </button>
+    </div>
+    <div class="results-bar-right">
+      <span class="rpp-label">Par page</span>
+      <select [(ngModel)]="pageSize" (change)="onPageSizeChange()" class="rpp-select">
+        <option *ngFor="let opt of pageSizeOptions" [value]="opt">{{ opt }}</option>
+      </select>
+      <div class="divider-v"></div>
+      <button class="btn-icon-sm" (click)="chargerActes()" matTooltip="Actualiser">
+        <mat-icon>refresh</mat-icon>
+      </button>
+      <button class="btn-icon-sm" matTooltip="Filtres avancés">
+        <mat-icon>filter_list</mat-icon>
+      </button>
+      <button class="btn-icon-sm" matTooltip="Exporter">
+        <mat-icon>download</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Chargement ────────────────────────────────────────────── -->
+  <div class="state-box state-box--loading" *ngIf="isLoading">
+    <div class="state-icon-wrap">
+      <mat-spinner diameter="36"></mat-spinner>
+    </div>
+    <span class="state-title">Chargement en cours…</span>
+    <span class="state-sub">Récupération des actes depuis le serveur</span>
+  </div>
+
+  <!-- ── Erreur ─────────────────────────────────────────────────── -->
+  <div class="state-box state-box--error" *ngIf="hasError && !isLoading">
+    <div class="state-icon-wrap">
+      <mat-icon style="color:#e53935">cloud_off</mat-icon>
+    </div>
+    <span class="state-title">Connexion impossible</span>
+    <span class="state-sub">Impossible de joindre le serveur. Vérifiez votre connexion et réessayez.</span>
+    <button class="btn-retry" (click)="chargerActes()">
+      <mat-icon>refresh</mat-icon> Réessayer
+    </button>
+  </div>
+
+  <!-- ── Vide ──────────────────────────────────────────────────── -->
+  <div class="state-box state-box--empty" *ngIf="!isLoading && !hasError && actes.length === 0">
+    <div class="state-icon-wrap">
+      <mat-icon style="color:#7c8db5">search_off</mat-icon>
+    </div>
+    <span class="state-title">Aucun résultat</span>
+    <span class="state-sub">Aucun acte ne correspond à vos critères de recherche. Modifiez les filtres et relancez.</span>
+    <button class="btn-header btn-header--active" (click)="retourRecherche()"
+            style="background:#2e7d32;border-color:#2e7d32;color:white;padding:8px 18px;border-radius:8px;margin-top:4px">
+      Modifier la recherche
+    </button>
+  </div>
+
+  <!-- ── En-tête de colonnes + Liste des actes ─────────────────── -->
+  <div class="table-wrap" *ngIf="!isLoading && !hasError && actes.length > 0">
+
+    <!-- En-tête colonnes sticky -->
+    <div class="table-header-sticky">
+      <div class="col-hdr col-hdr--icon"></div>
+      <div class="col-hdr col-hdr--statut">STATUT</div>
+      <div class="col-hdr col-hdr--identite">NOM / PRÉNOMS</div>
+      <div class="col-hdr col-hdr--npi">NPI</div>
+      <div class="col-hdr col-hdr--parents">PÈRE / MÈRE</div>
+      <div class="col-hdr col-hdr--type">TYPE</div>
+      <div class="col-hdr col-hdr--acte">N° ACTE</div>
+      <div class="col-hdr col-hdr--date">DATE NAISSANCE</div>
+      <div class="col-hdr col-hdr--actions">ACTIONS</div>
+    </div>
+
+    <!-- Card par acte -->
+    <div class="acte-card" [ngClass]="getCardClass(a)"
+         *ngFor="let a of actes">
+
+      <!-- Bande couleur type -->
+      <div class="card-accent" [style.background]="getDocColor(a)"></div>
+
+      <!-- Contenu principal -->
+      <div class="card-body">
+
+        <!-- Icône type -->
+        <div class="card-col card-col--icon">
+          <div class="type-icon-wrap" [style.color]="getDocColor(a)">
+            <mat-icon>description</mat-icon>
+          </div>
+        </div>
+
+        <!-- Statut -->
+        <div class="card-col card-col--statut">
+          <span [class]="getEtatChipClass(a)">
+            <mat-icon>{{ a.statut === 'VALIDE' ? 'verified' : 'draft' }}</mat-icon>
+            {{ getEtatLabel(a) }}
+          </span>
+          <span class="commune-label" *ngIf="a.commune">{{ a.commune }}</span>
+        </div>
+
+        <!-- Identité intéressé -->
+        <div class="card-col card-col--identite">
+          <div class="identite-principale">
+            <span class="role-pill role-pill--interesse">Intéressé·e</span>
+            <span class="td-prenom">{{ a.prenom || '—' }}</span>
+            <span class="td-nom">{{ a.nom || '—' }}</span>
+            <span [class.sexe-m]="a.sexe==='M'" [class.sexe-f]="a.sexe==='F'" class="sexe-tag">
+              {{ a.sexe || '?' }}
+            </span>
+          </div>
+        </div>
+
+        <!-- NPI -->
+        <div class="card-col card-col--npi">
+          <span class="npi-chip" *ngIf="a.npi">{{ a.npi }}</span>
+          <span class="npi-empty" *ngIf="!a.npi">—</span>
+        </div>
+
+        <!-- Parents -->
+        <div class="card-col card-col--parents">
+          <div class="parent-row">
+            <span class="role-pill role-pill--pere">Père</span>
+            <span class="parent-name">{{ a.prenomPere || '' }} {{ a.nomPere || '—' }}</span>
+          </div>
+          <div class="parent-row">
+            <span class="role-pill role-pill--mere">Mère</span>
+            <span class="parent-name">{{ a.prenomMere || '' }} {{ a.nomMere || '—' }}</span>
+          </div>
+        </div>
+
+        <!-- Type document -->
+        <div class="card-col card-col--type">
+          <span class="doc-badge" [ngClass]="getDocBadgeClass(a)">
+            {{ getDocLabel(a) }}
+          </span>
+        </div>
+
+        <!-- N° acte -->
+        <div class="card-col card-col--acte">
+          <span class="numero-value" *ngIf="a.numeroActe">{{ a.numeroActe }}</span>
+          <span class="empty-dash" *ngIf="!a.numeroActe">—</span>
+        </div>
+
+        <!-- Date -->
+        <div class="card-col card-col--date">
+          <span class="date-val">
+            {{ (a.dateNaissance   | date:'dd/MM/yyyy') ||
+               (a.dateInscription | date:'dd/MM/yyyy') ||
+               (a.dateDressage    | date:'dd/MM/yyyy') || '—' }}
+          </span>
+        </div>
+
+        <!-- Actions -->
+        <div class="card-col card-col--actions">
+          <div class="actions-group">
+            <button class="act-btn" matTooltip="Consulter" (click)="voirDetail(a)">
+              <mat-icon>visibility</mat-icon>
+            </button>
+            <button class="act-btn" matTooltip="Modifier" (click)="modifier(a)">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button class="act-btn act-btn--danger" matTooltip="Supprimer" (click)="supprimer(a)">
+              <mat-icon>delete_outline</mat-icon>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <!-- fin *ngFor -->
+
+  </div>
+
+  <!-- ── Pagination ─────────────────────────────────────────────── -->
+  <div class="pagination" *ngIf="!isLoading && !hasError && totalPages > 1">
+    <span class="pagination-info">
+      <strong>{{ debut }}</strong> – <strong>{{ fin }}</strong>
+      sur <strong>{{ totalElements }}</strong> actes
+    </span>
+    <div class="pagination-btns">
+      <button [disabled]="currentPage === 0" (click)="goToPage(0)" matTooltip="Première page">
+        <mat-icon>first_page</mat-icon>
+      </button>
+      <button [disabled]="currentPage === 0" (click)="goToPage(currentPage - 1)" matTooltip="Précédente">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+
+      <ng-container *ngFor="let p of pages">
+        <span class="page-gap" *ngIf="p > 0 && pages[pages.indexOf(p)-1] !== p - 1">…</span>
+        <button [class.active]="p === currentPage" (click)="goToPage(p)">
+          {{ p + 1 }}
+        </button>
+      </ng-container>
+
+      <button [disabled]="currentPage === totalPages - 1" (click)="goToPage(currentPage + 1)" matTooltip="Suivante">
+        <mat-icon>chevron_right</mat-icon>
+      </button>
+      <button [disabled]="currentPage === totalPages - 1" (click)="goToPage(totalPages - 1)" matTooltip="Dernière page">
+        <mat-icon>last_page</mat-icon>
+      </button>
+    </div>
+  </div>
+
+</div>

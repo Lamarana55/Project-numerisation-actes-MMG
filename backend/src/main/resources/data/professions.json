@@ -1,0 +1,707 @@
+[
+  {
+    "code": 1,
+    "masculin": "A.T.S.",
+    "feminin": "A.T.S."
+  },
+  {
+    "code": 2,
+    "masculin": "Administrateur",
+    "feminin": "Administratrice"
+  },
+  {
+    "code": 3,
+    "masculin": "Administrateur civil",
+    "feminin": "Administratrice civil"
+  },
+  {
+    "code": 4,
+    "masculin": "Agent commercial",
+    "feminin": "Agente commercial"
+  },
+  {
+    "code": 5,
+    "masculin": "Agent comptable",
+    "feminin": "Agente comptable"
+  },
+  {
+    "code": 6,
+    "masculin": "Agent de gardiennage",
+    "feminin": "Agente de gardiennage"
+  },
+  {
+    "code": 7,
+    "masculin": "Agent de sécurité",
+    "feminin": "Agente de sécurité"
+  },
+  {
+    "code": 8,
+    "masculin": "Agent Delmas Guinéen",
+    "feminin": "Agente Delmas Guinéen"
+  },
+  {
+    "code": 9,
+    "masculin": "Agent marketing",
+    "feminin": "Agente marketing"
+  },
+  {
+    "code": 10,
+    "masculin": "Agent marqueur",
+    "feminin": "Agente marqueur"
+  },
+  {
+    "code": 11,
+    "masculin": "Agent ménager",
+    "feminin": "Ménagère"
+  },
+  {
+    "code": 12,
+    "masculin": "Agent pénitencier",
+    "feminin": "Agente pénitencier"
+  },
+  {
+    "code": 13,
+    "masculin": "Analyste",
+    "feminin": "Analyste"
+  },
+  {
+    "code": 14,
+    "masculin": "Anesthésiste",
+    "feminin": "Anesthésiste"
+  },
+  {
+    "code": 15,
+    "masculin": "Architecte",
+    "feminin": "Architecte"
+  },
+  {
+    "code": 16,
+    "masculin": "Artiste",
+    "feminin": "Artiste"
+  },
+  {
+    "code": 17,
+    "masculin": "Assistant administratif",
+    "feminin": "Assistante administratif"
+  },
+  {
+    "code": 18,
+    "masculin": "Assistant",
+    "feminin": "Assistante"
+  },
+  {
+    "code": 19,
+    "masculin": "Banquier",
+    "feminin": "Banquière"
+  },
+  {
+    "code": 20,
+    "masculin": "Bijoutier",
+    "feminin": "Bijoutière"
+  },
+  {
+    "code": 21,
+    "masculin": "Biochimiste",
+    "feminin": "Biochimiste"
+  },
+  {
+    "code": 22,
+    "masculin": "Biologiste",
+    "feminin": "Biologiste"
+  },
+  {
+    "code": 23,
+    "masculin": "Boucher",
+    "feminin": "Bouchère"
+  },
+  {
+    "code": 24,
+    "masculin": "Carreleur",
+    "feminin": "Carreleuse"
+  },
+  {
+    "code": 25,
+    "masculin": "Chauffeur",
+    "feminin": "Chauffeuse"
+  },
+  {
+    "code": 26,
+    "masculin": "Chimiste",
+    "feminin": "Chimiste"
+  },
+  {
+    "code": 27,
+    "masculin": "CNSS",
+    "feminin": "CNSS"
+  },
+  {
+    "code": 28,
+    "masculin": "Coiffeur",
+    "feminin": "Coiffeuse"
+  },
+  {
+    "code": 29,
+    "masculin": "Commerçant",
+    "feminin": "Commerçante"
+  },
+  {
+    "code": 30,
+    "masculin": "Commercial",
+    "feminin": "Commerciale"
+  },
+  {
+    "code": 31,
+    "masculin": "Comptable",
+    "feminin": "Comptable"
+  },
+  {
+    "code": 32,
+    "masculin": "Conducteur",
+    "feminin": "Conductrice"
+  },
+  {
+    "code": 33,
+    "masculin": "Conseiller",
+    "feminin": "Conseillère"
+  },
+  {
+    "code": 34,
+    "masculin": "Contrôleur de gestion",
+    "feminin": "Contrôleuse de gestion"
+  },
+  {
+    "code": 35,
+    "masculin": "Contrôleur de navigation",
+    "feminin": "Contrôleuse de navigation"
+  },
+  {
+    "code": 36,
+    "masculin": "Cordonnier",
+    "feminin": "Cordonnière"
+  },
+  {
+    "code": 37,
+    "masculin": "Couturier",
+    "feminin": "Couturière"
+  },
+  {
+    "code": 38,
+    "masculin": "Cultivateur",
+    "feminin": "Cultivatrice"
+  },
+  {
+    "code": 39,
+    "masculin": "Dactylographe",
+    "feminin": "Dactylographe"
+  },
+  {
+    "code": 40,
+    "masculin": "Diplômé",
+    "feminin": "Diplômée"
+  },
+  {
+    "code": 41,
+    "masculin": "Douanier",
+    "feminin": "Douanière"
+  },
+  {
+    "code": 42,
+    "masculin": "Economiste",
+    "feminin": "Economiste"
+  },
+  {
+    "code": 43,
+    "masculin": "Electricien",
+    "feminin": "Electricienne"
+  },
+  {
+    "code": 44,
+    "masculin": "Electricien auto",
+    "feminin": "Electricienne auto"
+  },
+  {
+    "code": 45,
+    "masculin": "Élève",
+    "feminin": "Élève"
+  },
+  {
+    "code": 46,
+    "masculin": "Enseignant",
+    "feminin": "Enseignante"
+  },
+  {
+    "code": 47,
+    "masculin": "Entraineur national",
+    "feminin": "Entraineuse nationale"
+  },
+  {
+    "code": 48,
+    "masculin": "Entrepreneur",
+    "feminin": "Entrepreneuse"
+  },
+  {
+    "code": 49,
+    "masculin": "Environnementaliste",
+    "feminin": "Environnementaliste"
+  },
+  {
+    "code": 50,
+    "masculin": "Étudiant",
+    "feminin": "Étudiante"
+  },
+  {
+    "code": 51,
+    "masculin": "Étudiant diplômé",
+    "feminin": "Étudiante diplômée"
+  },
+  {
+    "code": 52,
+    "masculin": "Ferrailleur",
+    "feminin": "Ferrailleuse"
+  },
+  {
+    "code": 53,
+    "masculin": "Fonctionnaire",
+    "feminin": "Fonctionnaire"
+  },
+  {
+    "code": 54,
+    "masculin": "Footballeur",
+    "feminin": "Footballeuse"
+  },
+  {
+    "code": 55,
+    "masculin": "Gendarme",
+    "feminin": "Gendarme"
+  },
+  {
+    "code": 56,
+    "masculin": "Géographe",
+    "feminin": "Géographe"
+  },
+  {
+    "code": 57,
+    "masculin": "Gestionnaire",
+    "feminin": "Gestionnaire"
+  },
+  {
+    "code": 58,
+    "masculin": "Gestionnaire de RH",
+    "feminin": "Gestionnaire de RH"
+  },
+  {
+    "code": 59,
+    "masculin": "Gestionnaire touristique",
+    "feminin": "Gestionnaire touristique"
+  },
+  {
+    "code": 60,
+    "masculin": "Historien",
+    "feminin": "Historienne"
+  },
+  {
+    "code": 61,
+    "masculin": "Homme au foyer",
+    "feminin": "Femme au foyer"
+  },
+  {
+    "code": 62,
+    "masculin": "Homme d’affaire",
+    "feminin": "Femme d’affaire"
+  },
+  {
+    "code": 63,
+    "masculin": "Homme de lettres",
+    "feminin": "Femme de lettres"
+  },
+  {
+    "code": 64,
+    "masculin": "Hôtelier",
+    "feminin": "Hôtelière"
+  },
+  {
+    "code": 65,
+    "masculin": "Huissier de justice",
+    "feminin": "Huissière de justice"
+  },
+  {
+    "code": 66,
+    "masculin": "Humanitaire",
+    "feminin": "Humanitaire"
+  },
+  {
+    "code": 67,
+    "masculin": "Imam",
+    "feminin": "Imam"
+  },
+  {
+    "code": 68,
+    "masculin": "Infirmier",
+    "feminin": "Infirmière"
+  },
+  {
+    "code": 69,
+    "masculin": "Infirmier d’Etat",
+    "feminin": "Infirmière d’Etat"
+  },
+  {
+    "code": 70,
+    "masculin": "Informaticien",
+    "feminin": "Informaticienne"
+  },
+  {
+    "code": 71,
+    "masculin": "Ingénieur agroéconomiste",
+    "feminin": "Ingénieure agroéconomiste"
+  },
+  {
+    "code": 72,
+    "masculin": "Ingénieur agronome",
+    "feminin": "Ingénieure agronome"
+  },
+  {
+    "code": 73,
+    "masculin": "Ingénieur chimiste",
+    "feminin": "Ingénieure chimiste"
+  },
+  {
+    "code": 74,
+    "masculin": "Ingénieur des mines",
+    "feminin": "Ingénieure des mines"
+  },
+  {
+    "code": 75,
+    "masculin": "Ingénieur eaux et forêts",
+    "feminin": "Ingénieure eaux et forêts"
+  },
+  {
+    "code": 76,
+    "masculin": "Ingénieur en bâtiments",
+    "feminin": "Ingénieure en bâtiments"
+  },
+  {
+    "code": 77,
+    "masculin": "Ingénieur génie civil",
+    "feminin": "Ingénieure génie civil"
+  },
+  {
+    "code": 78,
+    "masculin": "Ingénieur géologue",
+    "feminin": "Ingénieure géologue"
+  },
+  {
+    "code": 79,
+    "masculin": "Ingénieur géologue",
+    "feminin": "Ingénieure géologue"
+  },
+  {
+    "code": 80,
+    "masculin": "Ingénieur Telecom",
+    "feminin": "Ingénieur Telecom"
+  },
+  {
+    "code": 81,
+    "masculin": "Ingénieur civil",
+    "feminin": "Ingénieure civil"
+  },
+  {
+    "code": 82,
+    "masculin": "Inspecteur de police",
+    "feminin": "Inspectrice de police"
+  },
+  {
+    "code": 83,
+    "masculin": "ISFC",
+    "feminin": "ISFC"
+  },
+  {
+    "code": 84,
+    "masculin": "Journaliste",
+    "feminin": "Journaliste"
+  },
+  {
+    "code": 85,
+    "masculin": "Juriste",
+    "feminin": "Juriste"
+  },
+  {
+    "code": 86,
+    "masculin": "Laborantin",
+    "feminin": "Laborantine"
+  },
+  {
+    "code": 87,
+    "masculin": "Logisticien",
+    "feminin": "Logisticienne"
+  },
+  {
+    "code": 88,
+    "masculin": "Maçon",
+    "feminin": "Maçonne"
+  },
+  {
+    "code": 89,
+    "masculin": "Magistrat",
+    "feminin": "Magistrate"
+  },
+  {
+    "code": 90,
+    "masculin": "Maïeuticien",
+    "feminin": "Sage-femme"
+  },
+  {
+    "code": 91,
+    "masculin": "Maître en céramique",
+    "feminin": "Maîtresse en céramique"
+  },
+  {
+    "code": 92,
+    "masculin": "Marchand",
+    "feminin": "Marchande"
+  },
+  {
+    "code": 93,
+    "masculin": "Mathématicien",
+    "feminin": "Mathématicienne"
+  },
+  {
+    "code": 94,
+    "masculin": "Mécanicien",
+    "feminin": "Mécanicienne"
+  },
+  {
+    "code": 95,
+    "masculin": "Mécanicien-chauffeur",
+    "feminin": "Mécanicienne-chauffeuse"
+  },
+  {
+    "code": 96,
+    "masculin": "Médecin",
+    "feminin": "Médecin"
+  },
+  {
+    "code": 97,
+    "masculin": "Menuisier",
+    "feminin": "Menuisière"
+  },
+  {
+    "code": 98,
+    "masculin": "Militaire",
+    "feminin": "Militaire"
+  },
+  {
+    "code": 99,
+    "masculin": "Opérateur mécanique",
+    "feminin": "Opératrice mécanique"
+  },
+  {
+    "code": 100,
+    "masculin": "Ouvrier",
+    "feminin": "Ouvrière"
+  },
+  {
+    "code": 101,
+    "masculin": "Pêcheur",
+    "feminin": "Pêcheuse"
+  },
+  {
+    "code": 102,
+    "masculin": "Peintre",
+    "feminin": "Peintre"
+  },
+  {
+    "code": 103,
+    "masculin": "Pharmacien",
+    "feminin": "Pharmacienne"
+  },
+  {
+    "code": 104,
+    "masculin": "Photographe",
+    "feminin": "Photographe"
+  },
+  {
+    "code": 105,
+    "masculin": "Plombier",
+    "feminin": "Plombière"
+  },
+  {
+    "code": 106,
+    "masculin": "Policier",
+    "feminin": "Policière"
+  },
+  {
+    "code": 107,
+    "masculin": "Publicitaire",
+    "feminin": "Publicitaire"
+  },
+  {
+    "code": 108,
+    "masculin": "Radiologue",
+    "feminin": "Radiologue"
+  },
+  {
+    "code": 109,
+    "masculin": "Réparateur Caissière",
+    "feminin": "Réparatrice Caissière"
+  },
+  {
+    "code": 110,
+    "masculin": "Responsable administratif",
+    "feminin": "Responsable administratif"
+  },
+  {
+    "code": 111,
+    "masculin": "Retraité",
+    "feminin": "Retraitée"
+  },
+  {
+    "code": 112,
+    "masculin": "Secrétaire",
+    "feminin": "Secrétaire"
+  },
+  {
+    "code": 113,
+    "masculin": "Sociologue",
+    "feminin": "Sociologue"
+  },
+  {
+    "code": 114,
+    "masculin": "Soudeur",
+    "feminin": "Soudeuse"
+  },
+  {
+    "code": 115,
+    "masculin": "Sportif",
+    "feminin": "Sportive"
+  },
+  {
+    "code": 116,
+    "masculin": "Stewart",
+    "feminin": "Hôtesse"
+  },
+  {
+    "code": 117,
+    "masculin": "Surveillant",
+    "feminin": "Surveillante"
+  },
+  {
+    "code": 118,
+    "masculin": "Syndicaliste",
+    "feminin": "Syndicaliste"
+  },
+  {
+    "code": 119,
+    "masculin": "Tailleur",
+    "feminin": "Tailleuse"
+  },
+  {
+    "code": 120,
+    "masculin": "Technicien",
+    "feminin": "Technicienne"
+  },
+  {
+    "code": 121,
+    "masculin": "Traiteur",
+    "feminin": "Traiteuse"
+  },
+  {
+    "code": 122,
+    "masculin": "Vendeur",
+    "feminin": "Vendeuse"
+  },
+  {
+    "code": 123,
+    "masculin": "Sans profession",
+    "feminin": "Sans profession"
+  },
+  {
+    "code": 124,
+    "masculin": "Pâtissier",
+    "feminin": "Pâtissière"
+  },
+  {
+    "code": 125,
+    "masculin": "Transitaire",
+    "feminin": "Transitaire"
+  },
+  {
+    "code": 126,
+    "masculin": "Vétérinaire",
+    "feminin": "Vétérinaire"
+  },
+  {
+    "code": 127,
+    "masculin": "Bioingénieur",
+    "feminin": "Bioingénieure"
+  },
+  {
+    "code": 128,
+    "masculin": "Opérateur minier",
+    "feminin": "Opératrice minière"
+  },
+  {
+    "code": 129,
+    "masculin": "Boulanger",
+    "feminin": "Boulangère"
+  },
+  {
+    "code": 130,
+    "masculin": "Clerc",
+    "feminin": "Clerc"
+  },
+  {
+    "code": 131,
+    "masculin": "Juge",
+    "feminin": "Juge"
+  },
+  {
+    "code": 132,
+    "masculin": "Juge président",
+    "feminin": "Juge présidente"
+  },
+  {
+    "code": 133,
+    "masculin": "Chef de greffe",
+    "feminin": "Cheffe de greffe"
+  },
+  {
+    "code": 134,
+    "masculin": "Greffier",
+    "feminin": "Greffière"
+  },
+  {
+    "code": 135,
+    "masculin": "Procureur de la république",
+    "feminin": "Procureure de la république"
+  },
+  {
+    "code": 136,
+    "masculin": "Substitut du procureur de la république",
+    "feminin": "Substitute du procureur de la république"
+  },
+  {
+    "code": 200,
+    "masculin": "Ingenieur",
+    "feminin": "Ingenieur"
+  },
+  {
+    "code": 201,
+    "masculin": "Maitre Coranique",
+    "feminin": "Maitre Coranique"
+  },
+  {
+    "code": 202,
+    "masculin": "Enseignant Chercheur",
+    "feminin": "Enseignante Chercheur"
+  },
+  {
+    "code": 203,
+    "masculin": "Avocat",
+    "feminin": "Avocate"
+  },
+  {
+    "code": 999,
+    "masculin": "Inconnue",
+    "feminin": "Inconnue"
+  }
+]

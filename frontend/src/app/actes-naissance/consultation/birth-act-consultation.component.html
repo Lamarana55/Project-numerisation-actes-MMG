@@ -1,32 +1,307 @@
-<div class="page-container">
+<div class="consult-page">
+
+  <!-- ── En-tête page ──────────────────────────────────────────────── -->
   <div class="page-header">
-    <div class="header-deco header-deco--1"></div>
-    <div class="header-deco header-deco--2"></div>
-    <div class="breadcrumb">
-      <mat-icon class="breadcrumb-home">home</mat-icon>
-      <span class="breadcrumb-sep">/</span>
-      <span>Actes de naissance</span>
-      <span class="breadcrumb-sep">/</span>
-      <span class="breadcrumb-current">Consultation</span>
+    <div class="page-header-left">
+      <div class="header-icon"><mat-icon>article</mat-icon></div>
+      <div>
+        <h1 class="page-title">Acte de naissance</h1>
+        <p class="page-subtitle">Consultation du détail de l'acte</p>
+      </div>
     </div>
-    <div class="title-row">
-      <div class="title-icon-wrap">
-        <mat-icon>search</mat-icon>
-      </div>
-      <div class="title-text">
-        <h1>Consultation des actes de naissance</h1>
-        <p>Recherche et consultation des actes validés</p>
-      </div>
+    <div class="page-header-actions">
+      <button class="btn-action btn-action--outline" (click)="retour()">
+        <mat-icon>arrow_back_ios</mat-icon> Retour à la liste
+      </button>
+      <button class="btn-action btn-action--edit" (click)="modifier()" *ngIf="acte && !isValide">
+        <mat-icon>edit</mat-icon> Modifier
+      </button>
+      <button class="btn-action btn-action--validate" (click)="valider()"
+              *ngIf="acte && !isValide" [disabled]="isValidating">
+        <mat-spinner *ngIf="isValidating" diameter="16" style="display:inline-block;margin-right:6px"></mat-spinner>
+        <mat-icon *ngIf="!isValidating">verified</mat-icon>
+        {{ isValidating ? 'Validation…' : 'Valider l\'acte' }}
+      </button>
+      <button class="btn-action btn-action--pdf" (click)="telechargerPdf()" *ngIf="isValide">
+        <mat-icon>picture_as_pdf</mat-icon> Copie intégrale PDF
+      </button>
     </div>
   </div>
 
-  <div class="page-content">
-    <div class="coming-soon-card">
-      <div class="coming-soon-icon">
-        <mat-icon>construction</mat-icon>
-      </div>
-      <h2>Module en cours de développement</h2>
-      <p>La consultation et recherche des actes de naissance validés sera bientôt disponible.</p>
-    </div>
+  <!-- ── Chargement ────────────────────────────────────────────────── -->
+  <div class="state-box" *ngIf="isLoading">
+    <mat-spinner diameter="36"></mat-spinner>
+    <span>Chargement de l'acte…</span>
   </div>
+
+  <!-- ── Erreur ─────────────────────────────────────────────────────── -->
+  <div class="state-box state-box--error" *ngIf="hasError && !isLoading">
+    <mat-icon>error_outline</mat-icon>
+    <span>Impossible de charger cet acte. Vérifiez l'identifiant.</span>
+    <button class="btn-action btn-action--outline" (click)="retour()">Retour</button>
+  </div>
+
+  <!-- ── Contenu ───────────────────────────────────────────────────── -->
+  <div class="acte-body" *ngIf="acte && !isLoading && !hasError">
+
+    <!-- Bandeau statut -->
+    <div [class]="bannerClass">
+      <mat-icon>{{ bannerIcon }}</mat-icon>
+      <span>{{ statutLabel }}</span>
+      <span class="source-badge">{{ sourceLabel }}</span>
+      <span class="meta-info" *ngIf="acte.agentNomComplet">
+        Agent : {{ acte.agentNomComplet }}
+      </span>
+      <span class="meta-info" *ngIf="acte.validateurNomComplet">
+        Validé par : {{ acte.validateurNomComplet }}
+      </span>
+    </div>
+
+    <!-- Carte de l'acte — style document officiel -->
+    <div class="acte-document">
+
+      <!-- ── EN-TÊTE DOCUMENT ─────────────────────────────────── -->
+      <div class="doc-header">
+        <div class="doc-header-left">
+          <div class="republic-title">RÉPUBLIQUE DE GUINÉE</div>
+          <div class="devise">
+            <span class="rouge">Travail</span> –
+            <span class="jaune">Justice</span> –
+            <span class="vert">Solidarité</span>
+          </div>
+          <div class="doc-commune">
+            Commune de {{ fmt(acte.commune) }}
+          </div>
+        </div>
+        <div class="doc-header-right">
+          <div class="doc-copy-label">COPIE INTÉGRALE</div>
+          <div class="doc-type">Acte de naissance</div>
+          <div class="doc-registre" *ngIf="acte.anneeRegistre || acte.numeroActe">
+            Registre {{ acte.anneeRegistre || '—' }} — N°&nbsp;<strong>{{ acte.numeroActe || '—' }}</strong>
+          </div>
+        </div>
+      </div>
+      <div class="tricolor-line">
+        <span class="rouge-bar"></span>
+        <span class="jaune-bar"></span>
+        <span class="vert-bar"></span>
+      </div>
+
+      <!-- ── NPI BLOC PROÉMINENT ──────────────────────────────── -->
+      <div class="npi-hero" *ngIf="acte.npiEnfant">
+        <div class="npi-hero-left">
+          <mat-icon>fingerprint</mat-icon>
+          <span class="npi-hero-label">Numéro Personnel d'Identification</span>
+        </div>
+        <span class="npi-hero-value">{{ acte.npiEnfant }}</span>
+      </div>
+      <div class="npi-hero npi-hero--pending" *ngIf="!acte.npiEnfant">
+        <div class="npi-hero-left">
+          <mat-icon>fingerprint</mat-icon>
+          <span class="npi-hero-label">Numéro Personnel d'Identification</span>
+        </div>
+        <span class="npi-hero-empty">Généré à la validation</span>
+      </div>
+
+      <!-- ── SECTION ENFANT ──────────────────────────────────── -->
+      <div class="doc-section">
+        <h3 class="section-title">ENFANT</h3>
+        <div class="fields-grid">
+          <div class="field-row">
+            <span class="field-label">Prénoms et Nom</span>
+            <span class="field-sep">:</span>
+            <span class="field-value name-value">{{ fmt(acte.prenom) }} {{ fmt(acte.nom) }}</span>
+          </div>
+          <div class="field-row">
+            <span class="field-label">Sexe</span>
+            <span class="field-sep">:</span>
+            <span class="field-value">{{ fmtSexe(acte.sexe) }}</span>
+          </div>
+          <div class="field-row">
+            <span class="field-label">Date de naissance</span>
+            <span class="field-sep">:</span>
+            <span class="field-value">{{ fmtDate(acte.dateNaissance) }}
+              <span *ngIf="acte.heureNaissance"> à {{ acte.heureNaissance }}</span>
+            </span>
+          </div>
+          <div class="field-row" *ngIf="acte.paysNaissance || acte.regionNaissance || acte.communeNaissance">
+            <span class="field-label">Lieu de naissance</span>
+            <span class="field-sep">:</span>
+            <span class="field-value">
+              {{ join([acte.communeNaissance, acte.prefectureNaissance, acte.regionNaissance, acte.paysNaissance]) }}
+            </span>
+          </div>
+          <div class="field-row" *ngIf="acte.formationSanitaire">
+            <span class="field-label">Formation sanitaire</span>
+            <span class="field-sep">:</span>
+            <span class="field-value">{{ acte.formationSanitaire }}</span>
+          </div>
+          <div class="field-row" *ngIf="acte.rangNaissanceMere">
+            <span class="field-label">Rang de naissance chez la mère</span>
+            <span class="field-sep">:</span>
+            <span class="field-value">{{ acte.rangNaissanceMere }}</span>
+          </div>
+          <div class="field-row" *ngIf="acte.naissanceMultiple === 'oui'">
+            <span class="field-label">Type naissance multiple</span>
+            <span class="field-sep">:</span>
+            <span class="field-value">{{ fmt(acte.typeNaissanceMultiple) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── SECTION PARENTS ──────────────────────────────────── -->
+      <div class="doc-section">
+        <h3 class="section-title">PARENTS</h3>
+        <div class="parents-table">
+          <div class="parents-header">
+            <div class="parents-col-label"></div>
+            <div class="parents-col parents-col--pere">PÈRE</div>
+            <div class="parents-col parents-col--mere">MÈRE</div>
+          </div>
+          <div class="parents-row" *ngIf="acte.npiPere || acte.npiMere">
+            <div class="parents-col-label">NPI</div>
+            <div class="parents-col npi-value">{{ fmt(acte.npiPere) }}</div>
+            <div class="parents-col npi-value">{{ fmt(acte.npiMere) }}</div>
+          </div>
+          <div class="parents-row">
+            <div class="parents-col-label">Prénoms et Nom</div>
+            <div class="parents-col name-value">{{ fmt(acte.prenomPere) }} {{ acte.nomPere || '' }}</div>
+            <div class="parents-col name-value">{{ fmt(acte.prenomMere) }} {{ acte.nomMere || '' }}</div>
+          </div>
+          <div class="parents-row">
+            <div class="parents-col-label">Date de naissance</div>
+            <div class="parents-col">{{ fmtDate(acte.dateNaissancePere) }}</div>
+            <div class="parents-col">{{ fmtDate(acte.dateNaissanceMere) }}</div>
+          </div>
+          <div class="parents-row">
+            <div class="parents-col-label">Lieu de naissance</div>
+            <div class="parents-col">{{ fmt(acte.communeNaissancePere) }}</div>
+            <div class="parents-col">{{ fmt(acte.communeNaissanceMere) }}</div>
+          </div>
+          <div class="parents-row">
+            <div class="parents-col-label">Nationalité</div>
+            <div class="parents-col">{{ getNatLabel(acte.nationalitePere, 'M') }}</div>
+            <div class="parents-col">{{ getNatLabel(acte.nationaliteMere, 'F') }}</div>
+          </div>
+          <div class="parents-row">
+            <div class="parents-col-label">Profession</div>
+            <div class="parents-col">{{ fmt(acte.professionPere) }}</div>
+            <div class="parents-col">{{ fmt(acte.professionMere) }}</div>
+          </div>
+          <div class="parents-row">
+            <div class="parents-col-label">Domicile</div>
+            <div class="parents-col">
+              {{ join([acte.adressePere, acte.communeDomicilePere, acte.prefectureDomicilePere]) }}
+            </div>
+            <div class="parents-col">
+              {{ join([acte.adresseMere, acte.communeDomicileMere, acte.prefectureDomicileMere]) }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Mariage des parents -->
+        <div class="marriage-info" *ngIf="acte.parentsMaries === 'oui'">
+          <mat-icon>favorite</mat-icon>
+          Parents mariés — {{ acte.documentMariage || '' }}
+          <span *ngIf="acte.dateMariage">le {{ fmtDate(acte.dateMariage) }}</span>
+          <span *ngIf="acte.communeMariage"> à {{ acte.communeMariage }}</span>
+        </div>
+      </div>
+
+      <!-- ── SECTION DÉCLARANT ─────────────────────────────────── -->
+      <div class="doc-section" *ngIf="acte.qualiteDeclarant || acte.dateDeclaration || acte.prenomDeclarant">
+        <h3 class="section-title">DÉCLARANT</h3>
+        <div class="fields-grid">
+          <div class="field-row">
+            <span class="field-label">Date de déclaration</span>
+            <span class="field-sep">:</span>
+            <span class="field-value">{{ fmtDate(acte.dateDeclaration) }}</span>
+          </div>
+          <div class="field-row">
+            <span class="field-label">Lien de parenté</span>
+            <span class="field-sep">:</span>
+            <span class="field-value">{{ fmt(acte.qualiteDeclarant) }}</span>
+          </div>
+          <div class="field-row" *ngIf="acte.prenomDeclarant || acte.nomDeclarant">
+            <span class="field-label">Identité du déclarant</span>
+            <span class="field-sep">:</span>
+            <span class="field-value">{{ fmt(acte.prenomDeclarant) }} {{ acte.nomDeclarant || '' }}</span>
+          </div>
+          <div class="field-row" *ngIf="acte.telephoneDeclarant">
+            <span class="field-label">Téléphone</span>
+            <span class="field-sep">:</span>
+            <span class="field-value">{{ acte.telephoneDeclarant }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── SECTION INSCRIPTION ───────────────────────────────── -->
+      <div class="doc-section">
+        <h3 class="section-title">INSCRIPTION DE L'ACTE</h3>
+        <div class="fields-grid">
+          <div class="field-row" *ngIf="acte.dateDressage">
+            <span class="field-label">Date de dressage</span>
+            <span class="field-sep">:</span>
+            <span class="field-value">{{ fmtDate(acte.dateDressage) }}
+              <span *ngIf="acte.heureDressage"> à {{ acte.heureDressage }}</span>
+            </span>
+          </div>
+          <div class="field-row" *ngIf="acte.dateInscription">
+            <span class="field-label">Date d'inscription</span>
+            <span class="field-sep">:</span>
+            <span class="field-value">{{ fmtDate(acte.dateInscription) }}</span>
+          </div>
+          <div class="field-row" *ngIf="acte.numeroActe">
+            <span class="field-label">Numéro de l'acte</span>
+            <span class="field-sep">:</span>
+            <span class="field-value npi-value">{{ acte.numeroActe }}</span>
+          </div>
+          <div class="field-row" *ngIf="acte.anneeRegistre">
+            <span class="field-label">Année du registre</span>
+            <span class="field-sep">:</span>
+            <span class="field-value">{{ acte.anneeRegistre }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── TRANSCRIPTION ─────────────────────────────────────── -->
+      <div class="doc-section" *ngIf="acte.source === 'TRANSCRIPTION' && acte.tribunal">
+        <h3 class="section-title">TRANSCRIPTION DU JUGEMENT SUPPLÉTIF</h3>
+        <div class="fields-grid">
+          <div class="field-row">
+            <span class="field-label">Tribunal</span>
+            <span class="field-sep">:</span>
+            <span class="field-value">{{ fmt(acte.tribunal) }}</span>
+          </div>
+          <div class="field-row">
+            <span class="field-label">N° Jugement</span>
+            <span class="field-sep">:</span>
+            <span class="field-value">{{ fmt(acte.numeroJugement) }}</span>
+          </div>
+          <div class="field-row">
+            <span class="field-label">Date du jugement</span>
+            <span class="field-sep">:</span>
+            <span class="field-value">{{ fmtDate(acte.dateJugement) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── FORMULE DE CLÔTURE ─────────────────────────────────── -->
+      <div class="closing-formula" *ngIf="isValide">
+        <p>
+          Lecture faite et le déclarant invité à lire l'acte. Nous, <strong>{{ fmt(acte.agentNomComplet) }}</strong>,
+          Officier délégué de l'État civil avons signé avec le déclarant.
+        </p>
+        <p>
+          Dressé à <strong>{{ fmt(acte.commune) }}</strong>
+          <span *ngIf="acte.dateDressage"> le {{ fmtDate(acte.dateDressage) }}</span>.
+        </p>
+      </div>
+
+    </div>
+    <!-- fin .acte-document -->
+
+  </div>
+  <!-- fin .acte-body -->
+
 </div>

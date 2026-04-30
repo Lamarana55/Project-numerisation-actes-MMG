@@ -19,13 +19,13 @@ export class ConfirmLeaveDialogComponent {
 
   constructor(
     public dialogRef: MatDialogRef<ConfirmLeaveDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) data: ConfirmLeaveData,
+    @Inject(MAT_DIALOG_DATA) data: ConfirmLeaveData | null,
   ) {
     this.data = {
-      title:        data.title        ?? 'Quitter sans sauvegarder ?',
-      message:      data.message      ?? 'Des informations ont déjà été saisies. Si vous quittez maintenant, toutes les données seront perdues.',
-      labelConfirm: data.labelConfirm ?? 'Oui, quitter',
-      labelCancel:  data.labelCancel  ?? 'Continuer la saisie',
+      title:        data?.title        ?? 'Quitter sans sauvegarder ?',
+      message:      data?.message      ?? 'Des informations ont déjà été saisies. Si vous quittez maintenant, toutes les données seront perdues.',
+      labelConfirm: data?.labelConfirm ?? 'Oui, quitter',
+      labelCancel:  data?.labelCancel  ?? 'Continuer la saisie',
     };
   }
 

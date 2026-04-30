@@ -11,6 +11,11 @@ export interface ActeModel {
   route: string;
 }
 
+export interface ActeSelectionResult {
+  route: string;
+  queryParams?: Record<string, string>;
+}
+
 export interface ActeCategory {
   label: string;
   expanded: boolean;
@@ -26,6 +31,7 @@ export class ActeSelectionDialogComponent {
 
   selectedModel: ActeModel | null = null;
   filterText = '';
+  acteManquant = false;
 
   // ── Naissance : liste plate ──────────────────────────────────────────────
   readonly modelsNaissance: ActeModel[] = [
@@ -183,7 +189,11 @@ export class ActeSelectionDialogComponent {
 
   confirm(): void {
     if (this.selectedModel) {
-      this.dialogRef.close(this.selectedModel.route);
+      const result: ActeSelectionResult = {
+        route: this.selectedModel.route,
+        ...(this.acteManquant ? { queryParams: { mode: 'repris' } } : {}),
+      };
+      this.dialogRef.close(result);
     }
   }
 

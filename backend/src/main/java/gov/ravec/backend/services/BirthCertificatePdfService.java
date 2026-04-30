@@ -6,7 +6,10 @@ import com.google.zxing.qrcode.QRCodeWriter;
 import com.google.zxing.common.BitMatrix;
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.*;
+import gov.ravec.backend.entities.ActeNaissance;
+import gov.ravec.backend.entities.Personne;
 import gov.ravec.backend.entities.ValidBirth;
+import gov.ravec.backend.repositories.ActeNaissanceRepository;
 import gov.ravec.backend.repositories.ValidBirthRepository;
 import gov.ravec.backend.utils.Delete;
 import gov.ravec.backend.utils.ValidationStatut;
@@ -29,6 +32,7 @@ import java.util.Map;
 public class BirthCertificatePdfService {
 
     private final ValidBirthRepository validBirthRepository;
+    private final ActeNaissanceRepository acteNaissanceRepository;
 
     // ── Couleurs Guinée ─────────────────────────────────────────
     private static final BaseColor ROUGE_GN = new BaseColor(0xCE, 0x11, 0x26);
@@ -48,8 +52,255 @@ public class BirthCertificatePdfService {
 
     private static final BaseColor LIGHT_GRAY = new BaseColor(245, 245, 245);
 
-    public BirthCertificatePdfService(ValidBirthRepository validBirthRepository) {
+    public BirthCertificatePdfService(ValidBirthRepository validBirthRepository,
+                                      ActeNaissanceRepository acteNaissanceRepository) {
         this.validBirthRepository = validBirthRepository;
+        this.acteNaissanceRepository = acteNaissanceRepository;
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    //  GÉNÉRATION PDF DEPUIS ActeNaissance
+    // ══════════════════════════════════════════════════════════════════
+
+    public byte[] generateForActeNaissance(String id) throws Exception {
+        ActeNaissance a = acteNaissanceRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Acte introuvable : " + id));
+
+        if (a.getStatut() != ValidationStatut.VALIDE) {
+            throw new IllegalStateException(
+                    "Seul un acte VALIDÉ peut être imprimé. Statut actuel : " + a.getStatut());
+        }
+
+        Personne enfant = a.getEnfant();
+        Personne pere   = a.getPere();
+        Personne mere   = a.getMere();
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        Document document = new Document(PageSize.A4, 50, 50, 40, 40);
+        PdfWriter writer = PdfWriter.getInstance(document, baos);
+        document.open();
+
+        addWatermark(writer);
+        addHeaderForActeNaissance(document, a, writer);
+        document.add(Chunk.NEWLINE);
+
+        // ── ENFANT ──────────────────────────────────────────────
+        addSectionTitle(document, "ENFANT");
+        addField(document, "NPI", safe(enfant != null ? enfant.getNpi() : null));
+        String prenomNom = (safe(enfant != null ? enfant.getPrenom() : null) + " "
+                          + safe(enfant != null ? enfant.getNom() : null)).trim();
+        addField(document, "Prénoms et Nom", prenomNom);
+        addField(document, "Sexe", formatGenre(enfant != null ? enfant.getSexe() : null));
+        addField(document, "Date et heure de naissance", formatDateNaissanceActe(a));
+        addField(document, "Lieu de naissance", buildLieuNaissanceActe(enfant, a));
+        addField(document, "Rang de naissance chez la\nmère",
+                a.getRangNaissanceMere() != null ? String.valueOf(a.getRangNaissanceMere()) : "");
+        document.add(Chunk.NEWLINE);
+
+        // ── PARENTS ─────────────────────────────────────────────
+        addSectionTitle(document, "PARENTS");
+        addParentsTableActeNaissance(document, pere, mere);
+        document.add(Chunk.NEWLINE);
+
+        // ── DÉCLARANT ───────────────────────────────────────────
+        addSectionTitle(document, "DÉCLARANT");
+        addField(document, "Date de déclaration", formatLocalDate(a.getDateDeclaration()));
+        addField(document, "Lien de parenté", safe(a.getQualiteDeclarant()));
+        document.add(Chunk.NEWLINE);
+
+        // ── MENTIONS MARGINALES ─────────────────────────────────
+        Paragraph mentions = new Paragraph("Mentions Marginales : Néant.", FONT_MENTION);
+        mentions.setAlignment(Element.ALIGN_CENTER);
+        document.add(mentions);
+        document.add(Chunk.NEWLINE);
+        document.add(Chunk.NEWLINE);
+
+        // ── PIED DE PAGE ─────────────────────────────────────────
+        addFooterForActeNaissance(document, a);
+
+        document.close();
+        return baos.toByteArray();
+    }
+
+    private void addHeaderForActeNaissance(Document document, ActeNaissance a, PdfWriter writer)
+            throws DocumentException {
+        String communeNom  = a.getCommune() != null ? a.getCommune().getNom() : "";
+        String communeCode = a.getCommune() != null && a.getCommune().getCode() != null
+                             ? a.getCommune().getCode() : "";
+        String annee = a.getAnneeRegistre() != null ? a.getAnneeRegistre()
+                       : (a.getDateDressage() != null ? String.valueOf(a.getDateDressage().getYear()) : "");
+
+        PdfPTable headerTable = new PdfPTable(2);
+        headerTable.setWidthPercentage(100);
+        headerTable.setWidths(new float[]{50, 50});
+
+        PdfPCell leftCell = new PdfPCell();
+        leftCell.setBorder(Rectangle.NO_BORDER);
+        leftCell.addElement(new Paragraph("RÉPUBLIQUE DE GUINÉE", FONT_REPUBLIQUE));
+
+        Phrase devisePhrase = new Phrase();
+        devisePhrase.add(new Chunk("Travail", new Font(Font.FontFamily.HELVETICA, 9, Font.BOLD | Font.ITALIC, ROUGE_GN)));
+        devisePhrase.add(new Chunk(" – ", new Font(Font.FontFamily.HELVETICA, 9, Font.ITALIC)));
+        devisePhrase.add(new Chunk("Justice", new Font(Font.FontFamily.HELVETICA, 9, Font.BOLD | Font.ITALIC, JAUNE_GN)));
+        devisePhrase.add(new Chunk(" – ", new Font(Font.FontFamily.HELVETICA, 9, Font.ITALIC)));
+        devisePhrase.add(new Chunk("Solidarité", new Font(Font.FontFamily.HELVETICA, 9, Font.BOLD | Font.ITALIC, VERT_GN)));
+        leftCell.addElement(new Paragraph(devisePhrase));
+        leftCell.addElement(Chunk.NEWLINE);
+        leftCell.addElement(new Paragraph("Commune de " + communeNom + " " + communeCode, FONT_HEADER));
+        leftCell.addElement(new Paragraph("Centre d'état civil de " + communeNom, FONT_HEADER));
+
+        PdfPCell rightCell = new PdfPCell();
+        rightCell.setBorder(Rectangle.NO_BORDER);
+        rightCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+
+        Paragraph titleP = new Paragraph("Acte de naissance", FONT_SUBTITLE);
+        titleP.setAlignment(Element.ALIGN_RIGHT);
+        rightCell.addElement(titleP);
+        rightCell.addElement(Chunk.NEWLINE);
+
+        Paragraph registreP = new Paragraph(
+                "Registre de l'année " + annee + "\nN° " + safe(a.getNumeroActe()), FONT_HEADER);
+        registreP.setAlignment(Element.ALIGN_RIGHT);
+        rightCell.addElement(registreP);
+
+        headerTable.addCell(leftCell);
+        headerTable.addCell(rightCell);
+        document.add(headerTable);
+        addTricolorLine(document, writer);
+    }
+
+    private void addParentsTableActeNaissance(Document document, Personne pere, Personne mere)
+            throws DocumentException {
+        PdfPTable table = new PdfPTable(3);
+        table.setWidthPercentage(100);
+        table.setWidths(new float[]{30, 35, 35});
+        table.setSpacingBefore(4);
+
+        addParentHeaderRow(table);
+
+        String npiPere  = safe(pere != null ? pere.getNpi() : null);
+        String npiMere  = safe(mere != null ? mere.getNpi() : null);
+        String nomPere  = (safe(pere != null ? pere.getPrenom() : null) + " "
+                         + safe(pere != null ? pere.getNom() : null)).trim();
+        String nomMere  = (safe(mere != null ? mere.getPrenom() : null) + " "
+                         + safe(mere != null ? mere.getNom() : null)).trim();
+        String dnPere   = pere != null && pere.getDateNaissance() != null
+                          ? formatLocalDate(pere.getDateNaissance()) : "";
+        String dnMere   = mere != null && mere.getDateNaissance() != null
+                          ? formatLocalDate(mere.getDateNaissance()) : "";
+        String lieuPere = (safe(pere != null ? pere.getCommuneNaissance() : null)).trim();
+        String lieuMere = (safe(mere != null ? mere.getCommuneNaissance() : null)).trim();
+        String natPere  = safe(pere != null ? pere.getNationalite() : null);
+        String natMere  = safe(mere != null ? mere.getNationalite() : null);
+        String profPere = safe(pere != null ? pere.getProfession() : null);
+        String profMere = safe(mere != null ? mere.getProfession() : null);
+        String domPere  = buildDomicile(pere);
+        String domMere  = buildDomicile(mere);
+
+        addParentRow(table, "NPI",              npiPere,  npiMere);
+        addParentRow(table, "Prénoms et Nom",   nomPere,  nomMere);
+        addParentRow(table, "Date de naissance", dnPere,  dnMere);
+        addParentRow(table, "Lieu de naissance", lieuPere, lieuMere);
+        addParentRow(table, "Nationalité",       natPere,  natMere);
+        addParentRow(table, "Profession",        profPere, profMere);
+        addParentRow(table, "Domicile",          domPere,  domMere);
+
+        document.add(table);
+    }
+
+    private void addFooterForActeNaissance(Document document, ActeNaissance a) throws Exception {
+        PdfPTable footerTable = new PdfPTable(2);
+        footerTable.setWidthPercentage(100);
+        footerTable.setWidths(new float[]{30, 70});
+
+        String qrData = "ACTE_NAISSANCE|NPI:" + safe(a.getEnfant() != null ? a.getEnfant().getNpi() : null)
+                + "|NOM:" + safe(a.getEnfant() != null ? a.getEnfant().getPrenom() : null) + " "
+                +           safe(a.getEnfant() != null ? a.getEnfant().getNom() : null)
+                + "|ACTE:" + safe(a.getNumeroActe())
+                + "|COMMUNE:" + safe(a.getCommune() != null ? a.getCommune().getNom() : null);
+        Image qrImage = generateQrCodeImage(qrData, 120, 120);
+        PdfPCell qrCell = new PdfPCell(qrImage, true);
+        qrCell.setBorder(Rectangle.NO_BORDER);
+        qrCell.setFixedHeight(120);
+        qrCell.setPadding(5);
+        footerTable.addCell(qrCell);
+
+        PdfPCell sigCell = new PdfPCell();
+        sigCell.setBorder(Rectangle.NO_BORDER);
+        sigCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+
+        String communeNom = a.getCommune() != null ? a.getCommune().getNom() : "";
+        String dateStr = communeNom + ", le " +
+                LocalDate.now().format(DateTimeFormatter.ofPattern("dd MMMM yyyy", java.util.Locale.FRENCH));
+        Paragraph dateP = new Paragraph(dateStr, FONT_VALUE);
+        dateP.setAlignment(Element.ALIGN_RIGHT);
+        sigCell.addElement(dateP);
+        sigCell.addElement(Chunk.NEWLINE);
+
+        // Fermeture de l'acte
+        String officier = a.getAgent() != null ? a.getAgent().getNomComplet() : "";
+        String dressageDate = formatLocalDate(a.getDateDressage());
+        String dressageLieu = communeNom;
+        Paragraph dressageP = new Paragraph(
+                "Dressé à " + dressageLieu + " le " + dressageDate, FONT_VALUE);
+        dressageP.setAlignment(Element.ALIGN_RIGHT);
+        sigCell.addElement(dressageP);
+        sigCell.addElement(Chunk.NEWLINE);
+
+        Paragraph copyP = new Paragraph("Pour copie certifiée conforme à l'original", FONT_VALUE);
+        copyP.setAlignment(Element.ALIGN_RIGHT);
+        sigCell.addElement(copyP);
+
+        Paragraph officerP = new Paragraph("L'officier délégué de l'État Civil\n" + officier, FONT_VALUE);
+        officerP.setAlignment(Element.ALIGN_RIGHT);
+        sigCell.addElement(officerP);
+
+        footerTable.addCell(sigCell);
+        document.add(footerTable);
+
+        // Lecture faite
+        document.add(Chunk.NEWLINE);
+        Paragraph lectureFaite = new Paragraph(
+                "Lecture faite et le déclarant invité à lire l'acte. Nous, " + officier
+                + ", Officier délégué de l'État civil avons signé avec le déclarant.", FONT_VALUE);
+        document.add(lectureFaite);
+    }
+
+    private String formatDateNaissanceActe(ActeNaissance a) {
+        if (a.getEnfant() == null || a.getEnfant().getDateNaissance() == null) return "";
+        java.time.LocalDate dn = a.getEnfant().getDateNaissance();
+        String dateMots = numberToFrenchWord(dn.getDayOfMonth()) + " "
+                        + monthToFrench(dn.getMonthValue()) + " "
+                        + yearToFrenchWords(dn.getYear());
+        StringBuilder sb = new StringBuilder(dateMots);
+        if (a.getHeureNaissance() != null && !a.getHeureNaissance().isBlank()) {
+            sb.append(" à ").append(a.getHeureNaissance());
+        }
+        sb.append(" (").append(dn.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))).append(")");
+        return sb.toString();
+    }
+
+    private String buildLieuNaissanceActe(Personne enfant, ActeNaissance a) {
+        if (enfant == null) return "";
+        StringBuilder sb = new StringBuilder();
+        if (enfant.getCommuneNaissance() != null) sb.append(enfant.getCommuneNaissance());
+        if (enfant.getRegionNaissance() != null)  sb.append(", ").append(enfant.getRegionNaissance());
+        if (a.getFormationSanitaire() != null)    sb.append(", ").append(a.getFormationSanitaire());
+        return sb.toString().replaceAll("^,\\s*", "");
+    }
+
+    private String buildDomicile(Personne p) {
+        if (p == null) return "";
+        StringBuilder sb = new StringBuilder();
+        if (p.getAdresse() != null)        sb.append(p.getAdresse());
+        if (p.getCommuneDomicile() != null) { if (sb.length() > 0) sb.append(", "); sb.append(p.getCommuneDomicile()); }
+        if (p.getPrefectureDomicile() != null) { if (sb.length() > 0) sb.append(", "); sb.append(p.getPrefectureDomicile()); }
+        return sb.toString();
+    }
+
+    private String formatLocalDate(java.time.LocalDate date) {
+        if (date == null) return "";
+        return date.format(DateTimeFormatter.ofPattern("dd MMMM yyyy", java.util.Locale.FRENCH));
     }
 
     /**

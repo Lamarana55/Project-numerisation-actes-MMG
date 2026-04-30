@@ -36,12 +36,9 @@
         </div>
 
         <div class="form-row">
-          <mat-form-field appearance="outline" class="half-width">
-            <mat-label>Téléphone</mat-label>
-            <input matInput formControlName="telephone" type="tel" placeholder="624 000 000">
-            <mat-icon matSuffix>phone</mat-icon>
-            <mat-error>{{ getFieldError('telephone') }}</mat-error>
-          </mat-form-field>
+          <div class="half-width">
+            <app-phone-input formControlName="telephone" label="Téléphone"></app-phone-input>
+          </div>
 
           <mat-form-field appearance="outline" class="half-width">
             <mat-label>Fonction (optionnel)</mat-label>

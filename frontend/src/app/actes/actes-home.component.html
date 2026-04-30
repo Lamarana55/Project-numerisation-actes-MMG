@@ -16,13 +16,17 @@
           <h4 class="section-label">CRITÈRES CONCERNANT LE CENTRE D'ÉTAT CIVIL</h4>
           <div class="form-row">
             <label>Centre d'État Civil</label>
-            <span class="centre-value">{{ authService.communeNom || 'Non défini' }}</span>
+            <select [(ngModel)]="searchCommune" class="form-select">
+              <option value="">— Tous les centres —</option>
+              <option *ngFor="let c of communes" [value]="c">{{ labelCommune(c) }}</option>
+            </select>
           </div>
           <div class="form-row">
             <label>Type d'Acte</label>
             <select [(ngModel)]="searchTypeActe" class="form-select">
               <option value="">Tous</option>
-              <option value="naissance">Naissance</option>
+              <option value="DECLARATION">Déclaration</option>
+              <option value="TRANSCRIPTION">Transcription</option>
               <option value="deces">Décès</option>
             </select>
           </div>
@@ -154,5 +158,6 @@
     </div>
 
   </div>
+
 
 </div>
