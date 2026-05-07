@@ -95,9 +95,12 @@
                     </div>
                     <div class="data-item">
                       <span class="data-label">Nationalité :</span>
-                      <span class="data-value" *ngIf="!isEditing">{{ getNationalite(data.nationalite_du_membre!) }}</span>
+                      <span class="data-value" *ngIf="!isEditing">{{ getNationalite(data.nationalite_du_membre!, data.genre_membre === 'F' ? 'F' : 'M') }}</span>
                       <select *ngIf="isEditing" [(ngModel)]="data.nationalite_du_membre" class="form-control">
-                        <option *ngFor="let p of allPays" [value]="p.code">{{ p.nom }}</option>
+                        <option value="">-- Sélectionner --</option>
+                        <option *ngFor="let n of nationalites" [value]="n.code">
+                          {{ data.genre_membre === 'F' ? n.libelleFeminin : n.libelleMasculin }}
+                        </option>
                       </select>
                     </div>
                     <div class="data-item">
@@ -213,8 +216,15 @@
                     <div class="data-item" *ngIf="!isGuinee()">
                       <span class="data-label">Ville :</span>
                       <span class="data-value" *ngIf="!isEditing">{{ data.ville_naissance || '—' }}</span>
-                      <input *ngIf="isEditing" [(ngModel)]="data.ville_naissance" class="form-control"
-                        placeholder="Saisir la ville de naissance">
+                      <select *ngIf="isEditing && villesNaissance.length > 0"
+                        [(ngModel)]="data.ville_naissance" class="form-control">
+                        <option value="">-- Sélectionner --</option>
+                        <option *ngFor="let v of villesNaissance" [value]="v.nom">{{ v.nom }}</option>
+                      </select>
+                      <input *ngIf="isEditing && villesNaissance.length === 0"
+                        [(ngModel)]="data.ville_naissance" class="form-control"
+                        [placeholder]="isLoadingVillesNaissance ? 'Chargement...' : 'Saisir la ville de naissance'"
+                        [disabled]="isLoadingVillesNaissance">
                     </div>
                   </div>
                   <div class="col-md-6">
@@ -287,9 +297,10 @@
                   <div class="col-md-6">
                     <div class="data-item">
                       <span class="data-label">Nationalité :</span>
-                      <span class="data-value" *ngIf="!isEditing">{{ getNationalite(data.nationalite_pere!) }}</span>
+                      <span class="data-value" *ngIf="!isEditing">{{ getNationalite(data.nationalite_pere!, 'M') }}</span>
                       <select *ngIf="isEditing" [(ngModel)]="data.nationalite_pere" class="form-control">
-                        <option *ngFor="let p of allPays" [value]="p.code">{{ p.nom }}</option>
+                        <option value="">-- Sélectionner --</option>
+                        <option *ngFor="let n of nationalites" [value]="n.code">{{ n.libelleMasculin }}</option>
                       </select>
                     </div>
                     <div class="data-item">
@@ -341,8 +352,15 @@
                     <div class="data-item" *ngIf="!isGuineePere()">
                       <span class="data-label">Ville :</span>
                       <span class="data-value" *ngIf="!isEditing">{{ data.ville_naissance_pere || '—' }}</span>
-                      <input *ngIf="isEditing" [(ngModel)]="data.ville_naissance_pere" class="form-control"
-                        placeholder="Saisir la ville">
+                      <select *ngIf="isEditing && villesNaissancePere.length > 0"
+                        [(ngModel)]="data.ville_naissance_pere" class="form-control">
+                        <option value="">-- Sélectionner --</option>
+                        <option *ngFor="let v of villesNaissancePere" [value]="v.nom">{{ v.nom }}</option>
+                      </select>
+                      <input *ngIf="isEditing && villesNaissancePere.length === 0"
+                        [(ngModel)]="data.ville_naissance_pere" class="form-control"
+                        [placeholder]="isLoadingVillesNaissancePere ? 'Chargement...' : 'Saisir la ville'"
+                        [disabled]="isLoadingVillesNaissancePere">
                     </div>
                   </div>
                   <div class="col-md-6">
@@ -410,9 +428,10 @@
                   <div class="col-md-6">
                     <div class="data-item">
                       <span class="data-label">Nationalité :</span>
-                      <span class="data-value" *ngIf="!isEditing">{{ getNationalite(data.nationalite_mere!) }}</span>
+                      <span class="data-value" *ngIf="!isEditing">{{ getNationalite(data.nationalite_mere!, 'F') }}</span>
                       <select *ngIf="isEditing" [(ngModel)]="data.nationalite_mere" class="form-control">
-                        <option *ngFor="let p of allPays" [value]="p.code">{{ p.nom }}</option>
+                        <option value="">-- Sélectionner --</option>
+                        <option *ngFor="let n of nationalites" [value]="n.code">{{ n.libelleFeminin }}</option>
                       </select>
                     </div>
                     <div class="data-item">
@@ -464,8 +483,15 @@
                     <div class="data-item" *ngIf="!isGuineeMere()">
                       <span class="data-label">Ville :</span>
                       <span class="data-value" *ngIf="!isEditing">{{ data.ville_naissance_mere || '—' }}</span>
-                      <input *ngIf="isEditing" [(ngModel)]="data.ville_naissance_mere" class="form-control"
-                        placeholder="Saisir la ville">
+                      <select *ngIf="isEditing && villesNaissanceMere.length > 0"
+                        [(ngModel)]="data.ville_naissance_mere" class="form-control">
+                        <option value="">-- Sélectionner --</option>
+                        <option *ngFor="let v of villesNaissanceMere" [value]="v.nom">{{ v.nom }}</option>
+                      </select>
+                      <input *ngIf="isEditing && villesNaissanceMere.length === 0"
+                        [(ngModel)]="data.ville_naissance_mere" class="form-control"
+                        [placeholder]="isLoadingVillesNaissanceMere ? 'Chargement...' : 'Saisir la ville'"
+                        [disabled]="isLoadingVillesNaissanceMere">
                     </div>
                   </div>
                   <div class="col-md-6">

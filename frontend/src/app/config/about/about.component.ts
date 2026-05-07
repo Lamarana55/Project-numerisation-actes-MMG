@@ -29,67 +29,77 @@ export class AboutComponent implements OnInit {
   currentYear = new Date().getFullYear();
 
   appInfo = {
-    name: '- Système de Validations des Données Collectés',
+    name: 'RAVEC — Registre et Administration de l\'État Civil',
     version: '1.1.0',
     releaseDate: '2025-01-15',
-    description: 'Plateforme numérique moderne pour la validation des données de l\'enquête ménage',
-    organization: 'Programme National de Recensement Administratif à vocation d\'Etat Civil',
+    description: 'Plateforme nationale de numérisation des archives d\'état civil et d\'enregistrement des faits d\'état civil en République de Guinée',
+    organization: 'Programme National de Recensement Administratif à vocation d\'État Civil (PN-RAVEC)',
     country: 'République de Guinée'
   };
 
   features: Feature[] = [
     {
-      icon: 'assignment_ind',
-      title: 'Gestion des Actes',
-      description: 'Validations des données des personnes qui ont des actes d\'état civil '
+      icon: 'scanner',
+      title: 'Numérisation des Archives',
+      description: 'Numérisation en haute résolution des anciens registres d\'état civil (actes de naissance, de décès et de mariage) conservés dans les centres d\'état civil.'
+    },
+    {
+      icon: 'label',
+      title: 'Indexation des Actes',
+      description: 'Saisie et indexation précise des informations contenues dans les actes numérisés pour les rendre consultables et exploitables.'
+    },
+    {
+      icon: 'child_care',
+      title: 'Enregistrement des Naissances',
+      description: 'Enregistrement des actes de naissance avec attribution du Numéro Personnel d\'Identification (NPI) et gestion des informations des parents.'
+    },
+    {
+      icon: 'sentiment_very_dissatisfied',
+      title: 'Enregistrement des Décès',
+      description: 'Enregistrement des actes de décès avec gestion complète des informations du défunt, des circonstances et des déclarants.'
     },
     {
       icon: 'fact_check',
-      title: 'Génération des actes ',
-      description: 'Système de génération des actes validés '
-    },
-    {
-      icon: 'security',
-      title: 'Sécurité Avancée',
-      description: 'Authentification avec gestion des accès, des rôles et des permissions utilisateurs de manière fine et sécurisée.'
+      title: 'Validation & Contrôle Qualité',
+      description: 'Circuit de validation multi-niveaux (agent → superviseur → responsable) garantissant la qualité et l\'intégrité des données enregistrées.'
     },
     {
       icon: 'assessment',
-      title: 'Rapports Détaillés',
-      description: 'Génération des rapports statistiques et tableaux de bord interactifs'
+      title: 'Rapports & Statistiques',
+      description: 'Tableaux de bord analytiques avec indicateurs clés, évolution mensuelle et exports CSV / PDF par territoire et par période.'
+    },
+    {
+      icon: 'security',
+      title: 'Gestion des Accès',
+      description: 'Authentification JWT avec gestion fine des rôles et permissions par niveau administratif : national, régional, préfectoral et communal.'
     },
     {
       icon: 'location_on',
-      title: 'Gestion des localités',
-      description: 'Structuration hiérarchique des localités dans le cadre de la décentralisation.'
-    },
-    {
-      icon: 'cloud_sync',
-      title: 'Synchronisation',
-      description: 'Synchronisation en temps réel entre les différents centres de collecte'
+      title: 'Couverture Territoriale',
+      description: 'Structuration hiérarchique complète du territoire guinéen : régions → préfectures → communes, pour un suivi précis de chaque localité.'
     }
   ];
 
   statistics: Statistic[] = [
     {
-      value: '250,000+',
-      label: 'Actes Traités',
-      icon: 'description'
+      value: '2 000 000+',
+      label: 'Archives à numériser',
+      icon: 'scanner'
     },
     {
-      value: '1,500+',
-      label: 'Utilisateurs Actifs',
-      icon: 'people'
-    },
-    {
-      value: '33',
-      label: 'Préfectures Couvertes',
+      value: '342',
+      label: 'Communes couvertes',
       icon: 'location_city'
     },
     {
-      value: '99.5%',
-      label: 'Disponibilité',
-      icon: 'trending_up'
+      value: '33',
+      label: 'Préfectures',
+      icon: 'map'
+    },
+    {
+      value: '8',
+      label: 'Régions administratives',
+      icon: 'flag'
     }
   ];
 
@@ -125,10 +135,10 @@ export class AboutComponent implements OnInit {
       avatar: 'I'
     },
     {
-      name: 'Raymon Gbamou KPOGOMOU',
-      role: 'Administrateur Réseaux et Systèmes.',
+      name: 'Thierno Mouctar SOW',
+      role: 'Administrateur Réseaux et Systèmes',
       email: 'admindb@ravec.gov.gn',
-      avatar: 'I'
+      avatar: 'T'
     },
     {
       name: 'Ansoumane DIALLO',
@@ -155,19 +165,30 @@ export class AboutComponent implements OnInit {
 
   changelog = [
     {
+      version: '1.1.0',
+      date: '2025-04-01',
+      changes: [
+        'Module Rapports & Statistiques avec sélection de période et exports CSV/PDF/PNG',
+        'Indicateurs KPI détaillés : naissances/décès avec répartition par sexe',
+        'Filtre territorial par région, préfecture et commune dans les rapports',
+        'Correction de la liste des nationalités et des villes dans le formulaire de numérisation',
+        'Tableau de bord connecté aux données réelles du backend',
+        'Création automatique des utilisateurs pour toutes les communes',
+        'Correction du calcul du taux de féminisation à zéro donnée'
+      ]
+    },
+    {
       version: '1.0.0',
       date: '2024-10-15',
       changes: [
-        'Verification des actes',
-        'validations ou rejet des actes ',
-        'Générations des actes',
-        'Gestion des utisateurs',
-        'Gestion des roles et permissions ',
-        'Gestion des localités',
-        'Export de données ',
-        'Statistiques',
-        'Système de sauvegarde automatique',
-        'Corrections de bugs critiques'
+        'Module de numérisation et indexation des anciens actes d\'état civil',
+        'Enregistrement des actes de naissance avec attribution du NPI',
+        'Enregistrement des actes de décès',
+        'Circuit de validation multi-niveaux (en attente → validé / rejeté)',
+        'Gestion des utilisateurs avec rôles et permissions par niveau administratif',
+        'Structuration territoriale : régions, préfectures et communes de Guinée',
+        'Tableau de bord statistique par territoire',
+        'Authentification sécurisée par JWT avec renouvellement automatique'
       ]
     }
   ];

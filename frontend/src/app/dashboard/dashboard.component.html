@@ -51,57 +51,63 @@
 
       <div class="filter-divider"></div>
 
-      <!-- Région -->
-      <div class="filter-group">
-        <label class="filter-field-label">
-          <span class="filter-step">1</span> Région
-        </label>
-        <div class="filter-select-wrap" [class.active]="selectedRegionCode">
-          <mat-icon class="filter-ico">place</mat-icon>
-          <select [(ngModel)]="selectedRegionCode" (ngModelChange)="onRegionChange()"
-            class="filter-sel" [disabled]="loadingData">
-            <option value="">Toutes les régions</option>
-            <option *ngFor="let r of apiRegions" [value]="r.code">{{ r.nom }}</option>
-          </select>
-          <mat-icon class="filter-chevron">expand_more</mat-icon>
+      <!-- Région (CENTRAL uniquement) -->
+      <ng-container *ngIf="showRegionFilter">
+        <div class="filter-group">
+          <label class="filter-field-label">
+            <span class="filter-step">1</span> Région
+          </label>
+          <div class="filter-select-wrap" [class.active]="selectedRegionCode">
+            <mat-icon class="filter-ico">place</mat-icon>
+            <select [(ngModel)]="selectedRegionCode" (ngModelChange)="onRegionChange()"
+              class="filter-sel" [disabled]="loadingData">
+              <option value="">Toutes les régions</option>
+              <option *ngFor="let r of apiRegions" [value]="r.code">{{ r.nom }}</option>
+            </select>
+            <mat-icon class="filter-chevron">expand_more</mat-icon>
+          </div>
         </div>
-      </div>
+        <div class="filter-arrow"><mat-icon>chevron_right</mat-icon></div>
+      </ng-container>
 
-      <div class="filter-arrow"><mat-icon>chevron_right</mat-icon></div>
-
-      <!-- Préfecture -->
-      <div class="filter-group">
-        <label class="filter-field-label">
-          <span class="filter-step">2</span> Préfecture
-        </label>
-        <div class="filter-select-wrap" [class.active]="selectedPrefCode" [class.disabled]="!selectedRegionCode">
-          <mat-icon class="filter-ico">place</mat-icon>
-          <select [(ngModel)]="selectedPrefCode" (ngModelChange)="onPrefChange()"
-            class="filter-sel" [disabled]="!selectedRegionCode">
-            <option value="">{{ selectedRegionCode ? 'Toutes' : '—' }}</option>
-            <option *ngFor="let p of prefOptions" [value]="p.code">{{ p.nom }}</option>
-          </select>
-          <mat-icon class="filter-chevron">expand_more</mat-icon>
+      <!-- Préfecture (CENTRAL + REGIONAL) -->
+      <ng-container *ngIf="showPrefFilter">
+        <div class="filter-group">
+          <label class="filter-field-label">
+            <span class="filter-step">{{ showRegionFilter ? '2' : '1' }}</span> Préfecture
+          </label>
+          <div class="filter-select-wrap" [class.active]="selectedPrefCode"
+               [class.disabled]="showRegionFilter && !selectedRegionCode">
+            <mat-icon class="filter-ico">place</mat-icon>
+            <select [(ngModel)]="selectedPrefCode" (ngModelChange)="onPrefChange()"
+              class="filter-sel" [disabled]="showRegionFilter && !selectedRegionCode">
+              <option value="">{{ (showRegionFilter && !selectedRegionCode) ? '—' : 'Toutes' }}</option>
+              <option *ngFor="let p of prefOptions" [value]="p.code">{{ p.nom }}</option>
+            </select>
+            <mat-icon class="filter-chevron">expand_more</mat-icon>
+          </div>
         </div>
-      </div>
+        <div class="filter-arrow"><mat-icon>chevron_right</mat-icon></div>
+      </ng-container>
 
-      <div class="filter-arrow"><mat-icon>chevron_right</mat-icon></div>
-
-      <!-- Commune -->
-      <div class="filter-group">
-        <label class="filter-field-label">
-          <span class="filter-step">3</span> Commune
-        </label>
-        <div class="filter-select-wrap" [class.active]="selectedComCode" [class.disabled]="!selectedPrefCode">
-          <mat-icon class="filter-ico">place</mat-icon>
-          <select [(ngModel)]="selectedComCode" (ngModelChange)="onComChange()"
-            class="filter-sel" [disabled]="!selectedPrefCode">
-            <option value="">{{ selectedPrefCode ? 'Toutes' : '—' }}</option>
-            <option *ngFor="let c of comOptions" [value]="c.code">{{ c.nom }}</option>
-          </select>
-          <mat-icon class="filter-chevron">expand_more</mat-icon>
+      <!-- Commune (tous sauf COMMUNAL) -->
+      <ng-container *ngIf="showComFilter">
+        <div class="filter-group">
+          <label class="filter-field-label">
+            <span class="filter-step">{{ showRegionFilter ? '3' : (showPrefFilter ? '2' : '1') }}</span> Commune
+          </label>
+          <div class="filter-select-wrap" [class.active]="selectedComCode"
+               [class.disabled]="showPrefFilter && !selectedPrefCode">
+            <mat-icon class="filter-ico">place</mat-icon>
+            <select [(ngModel)]="selectedComCode" (ngModelChange)="onComChange()"
+              class="filter-sel" [disabled]="showPrefFilter && !selectedPrefCode">
+              <option value="">{{ (showPrefFilter && !selectedPrefCode) ? '—' : 'Toutes' }}</option>
+              <option *ngFor="let c of comOptions" [value]="c.code">{{ c.nom }}</option>
+            </select>
+            <mat-icon class="filter-chevron">expand_more</mat-icon>
+          </div>
         </div>
-      </div>
+      </ng-container>
 
       <!-- Crumb -->
       <div class="filter-crumb" *ngIf="filterLabel">
@@ -134,7 +140,10 @@
       <div class="kpi-body">
         <span class="kpi-lbl">Actes enregistrés</span>
         <span class="kpi-num">{{ fmt(totalActes) }}</span>
-        <span class="kpi-chip chip-green">↑ {{ variation }}% ce mois</span>
+        <span class="kpi-sub" *ngIf="totalNaissance > 0 || totalDeces > 0">
+          {{ fmt(totalNaissance) }} naissances · {{ fmt(totalDeces) }} décès
+        </span>
+        <span class="kpi-chip chip-green">{{ variation }}% ce mois</span>
       </div>
     </div>
 

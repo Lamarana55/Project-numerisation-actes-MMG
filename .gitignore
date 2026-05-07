@@ -45,6 +45,7 @@ backend/logs/*
 
 # Environment files
 .env
+.env.server
 .env.local
 .env.development.local
 .env.test.local

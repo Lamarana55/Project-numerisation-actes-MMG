@@ -4,7 +4,9 @@ import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import { Subject, forkJoin, of } from 'rxjs';
 import { switchMap, map, catchError, takeUntil } from 'rxjs/operators';
 import { GeodataService } from '../services/geodata.service';
-import { RegionDTO, PrefectureDTO, CommuneDTO } from '../models/geodata';
+import { DashboardService, StatistiquesDTO, MoisStatDTO } from '../services/dashboard.service';
+import { AuthService } from '../services/auth.service';
+import { RegionDTO, PrefectureDTO } from '../models/geodata';
 
 // ─── Modèles internes ─────────────────────────────────────────────────────────
 export interface CommuneStat {
@@ -32,27 +34,6 @@ export interface RegionStat {
   femmes:  number;
 }
 
-export interface MonthStat {
-  mois:  string;
-  actes: number;
-}
-
-// ─── Données mensuelles (statiques — à remplacer par un endpoint stats) ───────
-const MONTHLY_DATA: MonthStat[] = [
-  { mois: 'Avr 25', actes: 142 },
-  { mois: 'Mai 25', actes: 168 },
-  { mois: 'Jun 25', actes: 247 },
-  { mois: 'Jul 25', actes: 289 },
-  { mois: 'Aoû 25', actes: 234 },
-  { mois: 'Sep 25', actes: 312 },
-  { mois: 'Oct 25', actes: 347 },
-  { mois: 'Nov 25', actes: 321 },
-  { mois: 'Déc 25', actes: 218 },
-  { mois: 'Jan 26', actes: 278 },
-  { mois: 'Fév 26', actes: 356 },
-  { mois: 'Mar 26', actes: 212 },
-];
-
 // ─── Palette de couleurs par région ───────────────────────────────────────────
 const REGION_COLORS = [
   '#4a8a4e', '#378ADD', '#EF9F27', '#9B59B6',
@@ -73,11 +54,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
   // ─── Date ────────────────────────────────────────────────────────────────────
   today = new Date().toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
 
-  // ─── Données géographiques chargées depuis l'API ──────────────────────────────
+  // ─── Données géographiques ────────────────────────────────────────────────────
   apiRegions:     RegionStat[]  = [];
   allPrefData:    PrefData[]    = [];
   allApiCommunes: CommuneStat[] = [];
-  private prefRegionMap = new Map<string, string>(); // prefCode → regionCode
+  private prefRegionMap = new Map<string, string>();
 
   // ─── État de chargement ───────────────────────────────────────────────────────
   loadingData = false;
@@ -91,12 +72,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
   comOptions:  CommuneStat[] = [];
 
   // ─── KPIs ────────────────────────────────────────────────────────────────────
-  totalActes  = 0;
-  totalHommes = 0;
-  totalFemmes = 0;
-  tauxHommes  = 0;
-  tauxFemmes  = 0;
-  variation   = '+12.4';
+  totalActes     = 0;
+  totalNaissance = 0;
+  totalDeces     = 0;
+  totalHommes    = 0;
+  totalFemmes    = 0;
+  totalValides   = 0;
+  totalEnAttente = 0;
+  totalRejetes   = 0;
+  tauxHommes     = 0;
+  tauxFemmes     = 0;
+  variation      = '0.0';
 
   // ─── Données pour le template ────────────────────────────────────────────────
   filteredComs: CommuneStat[] = [];
@@ -106,22 +92,20 @@ export class DashboardComponent implements OnInit, OnDestroy {
   pageSize    = 10;
   currentPage = 0;
 
-  get totalPages(): number {
-    return Math.ceil(this.filteredComs.length / this.pageSize);
-  }
-
+  get totalPages(): number { return Math.ceil(this.filteredComs.length / this.pageSize); }
   get pagedComs(): CommuneStat[] {
     const start = this.currentPage * this.pageSize;
     return this.filteredComs.slice(start, start + this.pageSize);
   }
-
-  get pages(): number[] {
-    return Array.from({ length: this.totalPages }, (_, i) => i);
-  }
-
+  get pages(): number[] { return Array.from({ length: this.totalPages }, (_, i) => i); }
   prevPage(): void { if (this.currentPage > 0) this.currentPage--; }
   nextPage(): void { if (this.currentPage < this.totalPages - 1) this.currentPage++; }
   goToPage(p: number): void { this.currentPage = p; }
+
+  // ─── Visibilité des filtres selon le niveau administratif ─────────────────────
+  get showRegionFilter(): boolean { return this.authService.isCentral; }
+  get showPrefFilter(): boolean   { return this.authService.isCentral || this.authService.isRegional; }
+  get showComFilter(): boolean    { return !this.authService.isCommunal; }
 
   // ── Graphique barres (communes) ───────────────────────────────────────────────
   barData: ChartData<'bar'> = { labels: [], datasets: [] };
@@ -172,11 +156,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   // ── Graphique ligne (évolution mensuelle) ─────────────────────────────────────
   lineData: ChartData<'line'> = {
-    labels: MONTHLY_DATA.map(m => m.mois),
+    labels: [],
     datasets: [
       {
         label: 'Actes numérisés & indexés',
-        data: MONTHLY_DATA.map(m => m.actes),
+        data: [],
         borderColor: '#4a8a4e',
         backgroundColor: 'rgba(74,138,78,0.08)',
         fill: true, tension: 0.4, pointRadius: 3, pointHoverRadius: 5, borderWidth: 2,
@@ -204,7 +188,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
     },
   };
 
-  constructor(private geodataService: GeodataService) {}
+  constructor(
+    private geodataService: GeodataService,
+    private dashboardService: DashboardService,
+    private authService: AuthService,
+  ) {}
 
   ngOnInit(): void {
     this.loadData();
@@ -223,13 +211,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.loadingData = true;
 
     forkJoin({
-      regions:  this.geodataService.getAllRegions(),
-      communes: this.geodataService.getAllCommunes(),
+      stats:   this.dashboardService.getDashboardStats().pipe(catchError(() => of(null as StatistiquesDTO | null))),
+      regions: this.geodataService.getAllRegions().pipe(catchError(() => of([] as RegionDTO[]))),
     }).pipe(
       takeUntil(this.destroy$),
-      switchMap(({ regions, communes }) => {
+      switchMap(({ stats, regions }) => {
         if (!regions.length) {
-          return of({ regions, communes, prefsByRegion: [] as { regionCode: string; prefs: PrefectureDTO[] }[] });
+          return of({ stats, regions, prefsByRegion: [] as { regionCode: string; prefs: PrefectureDTO[] }[] });
         }
         return forkJoin(
           regions.map(r =>
@@ -238,11 +226,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
               catchError(() => of({ regionCode: r.code, prefs: [] as PrefectureDTO[] }))
             )
           )
-        ).pipe(map(prefsByRegion => ({ regions, communes, prefsByRegion })));
+        ).pipe(map(prefsByRegion => ({ stats, regions, prefsByRegion })));
       })
     ).subscribe({
-      next: ({ regions, communes, prefsByRegion }) => {
-        this.buildGeoTree(regions, prefsByRegion, communes);
+      next: ({ stats, regions, prefsByRegion }) => {
+        this.buildFromStats(stats, regions, prefsByRegion);
         this.loadingData = false;
         this.computeAll();
       },
@@ -250,40 +238,93 @@ export class DashboardComponent implements OnInit, OnDestroy {
     });
   }
 
-  private buildGeoTree(
+  private buildFromStats(
+    stats: StatistiquesDTO | null,
     regions: RegionDTO[],
-    prefsByRegion: { regionCode: string; prefs: PrefectureDTO[] }[],
-    communes: CommuneDTO[]
+    prefsByRegion: { regionCode: string; prefs: PrefectureDTO[] }[]
   ): void {
     // 1. Régions avec couleurs déterministes
     this.apiRegions = regions.map((r, i) => ({
-      code:    r.code,
-      nom:     r.nom,
+      code: r.code, nom: r.nom,
       couleur: REGION_COLORS[i % REGION_COLORS.length],
       actes: 0, hommes: 0, femmes: 0,
     }));
 
     // 2. Map prefecture → region
     this.prefRegionMap.clear();
-    prefsByRegion.forEach(({ regionCode, prefs }) => {
-      prefs.forEach(p => this.prefRegionMap.set(p.code, regionCode));
-    });
-
-    // 3. Communes avec stats déterministes basées sur le code
-    this.allApiCommunes = communes.map(c => {
-      const stat = this.mockStat(c.code);
-      return { code: c.code, nom: c.nom, prefectureCode: c.codePrefecture, ...stat };
-    });
-
-    // 4. Structure préfectures avec leurs communes
-    this.allPrefData = prefsByRegion.flatMap(({ regionCode, prefs }) =>
-      prefs.map(p => ({
-        code:       p.code,
-        nom:        p.nom,
-        regionCode,
-        coms:       this.allApiCommunes.filter(c => c.prefectureCode === p.code),
-      }))
+    prefsByRegion.forEach(({ regionCode, prefs }) =>
+      prefs.forEach(p => this.prefRegionMap.set(p.code, regionCode))
     );
+
+    // 3. Communes depuis les statistiques backend
+    if (stats) {
+      this.allApiCommunes = stats.parCommune.map(c => ({
+        code:           c.codeCommune,
+        nom:            c.nomCommune,
+        prefectureCode: c.codePrefecture,
+        actes:          c.actes,
+        hommes:         c.hommes,
+        femmes:         c.femmes,
+      }));
+      this.totalNaissance = stats.totalNaissance;
+      this.totalDeces     = stats.totalDeces;
+      this.totalValides   = stats.totalValides;
+      this.totalEnAttente = stats.totalEnAttente;
+      this.totalRejetes   = stats.totalRejetes;
+      this.updateLineChart(stats.parMois);
+      this.computeVariation(stats.parMois);
+    } else {
+      this.allApiCommunes = [];
+    }
+
+    // 4. Structure préfectures (seulement celles présentes dans les données)
+    const prefCodesInData = new Set(this.allApiCommunes.map(c => c.prefectureCode));
+    this.allPrefData = prefsByRegion.flatMap(({ regionCode, prefs }) =>
+      prefs
+        .filter(p => prefCodesInData.has(p.code))
+        .map(p => ({
+          code:       p.code,
+          nom:        p.nom,
+          regionCode,
+          coms:       this.allApiCommunes.filter(c => c.prefectureCode === p.code),
+        }))
+    );
+
+    // 5. Pré-remplir les options de filtre pour les niveaux non-CENTRAL
+    this.initFiltersForNiveau();
+  }
+
+  private initFiltersForNiveau(): void {
+    const niveau = this.authService.niveauAdministratif;
+    if (niveau === 'REGIONAL') {
+      this.prefOptions = this.allPrefData;
+    } else if (niveau === 'PREFECTORAL') {
+      this.comOptions = this.allApiCommunes;
+    }
+  }
+
+  private updateLineChart(parMois: MoisStatDTO[]): void {
+    this.lineData = {
+      labels: parMois.map(m => m.label),
+      datasets: [
+        {
+          label: 'Actes numérisés & indexés',
+          data: parMois.map(m => m.actes),
+          borderColor: '#4a8a4e',
+          backgroundColor: 'rgba(74,138,78,0.08)',
+          fill: true, tension: 0.4, pointRadius: 3, pointHoverRadius: 5, borderWidth: 2,
+        },
+      ],
+    };
+  }
+
+  private computeVariation(parMois: MoisStatDTO[]): void {
+    if (parMois.length < 2) { this.variation = '0.0'; return; }
+    const curr = parMois[parMois.length - 1].actes;
+    const prev = parMois[parMois.length - 2].actes;
+    if (prev === 0) { this.variation = curr > 0 ? '+100.0' : '0.0'; return; }
+    const pct = ((curr - prev) / prev) * 100;
+    this.variation = (pct >= 0 ? '+' : '') + pct.toFixed(1);
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -317,6 +358,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.selectedComCode    = '';
     this.prefOptions        = [];
     this.comOptions         = [];
+    this.initFiltersForNiveau();
     this.computeAll();
   }
 
@@ -353,7 +395,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     const total = this.totalHommes + this.totalFemmes;
     this.tauxHommes = total > 0 ? Math.round((this.totalHommes / total) * 100) : 0;
-    this.tauxFemmes = 100 - this.tauxHommes;
+    this.tauxFemmes = total > 0 ? (100 - this.tauxHommes) : 0;
 
     this.updateRegionStats();
     this.updateBarChart(coms);
@@ -397,7 +439,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         hommes: coms.reduce((s, c) => s + c.hommes, 0),
         femmes: coms.reduce((s, c) => s + c.femmes, 0),
       };
-    }).sort((a, b) => b.actes - a.actes);
+    }).filter(r => r.actes > 0).sort((a, b) => b.actes - a.actes);
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -436,25 +478,5 @@ export class DashboardComponent implements OnInit, OnDestroy {
     if (this.selectedComCode)
       parts.push(this.allApiCommunes.find(c => c.code === this.selectedComCode)?.nom ?? '');
     return parts.join(' › ');
-  }
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // STATS DÉTERMINISTES (à remplacer par un endpoint /stats quand disponible)
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  private mockStat(code: string): { actes: number; hommes: number; femmes: number } {
-    const h = this.hashCode(code);
-    const actes  = 20 + (h % 300);
-    const tauxH  = 45 + (h % 11);   // entre 45 % et 55 %
-    const hommes = Math.round(actes * tauxH / 100);
-    return { actes, hommes, femmes: actes - hommes };
-  }
-
-  private hashCode(s: string): number {
-    let h = 0;
-    for (let i = 0; i < s.length; i++) {
-      h = Math.imul(31, h) + s.charCodeAt(i) | 0;
-    }
-    return Math.abs(h);
   }
 }

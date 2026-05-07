@@ -17,7 +17,7 @@
   <!-- Statistics Section -->
   <section class="statistics-section">
     <div class="container">
-      <h2>Nos Performances</h2>
+      <h2>Couverture du Projet</h2>
       <div class="stats-grid">
         <div class="stat-card" *ngFor="let stat of statistics">
           <mat-icon class="stat-icon">{{ stat.icon }}</mat-icon>
@@ -33,7 +33,7 @@
   <!-- Features Section -->
   <section class="features-section">
     <div class="container">
-      <h2>Fonctionnalités Principales</h2>
+      <h2>Modules de la Plateforme</h2>
       <div class="features-grid">
         <div class="feature-card" *ngFor="let feature of features">
           <mat-icon class="feature-icon">{{ feature.icon }}</mat-icon>
@@ -99,73 +99,73 @@
     </div>
   </section>
 
-  <!-- Organization Info -->
-  <section class="organization-section">
-    <div class="container">
-      <mat-card class="org-card">
-        <mat-card-header>
-          <mat-icon mat-card-avatar>account_balance</mat-icon>
-          <mat-card-title>{{ appInfo.organization }}</mat-card-title>
-          <mat-card-subtitle>{{ appInfo.country }}</mat-card-subtitle>
-        </mat-card-header>
-        <mat-card-content>
-          <p>
-            Le Système de Gestion des Collectes (SiGeC) est une initiative du
-            {{ appInfo.organization }} visant à moderniser et digitaliser
-            les processus administratifs liés à l'état civil et au recensement
-            de la population en {{ appInfo.country }}.
-          </p>
-          <div class="contact-info">
-            <div class="contact-item">
+  <!-- Organization Info — Hero Style -->
+  <section class="org-hero-section">
+
+    <!-- Bande couleurs drapeau guinéen -->
+    <div class="org-flag-strip">
+      <div class="flag-red"></div>
+      <div class="flag-yellow"></div>
+      <div class="flag-green"></div>
+    </div>
+
+    <!-- Corps hero -->
+    <div class="org-hero-body">
+      <div class="org-emblem">
+        <mat-icon>account_balance</mat-icon>
+      </div>
+      <div class="org-hero-text">
+        <p class="org-label">Organisation</p>
+        <h2 class="org-title">{{ appInfo.organization }}</h2>
+        <p class="org-country">{{ appInfo.country }}</p>
+        <div class="org-divider"></div>
+        <p class="org-mission">
+          Le <span class="org-highlight">Projet RAVEC</span> est une initiative nationale
+          visant à reconstituer, numériser et sécuriser les archives d'état civil de la Guinée,
+          et à moderniser l'enregistrement des faits d'état civil — naissances, décès, mariages —
+          sur l'ensemble du territoire de la
+          <span class="org-highlight">{{ appInfo.country }}</span>.
+        </p>
+      </div>
+    </div>
+
+    <!-- Cartes contact flottantes -->
+    <div class="org-contact-section">
+      <div class="container">
+        <div class="org-contact-grid">
+          <div class="org-contact-card">
+            <div class="org-contact-icon">
               <mat-icon>location_on</mat-icon>
-              <span>Conakry, République de Guinée</span>
             </div>
-            <div class="contact-item">
-              <mat-icon>phone</mat-icon>
-              <span>+224 622 000 000</span>
-            </div>
-            <div class="contact-item">
-              <mat-icon>email</mat-icon>
-              <span>contact&#64;ravec.gov.gn</span>
+            <div class="org-contact-info">
+              <h4>Adresse</h4>
+              <p>Conakry, République de Guinée</p>
             </div>
           </div>
-        </mat-card-content>
-      </mat-card>
+          <div class="org-contact-card">
+            <div class="org-contact-icon">
+              <mat-icon>phone</mat-icon>
+            </div>
+            <div class="org-contact-info">
+              <h4>Téléphone</h4>
+              <p>+224 622 000 000</p>
+            </div>
+          </div>
+          <div class="org-contact-card">
+            <div class="org-contact-icon">
+              <mat-icon>email</mat-icon>
+            </div>
+            <div class="org-contact-info">
+              <h4>Email</h4>
+              <p>contact&#64;ravec.gov.gn</p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
+
   </section>
 
   <!-- Footer -->
-  <footer class="about-footer">
-    <div class="container">
-      <div class="footer-content">
-        <div class="footer-section">
-          <h4>Liens Utiles</h4>
-          <ul>
-            <li><a href="#" routerLink="/admin/help">Documentation</a></li>
-            <li><a href="#" routerLink="/admin/support">Support Technique</a></li>
-            <li><a href="#" (click)="openExternalLink('https://ravec.gov.gn/')">Site Officiel RAVEC </a></li>
-          </ul>
-        </div>
-        <div class="footer-section">
-          <h4>Ressources</h4>
-          <ul>
-            <li><a href="#" routerLink="/admin/reports/statistics">Statistiques</a></li>
-            <li><a href="#" routerLink="/admin/notifications">Notifications</a></li>
-          </ul>
-        </div>
-        <div class="footer-section">
-          <h4>Sécurité</h4>
-          <ul>
-            <li><a href="#" routerLink="/admin/help/privacy">Politique de Confidentialité</a></li>
-            <li><a href="#" routerLink="/admin/help/privacy" >Conditions d'Utilisation</a></li>
-            <li><a href="#" routerLink="/admin/help/privacy">Signaler un Problème</a></li>
-          </ul>
-        </div>
-      </div>
-      <div class="footer-bottom">
-        <p>&copy; {{ currentYear }} {{ appInfo.organization }}. Tous droits réservés.</p>
-        <p class="footer-version"> v{{ appInfo.version }} - Développé avec ❤️ en Guinée</p>
-      </div>
-    </div>
-  </footer>
+
 </div>

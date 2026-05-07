@@ -1,30 +1,418 @@
-<div class="page-container">
-  <div class="page-header" style="background: linear-gradient(135deg, #0d47a1 0%, #1565c0 50%, #1976d2 100%);">
-    <div class="header-deco header-deco--1"></div>
-    <div class="header-deco header-deco--2"></div>
-    <div class="breadcrumb">
-      <mat-icon class="breadcrumb-home">home</mat-icon>
-      <span class="breadcrumb-sep">/</span>
-      <span class="breadcrumb-current">Rapports & Statistiques</span>
+<div class="rap-page">
+
+  <!-- ══════════════════════════════════════════════════════════════
+       HEADER
+  ══════════════════════════════════════════════════════════════ -->
+  <div class="rap-header no-print">
+    <div class="rap-header-deco rap-header-deco--1"></div>
+    <div class="rap-header-deco rap-header-deco--2"></div>
+    <div class="rap-breadcrumb">
+      <mat-icon class="bc-home">home</mat-icon>
+      <span class="bc-sep">/</span>
+      <span class="bc-cur">Rapports &amp; Statistiques</span>
     </div>
-    <div class="title-row">
-      <div class="title-icon-wrap">
+    <div class="rap-title-row">
+      <div class="rap-title-icon">
         <mat-icon>assessment</mat-icon>
       </div>
-      <div class="title-text">
-        <h1>Rapports & Statistiques</h1>
-        <p>Tableaux de bord, indicateurs et exports</p>
+      <div class="rap-title-text">
+        <h1>Rapports &amp; Statistiques</h1>
+        <p>Analyse par territoire et par période — exports inclus</p>
+      </div>
+      <div class="rap-header-actions">
+        <button class="btn-hdr-export btn-pdf" (click)="exportPdf()">
+          <mat-icon>picture_as_pdf</mat-icon> PDF
+        </button>
+        <button class="btn-hdr-export btn-csv" (click)="exportCsv()">
+          <mat-icon>download</mat-icon> CSV
+        </button>
       </div>
     </div>
   </div>
 
-  <div class="page-content">
-    <div class="coming-soon-card" style="border-color: #bbdefb;">
-      <div class="coming-soon-icon" style="background: #e3f2fd;">
-        <mat-icon style="color: #1565c0;">construction</mat-icon>
-      </div>
-      <h2 style="color: #0d47a1;">Module en cours de développement</h2>
-      <p>Les rapports et statistiques détaillés seront bientôt disponibles.</p>
-    </div>
+  <!-- PRINT HEADER -->
+  <div class="print-only print-header">
+    <div class="print-logo"><mat-icon>assessment</mat-icon><span>RAVEC — Rapports &amp; Statistiques</span></div>
+    <div class="print-meta">Période : {{ activePeriodLabel }}<span *ngIf="hasFilters"> · Filtré</span></div>
+    <div class="print-date">{{ today }}</div>
   </div>
-</div>
+
+  <div class="rap-body">
+
+    <!-- ══════════════════════════════════════════════════════════════
+         PERIOD + TERRITORY FILTERS
+    ══════════════════════════════════════════════════════════════ -->
+    <div class="rap-filter-bar no-print">
+      <div class="period-pills">
+        <button *ngFor="let p of periods"
+                class="period-pill"
+                [class.active]="selectedPeriod === p.key"
+                (click)="selectPeriod(p.key)">{{ p.label }}</button>
+      </div>
+
+      <div class="custom-dates" *ngIf="selectedPeriod === 'custom'">
+        <label>Du <input type="date" [(ngModel)]="customDateDebut" class="date-input"></label>
+        <label>au <input type="date" [(ngModel)]="customDateFin"   class="date-input"></label>
+        <button class="btn-apply" (click)="applyCustomPeriod()">Appliquer</button>
+      </div>
+
+      <!-- Territory filters inline -->
+      <div class="geo-inline" *ngIf="showRegionFilter || showPrefFilter || showComFilter">
+        <select class="geo-select-sm" *ngIf="showRegionFilter" [(ngModel)]="selectedRegionCode" (change)="onRegionChange()">
+          <option value="">Toutes les régions</option>
+          <option *ngFor="let r of allRegions" [value]="r.code">{{ r.nom }}</option>
+        </select>
+        <select class="geo-select-sm" *ngIf="showPrefFilter" [(ngModel)]="selectedPrefCode" (change)="onPrefChange()"
+                [disabled]="showRegionFilter && !selectedRegionCode">
+          <option value="">Toutes les préfectures</option>
+          <option *ngFor="let p of prefOptions" [value]="p.code">{{ p.nom }}</option>
+        </select>
+        <select class="geo-select-sm" *ngIf="showComFilter" [(ngModel)]="selectedComCode" (change)="onComChange()"
+                [disabled]="showPrefFilter && !selectedPrefCode">
+          <option value="">Toutes les communes</option>
+          <option *ngFor="let c of comOptions" [value]="c.codeCommune">{{ c.nomCommune }}</option>
+        </select>
+        <button class="btn-reset-sm" *ngIf="hasFilters" (click)="resetFilters()">
+          <mat-icon>clear</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <!-- LOADING -->
+    <div class="rap-loading no-print" *ngIf="loading">
+      <mat-spinner diameter="38"></mat-spinner>
+      <span>Chargement des données…</span>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         KPI CARDS — Total + 3 groupes
+    ══════════════════════════════════════════════════════════════ -->
+    <div class="kpi-section" *ngIf="!loading">
+
+      <!-- Total Actes — banner pleine largeur -->
+      <div class="kpi-banner">
+        <div class="kpi-banner-left">
+          <div class="kpi-banner-icon"><mat-icon>assignment</mat-icon></div>
+          <div>
+            <div class="kpi-banner-label">TOTAL ACTES ENREGISTRÉS</div>
+            <div class="kpi-banner-value">{{ fmt(totalActes) }}</div>
+          </div>
+        </div>
+        <div class="kpi-banner-right">
+          <div class="kpi-banner-pill kpi-pill-naissance">
+            <mat-icon>child_care</mat-icon>
+            {{ fmt(totalNaissance) }} naissances
+          </div>
+          <div class="kpi-banner-pill kpi-pill-deces">
+            <mat-icon>sentiment_very_dissatisfied</mat-icon>
+            {{ fmt(totalDeces) }} décès
+          </div>
+        </div>
+      </div>
+
+      <!-- 3 groupes -->
+      <div class="kpi-groups">
+
+        <!-- ── Naissances ──────────────────────────────────────── -->
+        <div class="kpi-group kpi-group--naissance">
+          <div class="kpi-group-header">
+            <div class="kpi-group-hdr-left">
+              <div class="kpi-group-icon"><mat-icon>child_care</mat-icon></div>
+              <div>
+                <div class="kpi-group-title">Naissances</div>
+                <div class="kpi-group-total">{{ fmt(totalNaissance) }}</div>
+              </div>
+            </div>
+          </div>
+          <div class="kpi-group-body kpi-group-body--2">
+            <div class="kpi-sub">
+              <div class="kpi-sub-icon kpi-icon-male"><mat-icon>male</mat-icon></div>
+              <div class="kpi-sub-data">
+                <div class="kpi-sub-value">{{ fmt(naissanceHommes) }}</div>
+                <div class="kpi-sub-label">Garçons</div>
+              </div>
+              <div class="kpi-sub-pct">{{ pct(naissanceHommes, totalNaissance) }}%</div>
+            </div>
+            <div class="kpi-sub">
+              <div class="kpi-sub-icon kpi-icon-female"><mat-icon>female</mat-icon></div>
+              <div class="kpi-sub-data">
+                <div class="kpi-sub-value">{{ fmt(naissanceFemmes) }}</div>
+                <div class="kpi-sub-label">Filles</div>
+              </div>
+              <div class="kpi-sub-pct">{{ pct(naissanceFemmes, totalNaissance) }}%</div>
+            </div>
+          </div>
+          <div class="kpi-group-bar">
+            <div class="kpi-group-bar-fill kpi-bar-male"
+                 [style.width.%]="pct(naissanceHommes, totalNaissance)"></div>
+            <div class="kpi-group-bar-fill kpi-bar-female"
+                 [style.width.%]="pct(naissanceFemmes, totalNaissance)"></div>
+          </div>
+        </div>
+
+        <!-- ── Décès ───────────────────────────────────────────── -->
+        <div class="kpi-group kpi-group--deces">
+          <div class="kpi-group-header">
+            <div class="kpi-group-hdr-left">
+              <div class="kpi-group-icon"><mat-icon>sentiment_very_dissatisfied</mat-icon></div>
+              <div>
+                <div class="kpi-group-title">Décès</div>
+                <div class="kpi-group-total">{{ fmt(totalDeces) }}</div>
+              </div>
+            </div>
+          </div>
+          <div class="kpi-group-body kpi-group-body--2">
+            <div class="kpi-sub">
+              <div class="kpi-sub-icon kpi-icon-male"><mat-icon>male</mat-icon></div>
+              <div class="kpi-sub-data">
+                <div class="kpi-sub-value">{{ fmt(decesHommes) }}</div>
+                <div class="kpi-sub-label">Hommes</div>
+              </div>
+              <div class="kpi-sub-pct">{{ pct(decesHommes, totalDeces) }}%</div>
+            </div>
+            <div class="kpi-sub">
+              <div class="kpi-sub-icon kpi-icon-female"><mat-icon>female</mat-icon></div>
+              <div class="kpi-sub-data">
+                <div class="kpi-sub-value">{{ fmt(decesFemmes) }}</div>
+                <div class="kpi-sub-label">Femmes</div>
+              </div>
+              <div class="kpi-sub-pct">{{ pct(decesFemmes, totalDeces) }}%</div>
+            </div>
+          </div>
+          <div class="kpi-group-bar">
+            <div class="kpi-group-bar-fill kpi-bar-male"
+                 [style.width.%]="pct(decesHommes, totalDeces)"></div>
+            <div class="kpi-group-bar-fill kpi-bar-female"
+                 [style.width.%]="pct(decesFemmes, totalDeces)"></div>
+          </div>
+        </div>
+
+        <!-- ── Actes Numérisés ─────────────────────────────────── -->
+        <div class="kpi-group kpi-group--numerises">
+          <div class="kpi-group-header">
+            <div class="kpi-group-hdr-left">
+              <div class="kpi-group-icon"><mat-icon>scanner</mat-icon></div>
+              <div>
+                <div class="kpi-group-title">Actes Numérisés</div>
+                <div class="kpi-group-total">{{ fmt(totalActes) }}</div>
+              </div>
+            </div>
+          </div>
+          <div class="kpi-group-body kpi-group-body--3">
+            <div class="kpi-sub kpi-sub--valide">
+              <div class="kpi-sub-icon"><mat-icon>verified</mat-icon></div>
+              <div class="kpi-sub-data">
+                <div class="kpi-sub-value">{{ fmt(totalValides) }}</div>
+                <div class="kpi-sub-label">Validés</div>
+              </div>
+              <div class="kpi-sub-pct kpi-pct--green">{{ pct(totalValides, totalActes) }}%</div>
+            </div>
+            <div class="kpi-sub kpi-sub--attente">
+              <div class="kpi-sub-icon"><mat-icon>hourglass_empty</mat-icon></div>
+              <div class="kpi-sub-data">
+                <div class="kpi-sub-value">{{ fmt(totalEnAttente) }}</div>
+                <div class="kpi-sub-label">En attente</div>
+              </div>
+              <div class="kpi-sub-pct kpi-pct--amber">{{ pct(totalEnAttente, totalActes) }}%</div>
+            </div>
+            <div class="kpi-sub kpi-sub--rejete">
+              <div class="kpi-sub-icon"><mat-icon>cancel</mat-icon></div>
+              <div class="kpi-sub-data">
+                <div class="kpi-sub-value">{{ fmt(totalRejetes) }}</div>
+                <div class="kpi-sub-label">Rejetés</div>
+              </div>
+              <div class="kpi-sub-pct kpi-pct--red">{{ pct(totalRejetes, totalActes) }}%</div>
+            </div>
+          </div>
+          <div class="kpi-group-bar">
+            <div class="kpi-group-bar-fill kpi-bar-valide"
+                 [style.width.%]="pct(totalValides, totalActes)"></div>
+            <div class="kpi-group-bar-fill kpi-bar-attente"
+                 [style.width.%]="pct(totalEnAttente, totalActes)"></div>
+            <div class="kpi-group-bar-fill kpi-bar-rejete"
+                 [style.width.%]="pct(totalRejetes, totalActes)"></div>
+          </div>
+        </div>
+
+      </div><!-- /kpi-groups -->
+    </div><!-- /kpi-section -->
+
+    <!-- ══════════════════════════════════════════════════════════════
+         LINE CHART — Évolution mensuelle
+    ══════════════════════════════════════════════════════════════ -->
+    <div class="chart-section" *ngIf="!loading">
+      <div class="chart-card chart-card--full">
+        <div class="chart-card-header">
+          <div class="chart-card-title">
+            <mat-icon>show_chart</mat-icon>
+            <span>Évolution mensuelle — Naissances vs Décès</span>
+          </div>
+          <button class="btn-chart-export no-print"
+                  (click)="exportChartPng(lineChartRef, 'evolution_mensuelle')">
+            <mat-icon>image</mat-icon> PNG
+          </button>
+        </div>
+        <div class="chart-wrap chart-wrap--tall">
+          <canvas baseChart #lineChart="base-chart"
+                  type="line" [data]="lineData" [options]="lineOptions">
+          </canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         BAR CHART — Top 10 communes
+    ══════════════════════════════════════════════════════════════ -->
+    <div class="chart-section" *ngIf="!loading">
+      <div class="chart-card chart-card--full">
+        <div class="chart-card-header">
+          <div class="chart-card-title">
+            <mat-icon>bar_chart</mat-icon>
+            <span>Top 10 communes par volume d'actes</span>
+          </div>
+          <button class="btn-chart-export no-print"
+                  (click)="exportChartPng(barChartRef, 'top10_communes')">
+            <mat-icon>image</mat-icon> PNG
+          </button>
+        </div>
+        <div class="chart-wrap chart-wrap--tall">
+          <canvas baseChart #barChart="base-chart"
+                  type="bar" [data]="barData" [options]="barOptions">
+          </canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         DOUGHNUT CHARTS
+    ══════════════════════════════════════════════════════════════ -->
+    <div class="chart-section chart-section--half" *ngIf="!loading">
+
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <div class="chart-card-title">
+            <mat-icon>pie_chart</mat-icon>
+            <span>Statuts de validation</span>
+          </div>
+          <button class="btn-chart-export no-print"
+                  (click)="exportChartPng(statutChartRef, 'statuts_validation')">
+            <mat-icon>image</mat-icon> PNG
+          </button>
+        </div>
+        <div class="chart-wrap chart-wrap--donut">
+          <canvas baseChart #statutChart="base-chart"
+                  type="doughnut" [data]="statutData" [options]="statutOptions">
+          </canvas>
+        </div>
+        <div class="donut-legend">
+          <div class="dl-item"><span class="dl-dot" style="background:#1565c0"></span>Validés : {{ fmt(totalValides) }}</div>
+          <div class="dl-item"><span class="dl-dot" style="background:#f59e0b"></span>En attente : {{ fmt(totalEnAttente) }}</div>
+          <div class="dl-item"><span class="dl-dot" style="background:#ef4444"></span>Rejetés : {{ fmt(totalRejetes) }}</div>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <div class="chart-card-title">
+            <mat-icon>people</mat-icon>
+            <span>Répartition par sexe</span>
+          </div>
+          <button class="btn-chart-export no-print"
+                  (click)="exportChartPng(sexeChartRef, 'repartition_sexe')">
+            <mat-icon>image</mat-icon> PNG
+          </button>
+        </div>
+        <div class="chart-wrap chart-wrap--donut">
+          <canvas baseChart #sexeChart="base-chart"
+                  type="doughnut" [data]="sexeData" [options]="sexeOptions">
+          </canvas>
+        </div>
+        <div class="donut-legend">
+          <div class="dl-item">
+            <span class="dl-dot" style="background:#1976d2"></span>
+            Hommes : {{ fmt(totalHommes) }} ({{ tauxH() }}%)
+          </div>
+          <div class="dl-item">
+            <span class="dl-dot" style="background:#e91e8c"></span>
+            Femmes : {{ fmt(totalFemmes) }} ({{ tauxF() }}%)
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         TABLE
+    ══════════════════════════════════════════════════════════════ -->
+    <div class="table-section" *ngIf="!loading">
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-title">
+            <mat-icon>table_chart</mat-icon>
+            <span>Détail par commune <span class="table-count">({{ tableData.length }})</span></span>
+          </div>
+          <button class="btn-csv-sm no-print" (click)="exportCsv()">
+            <mat-icon>download</mat-icon> CSV
+          </button>
+        </div>
+
+        <div class="table-scroll">
+          <table class="rap-table">
+            <thead>
+              <tr>
+                <th class="sortable" (click)="sortTable('nomCommune')">
+                  Commune
+                  <mat-icon class="sort-icon">{{ tableSort === 'nomCommune' ? (tableSortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon>
+                </th>
+                <th class="sortable right" (click)="sortTable('naissance')">
+                  Naissances
+                  <mat-icon class="sort-icon">{{ tableSort === 'naissance' ? (tableSortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon>
+                </th>
+                <th class="sortable right" (click)="sortTable('deces')">
+                  Décès
+                  <mat-icon class="sort-icon">{{ tableSort === 'deces' ? (tableSortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon>
+                </th>
+                <th class="sortable right" (click)="sortTable('actes')">
+                  Total
+                  <mat-icon class="sort-icon">{{ tableSort === 'actes' ? (tableSortAsc ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon>
+                </th>
+                <th class="right">Hommes</th>
+                <th class="right">Femmes</th>
+                <th class="right">% Femmes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let c of pagedTable">
+                <td class="commune-cell">
+                  <span class="commune-name">{{ c.nomCommune }}</span>
+                  <span class="commune-code">{{ c.codeCommune }}</span>
+                </td>
+                <td class="right num-blue">{{ fmt(c.naissance) }}</td>
+                <td class="right num-red">{{ fmt(c.deces) }}</td>
+                <td class="right num-bold">{{ fmt(c.actes) }}</td>
+                <td class="right">{{ fmt(c.hommes) }}</td>
+                <td class="right">{{ fmt(c.femmes) }}</td>
+                <td class="right">
+                  <div class="pct-bar-wrap">
+                    <div class="pct-bar" [style.width.%]="pct(c.femmes, c.actes)"></div>
+                    <span class="pct-label">{{ pct(c.femmes, c.actes) }}%</span>
+                  </div>
+                </td>
+              </tr>
+              <tr *ngIf="tableData.length === 0">
+                <td colspan="7" class="empty-row">Aucune donnée pour cette période</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="table-pagination" *ngIf="tablePages.length > 1">
+          <button [disabled]="tablePage === 0" (click)="tablePage = tablePage - 1"><mat-icon>chevron_left</mat-icon></button>
+          <button *ngFor="let p of tablePages" [class.active]="tablePage === p" (click)="tablePage = p">{{ p + 1 }}</button>
+          <button [disabled]="tablePage === tablePages.length - 1" (click)="tablePage = tablePage + 1"><mat-icon>chevron_right</mat-icon></button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /rap-body -->
+</div><!-- /rap-page -->

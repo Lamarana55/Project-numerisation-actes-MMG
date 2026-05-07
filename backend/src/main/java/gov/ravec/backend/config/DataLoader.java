@@ -35,9 +35,12 @@ import java.util.*;
  *  NIVEAU PRÉFECTORAL (1 compte par préfecture)
  *    cp_[prefecture]@ravec.gov.gn → COORDINATEUR_PREFECTORAL
  *
- *  NIVEAU COMMUNAL (2 comptes par commune)
+ *  NIVEAU COMMUNAL (3 comptes par commune)
  *    sup_[commune]@ravec.gov.gn   → SUPERVISEUR
  *    odec_[commune]@ravec.gov.gn  → ODEC
+ *    agent_[commune]@ravec.gov.gn → AGENT
+ *
+ *  Idempotent : saute les comptes dont l'email existe déjà.
  *
  *  Mot de passe par défaut : ChangeMe2026!
  * ============================================================
@@ -59,6 +62,7 @@ public class DataLoader implements CommandLineRunner {
     private static final String PROFIL_COORD_PREFECTORAL = "COORDINATEUR_PREFECTORAL";
     private static final String PROFIL_SUPERVISEUR       = "SUPERVISEUR";
     private static final String PROFIL_ODEC              = "ODEC";
+    private static final String PROFIL_AGENT             = "AGENT";
 
     @Autowired private UserRepository       userRepository;
     @Autowired private RoleRepository       roleRepository;
@@ -73,17 +77,12 @@ public class DataLoader implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        if (userRepository.count() > 0) {
-            log.info("=== DataLoader : utilisateurs déjà présents — arrêt ===");
-            return;
-        }
-
-        log.info("=== DataLoader PN-RAVEC : création des utilisateurs de référence ===");
+        log.info("=== DataLoader PN-RAVEC : synchronisation des utilisateurs de référence ===");
 
         // 1. Charger les profils créés par DataInitializer
         Map<String, Role> profils = chargerProfils();
-        if (profils.size() < 7) {
-            log.error("  ERREUR : seulement {}/7 profils disponibles. " +
+        if (profils.size() < 8) {
+            log.error("  ERREUR : seulement {}/8 profils disponibles. " +
                       "Vérifier que DataInitializer s'est exécuté correctement.", profils.size());
             return;
         }
@@ -116,8 +115,10 @@ public class DataLoader implements CommandLineRunner {
                                             prefParRegion, communeParPref);
         total += creerOfficiersCivils(profils.get(PROFIL_ODEC),
                                       prefParRegion, communeParPref);
+        total += creerAgentsCommunaux(profils.get(PROFIL_AGENT),
+                                      prefParRegion, communeParPref);
 
-        log.info("=== DataLoader : {} utilisateurs créés ===", total);
+        log.info("=== DataLoader : {} utilisateurs créés/mis à jour ===", total);
         log.info("    Mot de passe par défaut : {}", DEFAULT_PASSWORD);
     }
 
@@ -322,6 +323,46 @@ public class DataLoader implements CommandLineRunner {
     }
 
     // ─────────────────────────────────────────────────────────────────────────
+    //  NIVEAU COMMUNAL — Agents (1 par commune)
+    //  Login : agent_[slug_commune]@ravec.gov.gn
+    // ─────────────────────────────────────────────────────────────────────────
+
+    private int creerAgentsCommunaux(Role profil,
+                                     Map<Region, List<Prefecture>> prefParRegion,
+                                     Map<Prefecture, List<Commune>> communeParPref) {
+        int count = 0;
+        int index = 1;
+        Set<String> emailsUtilises = new HashSet<>();
+
+        for (Map.Entry<Region, List<Prefecture>> entree : prefParRegion.entrySet()) {
+            Region region = entree.getKey();
+            for (Prefecture prefecture : entree.getValue()) {
+                for (Commune commune : communeParPref.getOrDefault(prefecture, List.of())) {
+                    String email = emailUnique("agent_" + slug(commune.getNom()),
+                                               "@ravec.gov.gn", emailsUtilises);
+                    count += creer(User.builder()
+                            .id("USR-AGT-" + String.format("%04d", index))
+                            .code("AGT-" + sanitizeCode(commune.getCode()))
+                            .nom("AGENT").prenom(commune.getNom())
+                            .email(email).username(email)
+                            .telephone("+224626" + String.format("%06d", index))
+                            .fonction("Agent de Numérisation — " + commune.getNom())
+                            .password(passwordEncoder.encode(DEFAULT_PASSWORD))
+                            .role(profil)
+                            .region(region)
+                            .prefecture(prefecture)
+                            .commune(commune)
+                            .statut(Statut.Activated)
+                            .build());
+                    index++;
+                }
+            }
+        }
+        log.info("  [COMMUNAL/AGT]  {} agent(s) communal/aux", count);
+        return count;
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
     //  UTILITAIRES
     // ─────────────────────────────────────────────────────────────────────────
 
@@ -332,7 +373,7 @@ public class DataLoader implements CommandLineRunner {
         Map<String, Role> map = new LinkedHashMap<>();
         for (String nom : List.of(PROFIL_SUPER_ADMIN, PROFIL_ADMIN, PROFIL_ANALYSTE,
                                    PROFIL_COORD_REGIONAL, PROFIL_COORD_PREFECTORAL,
-                                   PROFIL_SUPERVISEUR, PROFIL_ODEC)) {
+                                   PROFIL_SUPERVISEUR, PROFIL_ODEC, PROFIL_AGENT)) {
             roleRepository.findByNom(nom).ifPresentOrElse(
                     role -> map.put(nom, role),
                     () -> log.warn("  Profil introuvable : {}", nom));
