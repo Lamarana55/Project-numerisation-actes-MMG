@@ -1,0 +1,113 @@
+version: '3.8'
+
+# ============================================================
+# Docker Compose — Serveur validation.ravec.gov.gn
+# Co-existence avec l'application existante (port 8083)
+# Usage : docker compose -f docker-compose.server.yml --env-file .env.server up -d
+# ============================================================
+
+services:
+
+  # ── Base de données PostgreSQL ──────────────────────────────────────────
+  postgres:
+    image: postgres:15-alpine
+    container_name: ravec-pn-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB:       ${DATABASE:-ravec_db}
+      POSTGRES_USER:     ${DATABASE_USER:-ravec_user}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      PGDATA:            /var/lib/postgresql/data/pgdata
+    volumes:
+      - ravec_pn_postgres_data:/var/lib/postgresql/data
+    expose:
+      - "5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER:-ravec_user} -d ${DATABASE:-ravec_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - ravec-pn-network
+
+  # ── Backend Spring Boot ─────────────────────────────────────────────────
+  backend:
+    image: ${BACKEND_IMAGE:-ghcr.io/lamarana55/ravec-backend:latest}
+    container_name: ravec-pn-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_IP:       postgres
+      DATABASE_PORT:     5432
+      DATABASE:          ${DATABASE:-ravec_db}
+      DATABASE_USER:     ${DATABASE_USER:-ravec_user}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      DDL_AUTO:          ${DDL_AUTO:-update}
+      SERVER_PORT:       8091
+      FRONT_URL:         ${FRONT_URL}
+      JWT_SECURITY:      ${JWT_SECURITY}
+      SPRING_MAIL_USERNAME: ${SPRING_MAIL_USERNAME}
+      SPRING_MAIL_PASSWORD: ${SPRING_MAIL_PASSWORD}
+      JAVA_OPTS: -Xms512m -Xmx1024m -XX:+UseG1GC -XX:+UseContainerSupport
+    expose:
+      - "8091"
+    volumes:
+      - ravec_pn_backend_logs:/app/logs
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider",
+             "http://localhost:8091/api/v1/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+    networks:
+      - ravec-pn-network
+
+  # ── Frontend Angular (Nginx static + proxy /api/ → backend) ────────────
+  frontend:
+    image: ${FRONTEND_IMAGE:-ghcr.io/lamarana55/ravec-frontend:latest}
+    container_name: ravec-pn-frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      # Port 8082 → évite le conflit avec Nginx hôte (80) et l'app existante (8083)
+      - "127.0.0.1:8082:80"
+    networks:
+      - ravec-pn-network
+
+  # ── PgAdmin (optionnel) ─────────────────────────────────────────────────
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: ravec-pn-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL:    ${PGADMIN_EMAIL:-admin@ravec.gov.gn}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
+      PGADMIN_LISTEN_PORT:      80
+    ports:
+      - "127.0.0.1:5051:80"
+    volumes:
+      - ravec_pn_pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - postgres
+    networks:
+      - ravec-pn-network
+    profiles:
+      - tools
+
+volumes:
+  ravec_pn_postgres_data:
+    driver: local
+  ravec_pn_backend_logs:
+    driver: local
+  ravec_pn_pgadmin_data:
+    driver: local
+
+networks:
+  ravec-pn-network:
+    driver: bridge

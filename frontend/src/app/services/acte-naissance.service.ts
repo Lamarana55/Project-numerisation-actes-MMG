@@ -157,6 +157,213 @@ export interface ActeNaissanceSummary {
   npi?:             string;
 }
 
+// ══════════════════════════════════════════════════════════════════
+//  DÉCÈS — DTOs
+// ══════════════════════════════════════════════════════════════════
+
+export interface ActeDecesDTO {
+  // Jugement (transcription)
+  dateJugement?:   string | null;
+  numeroJugement?: string;
+  tribunal?:       string;
+  // Notification
+  numeroNotification?: string;
+  // Défunt
+  hasNpi?:             string;
+  npiDefunt?:          string;
+  prenom?:             string;
+  nom?:                string;
+  sexe?:               string;
+  dateNaissance?:      string | null;
+  communeNaissance?:   string;
+  nationaliteConnue?:  string;
+  nationalite?:        string;
+  profession?:         string;
+  // Domicile du défunt
+  adresseDomicile?:    string;
+  communeDomicile?:    string;
+  quartierDomicile?:   string;
+  secteurDomicile?:    string;
+  // Parents — Père
+  pereDecede?:          string;
+  pereHasNpi?:          string;
+  npiPere?:             string;
+  prenomPere?:          string;
+  nomPere?:             string;
+  dateNaissancePere?:   string | null;
+  communeNaissancePere?: string;
+  pereNationaliteConnue?: string;
+  nationalitePere?:     string;
+  professionPere?:      string;
+  telephonePere?:       string;
+  etatCivilPere?:       string;
+  adresseDomicilePere?:  string;
+  communeDomicilePere?:  string;
+  quartierDomicilePere?: string;
+  secteurDomicilePere?:  string;
+  // Parents — Mère
+  mereDecedee?:          string;
+  mereHasNpi?:           string;
+  npiMere?:              string;
+  prenomMere?:           string;
+  nomMere?:              string;
+  dateNaissanceMere?:    string | null;
+  communeNaissanceMere?: string;
+  mereNationaliteConnue?: string;
+  nationaliteMere?:      string;
+  professionMere?:       string;
+  telephoneMere?:        string;
+  etatCivilMere?:        string;
+  memeDomicilePere?:     string;
+  adresseDomicileMere?:  string;
+  communeDomicileMere?:  string;
+  quartierDomicileMere?: string;
+  secteurDomicileMere?:  string;
+  // Décès
+  dateDecesConnue?:    string;
+  dateDeces?:          string | null;
+  heureDeces?:         string;
+  decesAuDomicile?:    string;
+  endroitDeces?:       string;
+  communeDeces?:       string;
+  lieuDeces?:          string;
+  causeDeces?:         string;
+  // Conjoints
+  situationMatrimoniale?: string;
+  prenomConjoint?:      string;
+  nomConjoint?:         string;
+  nationaliteConjoint?: string;
+  professionConjoint?:  string;
+  // Déclarant
+  hasNpiDeclarant?:          string;
+  npiDeclarant?:             string;
+  prenomDeclarant?:          string;
+  nomDeclarant?:             string;
+  sexeDeclarant?:            string;
+  dateNaissanceDeclarant?:   string | null;
+  communeNaissanceDeclarant?: string;
+  nationaliteDeclarant?:     string;
+  professionDeclarant?:      string;
+  adresseDeclarant?:         string;
+  communeDomicileDeclarant?: string;
+  quartierDeclarant?:        string;
+  secteurDeclarant?:         string;
+  lienParente?:              string;
+  telephoneDeclarant?:       string;
+  situationMatrimDeclarant?: string;
+  dateDeclaration?:          string | null;
+  signatureDeclarant?:       string;
+  raisonNonSignature?:       string;
+  // Acte
+  pointCollecte?: string;
+  dateDressage?:  string | null;
+  heureDressage?: string;
+  actionsFaire?:  ActionFaire;
+}
+
+export interface ActeDecesDetail {
+  id:                   string;
+  statut?:              string;
+  actionsFaire?:        string;
+  numeroActe?:          string;
+  // Notification
+  numeroNotification?:  string;
+  // Défunt
+  hasNpi?:              string;
+  npiDefunt?:           string;
+  prenom?:              string;
+  nom?:                 string;
+  sexe?:                string;
+  dateNaissance?:       string;
+  communeNaissance?:    string;
+  nationaliteConnue?:   string;
+  nationalite?:         string;
+  profession?:          string;
+  adresseDomicile?:     string;
+  communeDomicile?:     string;
+  quartierDomicile?:    string;
+  secteurDomicile?:     string;
+  // Parents — Père
+  pereDecede?:           string;
+  pereHasNpi?:           string;
+  npiPere?:              string;
+  prenomPere?:           string;
+  nomPere?:              string;
+  dateNaissancePere?:    string;
+  communeNaissancePere?: string;
+  pereNationaliteConnue?: string;
+  nationalitePere?:      string;
+  professionPere?:       string;
+  telephonePere?:        string;
+  etatCivilPere?:        string;
+  adresseDomicilePere?:  string;
+  communeDomicilePere?:  string;
+  quartierDomicilePere?: string;
+  secteurDomicilePere?:  string;
+  // Parents — Mère
+  mereDecedee?:          string;
+  mereHasNpi?:           string;
+  npiMere?:              string;
+  prenomMere?:           string;
+  nomMere?:              string;
+  dateNaissanceMere?:    string;
+  communeNaissanceMere?: string;
+  mereNationaliteConnue?: string;
+  nationaliteMere?:      string;
+  professionMere?:       string;
+  telephoneMere?:        string;
+  etatCivilMere?:        string;
+  memeDomicilePere?:     string;
+  adresseDomicileMere?:  string;
+  communeDomicileMere?:  string;
+  quartierDomicileMere?: string;
+  secteurDomicileMere?:  string;
+  // Décès
+  dateDecesConnue?:     string;
+  dateDeces?:           string;
+  heureDeces?:          string;
+  decesAuDomicile?:     string;
+  endroitDeces?:        string;
+  communeDeces?:        string;
+  lieuDeces?:           string;
+  causeDeces?:          string;
+  // Conjoints
+  situationMatrimoniale?: string;
+  prenomConjoint?:       string;
+  nomConjoint?:          string;
+  nationaliteConjoint?:  string;
+  professionConjoint?:   string;
+  // Déclarant
+  hasNpiDeclarant?:           string;
+  npiDeclarant?:              string;
+  prenomDeclarant?:           string;
+  nomDeclarant?:              string;
+  sexeDeclarant?:             string;
+  dateNaissanceDeclarant?:    string;
+  communeNaissanceDeclarant?: string;
+  nationaliteDeclarant?:      string;
+  professionDeclarant?:       string;
+  adresseDeclarant?:          string;
+  communeDomicileDeclarant?:  string;
+  quartierDeclarant?:         string;
+  secteurDeclarant?:          string;
+  lienParente?:               string;
+  telephoneDeclarant?:        string;
+  situationMatrimDeclarant?:  string;
+  dateDeclaration?:           string;
+  signatureDeclarant?:        string;
+  raisonNonSignature?:        string;
+  // Acte
+  pointCollecte?:       string;
+  dateDressage?:        string;
+  heureDressage?:       string;
+  // Méta
+  commune?:             string;
+  agentNomComplet?:     string;
+  validateurNomComplet?: string;
+  createdAt?:           string;
+}
+
 /** DTO complet pour la consultation / modification d'un acte de naissance */
 export interface ActeNaissanceDetail {
   id:                       string;
@@ -330,6 +537,32 @@ export class ActeNaissanceService {
   /** Supprimer logiquement un acte de décès */
   deleteDeces(id: string): Observable<void> {
     return this.http.delete<void>(`${environment.apiURL}/actes/deces/${id}`);
+  }
+
+  /** Enregistrer une déclaration de décès */
+  createDeclarationDeces(payload: ActeDecesDTO): Observable<ActeNaissanceSummary> {
+    return this.http.post<ActeNaissanceSummary>(`${environment.apiURL}/actes/deces`, {
+      ...payload,
+      typeCreation: 'DECLARATION',
+    });
+  }
+
+  /** Consulter le détail complet d'un acte de décès */
+  getByIdDeces(id: string): Observable<ActeDecesDetail> {
+    return this.http.get<ActeDecesDetail>(`${environment.apiURL}/actes/deces/${id}`);
+  }
+
+  /** Mettre à jour un acte de décès */
+  updateDeces(id: string, payload: ActeDecesDTO): Observable<ActeNaissanceSummary> {
+    return this.http.put<ActeNaissanceSummary>(`${environment.apiURL}/actes/deces/${id}`, payload);
+  }
+
+  /** Enregistrer une transcription de jugement supplétif de décès */
+  createTranscriptionDeces(payload: ActeDecesDTO): Observable<ActeNaissanceSummary> {
+    return this.http.post<ActeNaissanceSummary>(`${environment.apiURL}/actes/deces/transcription`, {
+      ...payload,
+      typeCreation: 'TRANSCRIPTION',
+    });
   }
 
   private buildParams(params: ActeNaissanceSearchParams): HttpParams {

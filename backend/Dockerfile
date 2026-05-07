@@ -8,8 +8,8 @@ WORKDIR /app
 COPY pom.xml .
 COPY src ./src
 
-# Build l'application (skip tests pour accélérer le build)
-RUN mvn clean package -DskipTests
+# Build avec cache Maven persistant entre les builds (BuildKit)
+RUN --mount=type=cache,target=/root/.m2 mvn clean package -DskipTests -B
 
 # Stage 2: Runtime
 FROM eclipse-temurin:21-jre

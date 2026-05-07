@@ -214,7 +214,9 @@ export class NumerisationIndexationComponent implements OnInit {
         this.allRegions   = regions;
         this.allPays      = pays;
         this.professions  = professions;
-        this.nationalites = nationalites;
+        this.nationalites = nationalites.sort((a, b) =>
+          a.libelleMasculin.localeCompare(b.libelleMasculin, 'fr', { sensitivity: 'base' })
+        );
       },
       error: () => this.showError('Erreur lors du chargement des référentiels.'),
     });
@@ -250,8 +252,8 @@ export class NumerisationIndexationComponent implements OnInit {
     }
     this.selectedFile = file;
     this.fileMediaType = file.type;
-    this.data = this.getTestData();
-    this.isEditing = true; // on passe directement en mode saisie
+    this.data = {};
+    this.isEditing = true;
 
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -317,7 +319,7 @@ export class NumerisationIndexationComponent implements OnInit {
   // ═══════════════════════════════════════════════════════════════════════════
 
   isGuinee(): boolean {
-    return !this.data.pays_de_naissance || this.data.pays_de_naissance === 'GN';
+    return !this.data.pays_de_naissance || this.data.pays_de_naissance === 'GIN';
   }
 
   onPaysNaissanceChange(code: string): void {
@@ -331,7 +333,7 @@ export class NumerisationIndexationComponent implements OnInit {
     this.quartiersNaissance = [];
     this.villesNaissance = [];
     // Si pays étranger, charger les villes
-    if (code && code !== 'GN') {
+    if (code && code !== 'GIN') {
       this.isLoadingVillesNaissance = true;
       this.geodataService.getVillesByPays(code).subscribe({
         next: d => { this.villesNaissance = d; this.isLoadingVillesNaissance = false; },
@@ -384,7 +386,7 @@ export class NumerisationIndexationComponent implements OnInit {
   // ═══════════════════════════════════════════════════════════════════════════
 
   isGuineePere(): boolean {
-    return !this.data.pays_naissance_pere || this.data.pays_naissance_pere === 'GN';
+    return !this.data.pays_naissance_pere || this.data.pays_naissance_pere === 'GIN';
   }
 
   onPaysNaissancePereChange(code: string): void {
@@ -397,7 +399,7 @@ export class NumerisationIndexationComponent implements OnInit {
     this.communesNaissancePere = [];
     this.quartiersNaissancePere = [];
     this.villesNaissancePere = [];
-    if (code && code !== 'GN') {
+    if (code && code !== 'GIN') {
       this.isLoadingVillesNaissancePere = true;
       this.geodataService.getVillesByPays(code).subscribe({
         next: d => { this.villesNaissancePere = d; this.isLoadingVillesNaissancePere = false; },
@@ -450,7 +452,7 @@ export class NumerisationIndexationComponent implements OnInit {
   // ═══════════════════════════════════════════════════════════════════════════
 
   isGuineeMere(): boolean {
-    return !this.data.pays_naissance_mere || this.data.pays_naissance_mere === 'GN';
+    return !this.data.pays_naissance_mere || this.data.pays_naissance_mere === 'GIN';
   }
 
   onPaysNaissanceMereChange(code: string): void {
@@ -463,7 +465,7 @@ export class NumerisationIndexationComponent implements OnInit {
     this.communesNaissanceMere = [];
     this.quartiersNaissanceMere = [];
     this.villesNaissanceMere = [];
-    if (code && code !== 'GN') {
+    if (code && code !== 'GIN') {
       this.isLoadingVillesNaissanceMere = true;
       this.geodataService.getVillesByPays(code).subscribe({
         next: d => { this.villesNaissanceMere = d; this.isLoadingVillesNaissanceMere = false; },
@@ -569,8 +571,8 @@ export class NumerisationIndexationComponent implements OnInit {
     return this.allPays.find(p => p.code === code)?.nom ?? '—';
   }
 
-  getNationalite(code: string): string {
-    return this.nationaliteService.getLibelle(code, 'F', this.nationalites);
+  getNationalite(code: string, sexe: 'M' | 'F' = 'M'): string {
+    return this.nationaliteService.getLibelle(code, sexe, this.nationalites);
   }
 
   getProfession(code: number | string | undefined, genre: string): string {
@@ -760,45 +762,4 @@ export class NumerisationIndexationComponent implements OnInit {
   private showError(msg: string):   void { this.toast.error(msg); }
   private showWarning(msg: string): void { this.toast.warning(msg); }
 
-  /** Données de test pré-remplies au chargement d'une image. */
-  private getTestData(): ActeData {
-    return {
-      // Registre
-      numero_acte:             '0042',
-      numero_registre:         '001',
-      annee_registre:          '2010',
-      feuillet:                '12',
-      date_etablissement_acte: '05/01/2010',
-
-      // Zone de collecte — Conakry / Kaloum
-      region_collecte:    'Conakry',
-      prefecture_collecte:'Kaloum',
-      commune:            'Kaloum',
-      district:           'Almamya',
-
-      // Enfant
-      prenoms:             'Yaya',
-      nom_membre:          'Camara',
-      date_de_nais_membre: '01/01/2010',
-      genre_membre:        'M',
-      nationalite_du_membre: 'GN',
-      pays_de_naissance:   'GN',
-      commune_de_nais:     'Kaloum',
-
-      // Père
-      prenoms_pere:       'Ousmane',
-      nom_pere:           'Camara',
-      date_de_nais_pere:  '01/01/1980',
-      nationalite_pere:   'GN',
-      pays_naissance_pere: 'GN',
-
-      // Mère
-      prenoms_mere:       'Aissata',
-      nom_mere:           'Condé',
-      date_de_nais_mere:  '01/01/1988',
-      nationalite_mere:   'GN',
-      pays_naissance_mere: 'GN',
-      region_naissance:   'Kankan',
-    };
-  }
 }

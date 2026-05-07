@@ -1,0 +1,46 @@
+/* ── Purple overrides for death act (inherits birth-act-creation.component.css) ── */
+
+:host {
+  --green:       #4a148c;
+  --green-mid:   #7b1fa2;
+  --green-l:     #f3e5f5;
+  --green-pale:  #faf4ff;
+  --primary:     #7b1fa2;
+}
+
+.page-header {
+  background: linear-gradient(135deg, #4a148c 0%, #7b1fa2 55%, #9c27b0 100%) !important;
+  box-shadow: 0 8px 24px rgba(74, 20, 140, .32) !important;
+}
+
+.step-node--active .step-bubble {
+  background: #7b1fa2 !important;
+  border-color: #7b1fa2 !important;
+  box-shadow: 0 0 0 4px rgba(123, 31, 162, .15) !important;
+}
+
+.step-node--done .step-bubble {
+  background: #f3e5f5 !important;
+  border-color: #7b1fa2 !important;
+  color: #4a148c !important;
+}
+
+.step-node--done .step-node-label { color: #4a148c; }
+
+.step-connector--done { background: #7b1fa2 !important; }
+
+.legend-num { background: #7b1fa2 !important; }
+
+.fields-section-title { border-left-color: #7b1fa2 !important; }
+
+.btn-primary,
+.btn-next {
+  background: #4a148c !important;
+  border-color: #4a148c !important;
+}
+
+.btn-primary:hover,
+.btn-next:hover {
+  background: #6a1b9a !important;
+  border-color: #6a1b9a !important;
+}

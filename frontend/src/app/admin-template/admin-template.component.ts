@@ -206,8 +206,10 @@ canViewLocalities(): boolean {
 }
 
 canViewReports(): boolean {
-  return this.authService.roles?.includes('CAN_VIEW_REPORTS') ||
-         this.authService.roles?.includes('CAN_MANAGE_SETTINGS') || false;
+  const roles = this.authService.roles ?? [];
+  return roles.some(r => ['CAN_VIEW_REPORTS_NATIONAL', 'CAN_VIEW_REPORTS_REGIONAL',
+                           'CAN_VIEW_REPORTS_PREFECTORAL', 'CAN_VIEW_REPORTS_COMMUNAL',
+                           'CAN_MANAGE_SETTINGS'].includes(r));
 }
 
 canViewParametrage(): boolean {

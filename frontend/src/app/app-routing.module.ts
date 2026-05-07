@@ -147,7 +147,7 @@ const routes: Routes = [
         path: 'rapports',
         component: RapportsComponent,
         canActivate: [AuthorizationGuard],
-        data: { roles: ['CAN_VIEW_REPORTS'] },
+        data: { roles: ['CAN_VIEW_REPORTS_NATIONAL', 'CAN_VIEW_REPORTS_REGIONAL', 'CAN_VIEW_REPORTS_PREFECTORAL', 'CAN_VIEW_REPORTS_COMMUNAL'] },
       },
 
       // === GESTION DES UTILISATEURS ===
